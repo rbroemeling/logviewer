@@ -1,0 +1,127 @@
+<?php
+
+$log_sources = array
+(
+	'php-live' => '/var/log/php-live.log',
+	'php-stage' => '/var/log/php-stage.log',
+	'ruby-live' => '/var/log/ruby-live.log',
+	'ruby-stage' => '/var/log/ruby-stage.log'
+);
+
+$tail_sizes = array();
+for ($i = 1; $i <= 7; $i++)
+{
+	$tail_sizes[pow(2, $i)] = pow(2, $i) * 1024;
+}
+if (! ($_GET['tail_size'] && $tail_sizes[$_GET['tail_size']]))
+{
+	$_GET['tail_size'] = pow(2, 3);
+}
+
+$log_excerpt = '';
+$tail_size = $tail_sizes[$_GET['tail_size']];
+if ($_GET['log'] && $log_sources[$_GET['log']])
+{
+	if (file_exists($log_sources[$_GET['log']]))
+	{
+		$tail_size = min($tail_size, filesize($log_sources[$_GET['log']]));
+		if ($log_handle = fopen($log_sources[$_GET['log']], 'r'))
+		{
+			if ($tail_size)
+			{
+				fseek($log_handle, filesize($log_sources[$_GET['log']]) - $tail_size);
+				$log_excerpt = fread($log_handle, $tail_size);
+				$log_excerpt = preg_split("/\r?\n/", $log_excerpt);
+				array_shift($log_excerpt);
+
+				foreach (array_keys($log_excerpt) as $i)
+				{
+					$log_excerpt[$i] = str_split($log_excerpt[$i], 5);
+					foreach (array_keys($log_excerpt[$i]) as $j)
+					{
+						$log_excerpt[$i][$j] = htmlspecialchars($log_excerpt[$i][$j], ENT_QUOTES);
+					}
+					$log_excerpt[$i] = implode('<wbr>', $log_excerpt[$i]);
+				}
+				$log_excerpt = "<div class='log_line'>" . implode("</div>\n<div class='log_line'>", $log_excerpt) . "</div>";
+			}
+			else
+			{
+				$log_excerpt = '<div class="error">' . $log_sources[$_GET['log']] . ' is empty.</div>';
+			}
+			fclose($log_handle);
+		}
+		else
+		{
+			$log_excerpt = '<div class="error">' . $log_sources[$_GET['log']] . ' could not be read.</div>';
+		}
+	}
+	else
+	{
+		$log_excerpt = '<div class="error">' . $log_sources[$_GET['log']] . ' does not exist.</div>';
+	}
+}
+?>
+<html>
+	<head>
+		<title>Simple Online Log Viewer</title>
+		<style type='text/css'>
+			div#log_excerpt
+			{
+				font-family: monospace;
+			}
+			
+			div.error
+			{
+				color: #660000;
+				font-weight: bold;
+			}
+			div.log_line
+			{
+				margin-bottom: 15px;
+				text-align: justify;
+			}
+		</style>
+	</head>
+	<body>
+		<form>
+			Show last
+			<select name='tail_size'>
+				<?php
+					foreach (array_keys($tail_sizes) as $tail_size)
+					{
+						if ($_GET['tail_size'] == $tail_size)
+						{
+							echo '<option selected>';
+						}
+						else
+						{
+							echo '<option>';
+						}
+						echo "$tail_size</option>\n";
+					}
+				?>
+			</select>
+			kilobytes of
+			<select name='log'>
+				<option></option>
+				<?php
+					foreach (array_keys($log_sources) as $log)
+					{
+						if ($_GET['log'] == $log)
+						{
+							echo '<option selected>';
+						}
+						else
+						{
+							echo '<option>';
+						}
+						echo "$log</option>\n";
+					}
+				?>
+			</select>
+			<input type='submit' value='Refresh' />
+		</form>
+		<div id="log_excerpt"><?php echo $log_excerpt; ?></div>
+	</body>
+</html>
