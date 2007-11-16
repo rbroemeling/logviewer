@@ -24,15 +24,19 @@ if ($_GET['log'] && $log_sources[$_GET['log']])
 {
 	if (file_exists($log_sources[$_GET['log']]))
 	{
-		$tail_size = min($tail_size, filesize($log_sources[$_GET['log']]));
+		$file_size = filesize($log_sources[$_GET['log']]);
+		$tail_size = min($tail_size, $file_size);
 		if ($log_handle = fopen($log_sources[$_GET['log']], 'r'))
 		{
 			if ($tail_size)
 			{
-				fseek($log_handle, filesize($log_sources[$_GET['log']]) - $tail_size);
+				fseek($log_handle, $file_size - $tail_size);
 				$log_excerpt = fread($log_handle, $tail_size);
 				$log_excerpt = preg_split("/\r?\n/", $log_excerpt);
-				array_shift($log_excerpt);
+				if ($tail_size != $file_size)
+				{
+					array_shift($log_excerpt);
+				}
 
 				foreach (array_keys($log_excerpt) as $i)
 				{
@@ -70,7 +74,7 @@ if ($_GET['log'] && $log_sources[$_GET['log']])
 			{
 				font-family: monospace;
 			}
-			
+
 			div.error
 			{
 				color: #660000;
