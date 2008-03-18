@@ -73,6 +73,7 @@ if ($_GET['log'] && $log_sources[$_GET['log']])
 			div#log_excerpt
 			{
 				font-family: monospace;
+				font-size: 12px;
 			}
 
 			div.error
