@@ -2,8 +2,10 @@
 
 $log_sources = array
 (
+	'php-beta' => '/var/log/php-beta.log',
 	'php-live' => '/var/log/php-live.log',
 	'php-stage' => '/var/log/php-stage.log',
+	'ruby-beta' => '/var/log/ruby-beta.log',
 	'ruby-live' => '/var/log/ruby-live.log',
 	'ruby-stage' => '/var/log/ruby-stage.log'
 );
