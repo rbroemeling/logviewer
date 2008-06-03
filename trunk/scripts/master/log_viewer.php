@@ -148,7 +148,7 @@ if (get_magic_quotes_gpc())
 	slash_machine($_GET);
 }
 
-if (sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_position())
+if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_position())
 {
 	if ($log_handle = fopen($log_sources[$_GET['log']], 'r'))
 	{
