@@ -48,8 +48,9 @@ if ($_GET['log'] && $log_sources[$_GET['log']])
 						$log_excerpt[$i][$j] = htmlspecialchars($log_excerpt[$i][$j], ENT_QUOTES);
 					}
 					$log_excerpt[$i] = implode('<wbr>', $log_excerpt[$i]);
+					$log_excerpt[$i] = "<div id='line" . $i . "' class='log_line'>" . $log_excerpt[$i] . "</div>";
 				}
-				$log_excerpt = "<div class='log_line'>" . implode("</div>\n<div class='log_line'>", $log_excerpt) . "</div>";
+				$log_excerpt = implode("\n", $log_excerpt);
 			}
 			else
 			{
