@@ -133,7 +133,7 @@ if ($_GET['log'] && $log_sources[$_GET['log']])
 					}
 				?>
 			</select>,
-			filtered for the text <input type='text' name='filter' size='20' maxlength='100' />.
+			filtered for the text <input type='text' name='filter' size='20' maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />.
 			<input type='submit' value='Refresh' />
 		</form>
 		<div id="log_excerpt"><?php echo $log_excerpt; ?></div>
