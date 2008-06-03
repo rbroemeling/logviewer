@@ -210,28 +210,42 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 	</head>
 	<body>
 		<form>
-			Log File: 
-			<select name='log'>
-				<option></option>
-				<?php
-					foreach (array_keys($log_sources) as $log)
-					{
-						if ($_GET['log'] == $log)
-						{
-							echo '<option selected>';
-						}
-						else
-						{
-							echo '<option>';
-						}
-						echo "$log</option>\n";
-					}
-				?>
-			</select>
-			Offset: <input type="text" name="offset" size="11" maxlength="10" value='<?php echo htmlspecialchars($_GET['offset'], ENT_QUOTES); ?>' />
-			Length: <input type="text" name="length" size="9" maxlength="8" value='<?php echo htmlspecialchars($_GET['length'], ENT_QUOTES); ?>' />
-			Filter: <input type='text' name='filter' size='20' maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
-			<input type='submit' value='Refresh' />
+			<table>
+				<tr>
+					<td>
+						Log File: 
+						<select name='log'>
+							<option></option>
+							<?php
+								foreach (array_keys($log_sources) as $log)
+								{
+									if ($_GET['log'] == $log)
+									{
+										echo '<option selected>';
+									}
+									else
+									{
+										echo '<option>';
+									}
+									echo "$log</option>\n";
+								}
+							?>
+						</select>
+					</td>
+					<td style="text-align: center;">
+						Offset: <input type="text" name="offset" size="11" maxlength="10" value='<?php echo htmlspecialchars($_GET['offset'], ENT_QUOTES); ?>' />
+					</td>
+					<td style="text-align: center;">
+						Length: <input type="text" name="length" size="9" maxlength="8" value='<?php echo htmlspecialchars($_GET['length'], ENT_QUOTES); ?>' />
+					</td>
+					<td style="text-align: center;">
+						Filter: <input type='text' name='filter' size='20' maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
+					</td>
+					<td style="text-align: right;">
+						<input type='submit' value='Refresh' />
+					</td>
+				</tr>
+			</table>
 		</form>
 		<table>
 			<thead>
