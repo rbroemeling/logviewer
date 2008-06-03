@@ -1,5 +1,24 @@
 <?php
+function slash_machine(&$data)
+{
+	if (is_array($data))
+	{
+		foreach (array_keys($data) as $key)
+		{
+			slash_machine($data[$key]);
+		}
+	}
+	else if (is_string($data))
+	{
+		$data = stripslashes($data);
+	}
+}
+
 set_magic_quotes_runtime(0);
+if (get_magic_quotes_gpc())
+{
+	slash_machine($_GET);
+}
 
 $log_sources = array
 (
