@@ -210,7 +210,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 	</head>
 	<body>
 		<form>
-			<table>
+			<table width="100%">
 				<tr>
 					<td>
 						Log File: 
@@ -247,7 +247,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				</tr>
 			</table>
 		</form>
-		<table>
+		<table width="100%">
 			<thead>
 				<tr>
 					<th>Field Name</th>
