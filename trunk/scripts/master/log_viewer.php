@@ -18,7 +18,7 @@ function sanitize_length()
 {
 	global $errors;
 
-	if (! isset($_GET['length']))
+	if (! strlen($_GET['length']))
 	{
 		// Default length is -1 * 8 Kb
 		$_GET['length'] = -1 * 8 * 1024;
@@ -69,7 +69,7 @@ function sanitize_offset()
 	global $errors;
 	global $log_size;
 
-	if (! isset($_GET['offset']))
+	if (! strlen($_GET['offset']))
 	{
 		// Default offset is the bottom of the file
 		$_GET['offset'] = $log_size;
