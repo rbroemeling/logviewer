@@ -1,4 +1,7 @@
 <?php
+// Default length is -1 * 16 Kb
+define('DEFAULT_LENGTH', -1 * 16 * 1024);
+
 $errors = array();
 $log_excerpt = array();
 $log_size = -1;
@@ -20,8 +23,7 @@ function sanitize_length()
 
 	if (! strlen($_GET['length']))
 	{
-		// Default length is -1 * 8 Kb
-		$_GET['length'] = -1 * 8 * 1024;
+		$_GET['length'] = DEFAULT_LENGTH;
 	}
 	if (! is_numeric($_GET['length']))
 	{
@@ -225,12 +227,43 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						echo "$log</option>\n";
 					}
 				?>
-			</select> Which log file to retrieve data from.<br />
-			Offset: <input type="text" name="offset" size="11" maxlength="10" value='<?php echo htmlspecialchars($_GET['offset'], ENT_QUOTES); ?>' /> The byte position to begin fetching data from within the log file.  If not set (blank), defaults to the last byte position in the file.<br />
-			Length: <input type="text" name="length" size="9" maxlength="8" value='<?php echo htmlspecialchars($_GET['length'], ENT_QUOTES); ?>' /> The amount of data to read from the log file.  If positive, reads forwards from the offset and if negative reads backwards from the offset.<br />
-			Filter: <input type='text' name='filter' size='20' maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' /> A string to look for within the data retrieved from the log file.  Only log lines containing the string will be displayed.<br />
+			</select>
+			Offset: <input type="text" name="offset" size="11" maxlength="10" value='<?php echo htmlspecialchars($_GET['offset'], ENT_QUOTES); ?>' />
+			Length: <input type="text" name="length" size="9" maxlength="8" value='<?php echo htmlspecialchars($_GET['length'], ENT_QUOTES); ?>' />
+			Filter: <input type='text' name='filter' size='20' maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
 			<input type='submit' value='Refresh' />
 		</form>
+		<table>
+			<thead>
+				<tr>
+					<th>Field Name</th>
+					<th>Description</th>
+					<th>Default Value</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Log File</td>
+					<td>Which log file to retrieve data from.</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>Offset</td>
+					<td>The byte position to begin fetching data from within the log file.  If not set (blank), defaults to the last byte position in the file.</td>
+					<td>The last byte position in the log file.</td>
+				</tr>
+				<tr>
+					<td>Length</td>
+					<td>The amount of data to read from the log file.  If positive, reads forwards from the offset and if negative reads backwards from the offset.</td>
+					<td><?php echo number_format(DEFAULT_LENGTH); ?></td>
+				</tr>
+				<tr>
+					<td>Filter</td>
+					<td>A string to look for within the data retrieved from the log file.  Only log lines containing the string will be displayed.</td>
+					<td></td>
+				</tr>
+			</tbody>
+		</table>
 		<?php
 			foreach ($errors as $error_message)
 			{
