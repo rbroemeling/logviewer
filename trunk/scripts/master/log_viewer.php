@@ -11,7 +11,7 @@ $log_sources = array
 );
 
 $tail_sizes = array();
-for ($i = 1; $i <= 9; $i++)
+for ($i = 1; $i <= 11; $i++)
 {
 	$tail_sizes[pow(2, $i)] = pow(2, $i) * 1024;
 }
@@ -42,6 +42,11 @@ if ($_GET['log'] && $log_sources[$_GET['log']])
 
 				foreach (array_keys($log_excerpt) as $i)
 				{
+					if ($_GET['filter'] && (stristr($log_excerpt[$i], $_GET['filter']) == FALSE))
+					{
+						unset($log_excerpt[$i]);
+						continue;
+					}
 					$log_excerpt[$i] = str_split($log_excerpt[$i], 5);
 					foreach (array_keys($log_excerpt[$i]) as $j)
 					{
@@ -127,7 +132,8 @@ if ($_GET['log'] && $log_sources[$_GET['log']])
 						echo "$log</option>\n";
 					}
 				?>
-			</select>
+			</select>,
+			filtered for the text <input type='text' name='filter' size='20' maxlength='100' />.
 			<input type='submit' value='Refresh' />
 		</form>
 		<div id="log_excerpt"><?php echo $log_excerpt; ?></div>
