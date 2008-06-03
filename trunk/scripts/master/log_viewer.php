@@ -172,6 +172,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			$log_excerpt[$i] = implode('<wbr>', $log_excerpt[$i]);
 			$log_excerpt[$i] = "<div id='line" . $i . "' class='log_line'>" . $log_excerpt[$i] . "</div>";
 		}
+		array_reverse($log_excerpt);
 	}
 	else
 	{
