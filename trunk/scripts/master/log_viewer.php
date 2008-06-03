@@ -1,4 +1,5 @@
 <?php
+set_magic_quotes_runtime(0);
 
 $log_sources = array
 (
