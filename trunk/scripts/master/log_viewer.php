@@ -184,22 +184,24 @@ if (sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_positio
 			div#log_excerpt
 			{
 				font-family: monospace;
-				font-size: 12px;
+				font-size: 10px;
 			}
 
 			div.error
 			{
 				color: #660000;
 				font-weight: bold;
+				margin-bottom: 10px;
 			}
 			div.warning
 			{
-				color: #ff8b3d;
+				color: #c24e00;
 				font-weight: bold;
+				margin-bottom: 10px;
 			}
 			div.log_line
 			{
-				margin-bottom: 15px;
+				margin-bottom: 10px;
 				text-align: justify;
 			}
 		</style>
