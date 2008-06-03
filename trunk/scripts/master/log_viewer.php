@@ -11,7 +11,7 @@ $log_sources = array
 );
 
 $tail_sizes = array();
-for ($i = 1; $i <= 7; $i++)
+for ($i = 1; $i <= 9; $i++)
 {
 	$tail_sizes[pow(2, $i)] = pow(2, $i) * 1024;
 }
