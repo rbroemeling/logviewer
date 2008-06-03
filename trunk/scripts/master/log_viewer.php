@@ -160,7 +160,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 		$current_offset = $_GET['offset'];
 		foreach (array_keys($log_excerpt) as $i)
 		{
-			$line_length = strlen($log_excerpt[$i]) + 1; // +1 to make up for the newline that we trimmed.
+			$line_length = strlen($log_excerpt[$i]);
 			if ($_GET['filter'] && (stristr($log_excerpt[$i], $_GET['filter']) == FALSE))
 			{
 				$current_offset += $line_length;
