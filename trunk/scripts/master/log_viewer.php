@@ -187,6 +187,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			{
 				font-family: monospace;
 				font-size: 10px;
+				margin-top: 30px;
 			}
 
 			div.error
@@ -263,12 +264,12 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				</tr>
 				<tr>
 					<td>Offset</td>
-					<td>The byte position to begin fetching data from within the log file.  If not set (blank), defaults to the last byte position in the file.</td>
+					<td>The byte position to begin fetching data from within the log file.</td>
 					<td>The last byte position in the log file.</td>
 				</tr>
 				<tr>
 					<td>Length</td>
-					<td>The amount of data to read from the log file.  If positive, reads forwards from the offset and if negative reads backwards from the offset.</td>
+					<td>The amount of data to read from the log file.  Reads forwards from the offset if positive and reads backwards from the offset if negative.</td>
 					<td><?php echo number_format(DEFAULT_LENGTH); ?></td>
 				</tr>
 				<tr>
