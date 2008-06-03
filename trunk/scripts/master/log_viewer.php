@@ -50,7 +50,7 @@ if ($_GET['log'] && $log_sources[$_GET['log']])
 					$log_excerpt[$i] = implode('<wbr>', $log_excerpt[$i]);
 					$log_excerpt[$i] = "<div id='line" . $i . "' class='log_line'>" . $log_excerpt[$i] . "</div>";
 				}
-				$log_excerpt = implode("\n", $log_excerpt);
+				$log_excerpt = implode("\n", array_reverse($log_excerpt));
 			}
 			else
 			{
