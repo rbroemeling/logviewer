@@ -16,6 +16,8 @@ $warnings = array();
 
 function sanitize_length()
 {
+	global $errors;
+
 	if (! isset($_GET['length']))
 	{
 		// Default length is -1 * 8 Kb
@@ -38,6 +40,10 @@ function sanitize_length()
 
 function sanitize_log()
 {
+	global $errors;
+	global $log_size;
+	global $log_sources;
+
 	if (! $log_sources[$_GET['log']])
 	{
 		$errors[] = 'Log name "' . $_GET['log'] . '" is not known to this interface.';
@@ -60,6 +66,9 @@ function sanitize_log()
 
 function sanitize_offset()
 {
+	global $errors;
+	global $log_size;
+
 	if (! isset($_GET['offset']))
 	{
 		// Default offset is the bottom of the file
@@ -88,6 +97,9 @@ function sanitize_offset()
 
 function sanitize_position()
 {
+	global $log_size;
+	global $warnings;
+
 	if ($_GET['length'] > 0)
 	{
 		if (($_GET['offset'] + $_GET['length'] - 1) > $log_size)
