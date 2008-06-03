@@ -160,7 +160,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 		$current_offset = $_GET['offset'];
 		foreach (array_keys($log_excerpt) as $i)
 		{
-			$current_offset += strlen($log_excerpt[$i]);
+			$current_offset += strlen($log_excerpt[$i]) + 1; // +1 for the newline that we snarfed.
 			if ($_GET['filter'] && (stristr($log_excerpt[$i], $_GET['filter']) == FALSE))
 			{
 				unset($log_excerpt[$i]);
