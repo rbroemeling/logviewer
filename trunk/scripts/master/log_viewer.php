@@ -485,13 +485,13 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			div.log_line
 			{
 				font-family: monospace;
-				margin-bottom: 10px;
+				padding-bottom: 10px;
 			}
 			div.log_line_context
 			{
-				background: #333333;
+				background: #222222;
 				font-family: monospace;
-				margin-bottom: 10px;
+				padding-bottom: 10px;
 			}
 			
 			/* General log line field coloring. */
