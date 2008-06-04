@@ -741,7 +741,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					}
 
 					LineArchive::reset();
-					$contextual_lines = 0;
+					$contextual_lines = $_GET['filter_context'];
 					while ((! feof($log_handle)) && ($current_position <= ($_GET['offset'] + $_GET['length'])) && (LineOutput::$displayed_lines < MAX_LINES))
 					{
 						$current_line = fgets($log_handle);
