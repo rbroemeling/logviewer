@@ -59,7 +59,7 @@ class LineArchive
 		
 		if ($count)
 		{
-			return "<div class='warning'>Skipped " . number_format($count) . " log lines based on filters applied.</div>\n";
+			return "<div class='warning'>Skipped " . number_format($count) . " log line" . ($count > 1 ? 's' : '') . " based on filters applied.</div>\n";
 		}
 		return "";
 	}
