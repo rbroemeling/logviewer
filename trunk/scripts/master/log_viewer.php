@@ -156,7 +156,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 	{
 		fseek($log_handle, $_GET['offset']);
 		$log_excerpt = fread($log_handle, $_GET['length']);
-		$log_excerpt = preg_split("/\n/", $log_excerpt);
+		$log_excerpt = explode("\n", $log_excerpt);
 		$current_offset = $_GET['offset'];
 		foreach (array_keys($log_excerpt) as $i)
 		{
@@ -172,7 +172,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				$log_excerpt[$i][$j] = htmlspecialchars($log_excerpt[$i][$j], ENT_QUOTES);
 			}
 			$log_excerpt[$i] = implode('<wbr>', $log_excerpt[$i]);
-			$log_excerpt[$i] = "<div class='log_line'>[<a href='?log=" . $_GET['log'] . "&offset=" . $current_offset . "&length=-8192'>" . $current_offset .  "</a>] " . $log_excerpt[$i] . "</div>";
+			$log_excerpt[$i] = "<div class='log_line'>[<a href='?log=" . $_GET['log'] . "&offset=" . ($current_offset - 2) . "&length=-8192'>" . ($current_offset - 2) .  "</a>] " . $log_excerpt[$i] . "</div>";
 		}
 		$log_excerpt = array_reverse($log_excerpt);
 	}
