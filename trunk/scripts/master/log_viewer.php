@@ -135,6 +135,7 @@ class PHPLogLine extends LogLine
 
 class RubyLogLine extends LogLine
 {
+	protected static $component;
 	protected static $ruby_fields;
 
 
@@ -150,7 +151,7 @@ class RubyLogLine extends LogLine
 		
 		$string .= " <span class='pid'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>.";
 		
-		$string .= htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . ".";
+		$string .= "<span class='ruby_component_" . self::$component . "'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>.";
 		
 		$string .= "<span class='errorlevel_" . parent::$error_level . "'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>:<span class='errorlevel_" . parent::$error_level . "'>";
 		
@@ -173,7 +174,8 @@ class RubyLogLine extends LogLine
 			array_pop(parent::$fields);
 			array_shift(self::$ruby_fields);
 			
-			parent::$error_level = self::$ruby_fields[2];
+			self::$component = htmlspecialchars(self::$ruby_fields[1], ENT_QUOTES);
+			parent::$error_level = htmlspecialchars(self::$ruby_fields[2], ENT_QUOTES);
 			return true;
 		}
 		else
@@ -416,6 +418,42 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				color: #888888;
 			}
 			
+			/* Ruby component coloring. */
+			div.log_line span.ruby_component_files
+			{
+				color: #ffffff;
+			}
+			div.log_line span.ruby_component_general
+			{
+				color: #ffff00;
+				font-weight: bold;
+			}
+			div.log_line span.ruby_component_memcache
+			{
+				color: #0000ff;
+			}
+			div.log_line span.ruby_component_pagehandler
+			{
+				color: #ff00ff;
+			}
+			div.log_line span.ruby_component_site_module
+			{
+				color: #ffff00;
+			}
+			div.log_line span.ruby_component_sql
+			{
+				color: #0000ff;
+				font-weight: bold;
+			}
+			div.log_line span.ruby_component_template
+			{
+				color: #00ffff;
+			}
+			div.log_line span.ruby_component_worker
+			{
+				color: #00ff00;
+			}
+
 			/* Error level log line coloring. */
 			div.log_line span.errorlevel_critical
 			{
