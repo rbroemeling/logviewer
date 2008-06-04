@@ -100,16 +100,10 @@ function sanitize_offset()
 function sanitize_position()
 {
 	global $errors;
-	global $log_size;
 	global $warnings;
 
 	if ($_GET['length'] > 0)
 	{
-		if (($_GET['offset'] + $_GET['length'] - 1) > $log_size)
-		{
-			$warnings[] = 'Impossible to read ' . number_format($_GET['length']) . ' bytes from offset ' . number_format($_GET['offset']) . '.  Log file size is only ' . number_format($log_size) . ' bytes.  Adjusting length to be ' . number_format($log_size - $_GET['offset'] + 1) . ' bytes.';
-			$_GET['length'] = $log_size - $_GET['offset'] + 1;
-		}
 		return 1;
 	}
 	
@@ -160,66 +154,11 @@ if (get_magic_quotes_gpc())
 	slash_machine($_GET);
 }
 
+$log_handle = 0;
 if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_position())
 {
-	if ($log_handle = fopen($log_sources[$_GET['log']], 'r'))
-	{
-		fseek($log_handle, $_GET['offset']);
-		$log_excerpt = fread($log_handle, $_GET['length']);
-		$log_excerpt = explode("\n", $log_excerpt);
-		$current_offset = $_GET['offset'];
-
-		// We drop the first line if it is a partial line.  It is a partial line
-		// unless we started reading at the beginning of the log file or the
-		// character immediately before our read was a newline.
-		//
-		// Thus we drop the line if we have $_GET['offset'] and if the character
-		// at $_GET['offset'] - 1 != "\n".
-		if ($_GET['offset'])
-		{
-			fseek($log_handle, $_GET['offset'] - 1);
-			if (strcmp(fread($log_handle, 1), "\n"))
-			{
-				$current_offset += strlen(array_shift($log_excerpt)) + 1;
-			}
-		}
-		fclose($log_handle);
-
-		// We always drop the last element.  If we read a complete log line at the
-		// end of the read; then this will be an empty entry and if we didn't then
-		// it is a partial log line.
-		array_pop($log_excerpt);
-
-		foreach (array_keys($log_excerpt) as $i)
-		{
-			// Store the index of the first character of the line, for ease of use.
-			$line_start = $current_offset;
-			
-			// Store the index of the last character of the line, for ease of use.
-			$line_end = $current_offset + strlen($log_excerpt[$i]);
-			
-			// Advance our offset pointer to the beginning of the next line.
-			$current_offset += strlen($log_excerpt[$i]) + 1; // +1 to make up for the newline that we skipped.
-
-			// If we have a filter, skip lines that do not match it.
-			if ($_GET['filter'] && (stristr($log_excerpt[$i], $_GET['filter']) == FALSE))
-			{
-				unset($log_excerpt[$i]);
-				continue;
-			}
-			
-			// Quote the line and add <wbr> elements so that the line will wrap nicely.
-			$log_excerpt[$i] = str_split($log_excerpt[$i], 5);
-			foreach (array_keys($log_excerpt[$i]) as $j)
-			{
-				$log_excerpt[$i][$j] = htmlspecialchars($log_excerpt[$i][$j], ENT_QUOTES);
-			}
-			$log_excerpt[$i] = implode('<wbr>', $log_excerpt[$i]);
-			
-			$log_excerpt[$i] = "<div class='log_line'>[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start - 8192), 0) . "&length=12288#" . $line_start . "' name='" . $line_start . "'>" . $line_start .  "</a>] " . $log_excerpt[$i] . "</div>";
-		}
-	}
-	else
+	$log_handle = fopen($log_sources[$_GET['log']], 'r');
+	if (! $log_handle)
 	{
 		$errors[] = $log_sources[$_GET['log']] . ' could not be opened for read.';
 	}
@@ -289,7 +228,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						Filter: <input type='text' name='filter' size='20' maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
 					</td>
 					<td style="text-align: right;">
-						<input type='button' value='Tail' onclick='window.location = "?log=" + document.getElementById("log").value + "#tail";' />
+						<input type='button' value='Tail' onclick='window.location = "?log=" + document.getElementById("log").value + "&timestamp=" + (new Date()).getTime() + "#tail";' />
 						<input type='submit' value='Submit' />
 					</td>
 				</tr>
@@ -337,7 +276,83 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			}
 		?>
 		<div id="log_excerpt">
-			<?php echo implode("\n", $log_excerpt); ?>
+			<?php
+				if ($log_handle)
+				{
+					$current_position = $_GET['offset'];
+
+					// We ignore the first line if it is a partial line.  It is a partial line
+					// unless we started reading at the beginning of the log file or the
+					// character immediately before our read was a newline.
+					//
+					// Thus we ignore the line if we have $_GET['offset'] and if the character
+					// at $_GET['offset'] - 1 != "\n".
+					if ($current_position)
+					{
+						fseek($log_handle, $current_position - 1);
+						if (strcmp(fread($log_handle, 1), "\n"))
+						{
+							$current_position += strlen(fgets($log_handle));
+						}
+					}
+					else
+					{
+						fseek($log_handle, $current_position);
+					}
+
+					$filtered = 0;
+					while ((! feof($log_handle)) && ($current_position <= ($_GET['offset'] + $_GET['length'])))
+					{
+						$current_line = fgets($log_handle);
+
+						$line_start_position = $current_position;
+						$current_position += strlen($current_line);
+						$line_end_position = $current_position - 1;
+
+						// Remove any trailing newline character.
+						$current_line = rtrim($current_line, "\n");
+
+						// If we have a filter, skip lines that do not match it.
+						if ($_GET['filter'] && (stristr($current_line, $_GET['filter']) == FALSE))
+						{
+							$filtered++;
+							continue;
+						}
+
+						if ($filtered)
+						{
+							echo "<div class='filtered'>Skipped " . number_format($filtered) . " log lines based on filters applied.</div>\n";
+						}
+
+						// If we have just hit the end of a file; we will have a line that is empty;
+						// there is nothing between the last newline of the file and EOF.  Skip that
+						// line if/when we encounter it.
+						if (! strlen($current_line))
+						{
+							continue;
+						}
+
+						// Quote the line and add <wbr> elements so that the line will wrap nicely.
+						$current_line = str_split($current_line, 5);
+						foreach (array_keys($current_line) as $i)
+						{
+							$current_line[$i] = htmlspecialchars($current_line[$i], ENT_QUOTES);
+						}
+						
+						echo "<div class='log_line'>";
+						echo "[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start_position - 8192), 0) . "&length=12288#" . $line_start_position . "' name='" . $line_start_position . "'>" . $line_start_position .  "</a>] ";
+						echo implode('<wbr>', $current_line);
+						echo "</div>\n";
+					}
+					
+					if (feof($log_handle))
+					{
+						echo "<div class='eof'>Encountered end of file at offset " . number_format($current_position) . ".</div>\n";
+					}
+
+					fclose($log_handle);
+				}
+			?>
 		</div>
 		<a name="tail">
 	</body>
