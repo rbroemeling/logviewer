@@ -208,7 +208,6 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			
 			$log_excerpt[$i] = "<div class='log_line'>[<a href='?log=" . $_GET['log'] . "&offset=" . $line_end . "&length=-8192'>" . $line_start .  "</a>] " . $log_excerpt[$i] . "</div>";
 		}
-		$log_excerpt = array_reverse($log_excerpt);
 	}
 	else
 	{
