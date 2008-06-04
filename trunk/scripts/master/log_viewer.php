@@ -229,20 +229,34 @@ class RubyLogLine extends LogLine
 }
 
 
-function format_line($line)
+class LineOutput
 {
-	if (preg_match('/ PHP error: /', $line))
+	public static $displayed_lines = 0;
+	
+	public static function display($line, $line_start_position, $line_end_position)
 	{
-		PHPLogLine::parse($line);
-		return PHPLogLine::display();
+		self::$displayed_lines++;
+
+		echo "<div id='" . $line_start_position . "' class='log_line'>";
+		echo "[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start_position - 8192), 0) . "&length=12288#" . $line_start_position . "' name='" . $line_start_position . "'>" . $line_start_position .  "</a>] ";
+			
+		if (preg_match('/ PHP error: /', $line))
+		{
+			PHPLogLine::parse($line);
+			echo PHPLogLine::display();
+		}
+		elseif (preg_match('/nexopia(-child|-parent|\.rb:)/', $line))
+		{
+			RubyLogLine::parse($line);
+			echo RubyLogLine::display();
+		}
+		else
+		{
+			LogLine::parse($line);
+			echo LogLine::display();
+		}
+		echo "</div>\n";
 	}
-	if (preg_match('/nexopia(-child|-parent|\.rb:)/', $line))
-	{
-		RubyLogLine::parse($line);
-		return RubyLogLine::display();
-	}
-	LogLine::parse($line);
-	return LogLine::display();
 }
 
 
@@ -723,9 +737,8 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						fseek($log_handle, $current_position);
 					}
 
-					$line_display_count = 0;
 					echo LineArchive::reset();
-					while ((! feof($log_handle)) && ($current_position <= ($_GET['offset'] + $_GET['length'])) && ($line_display_count < MAX_LINES))
+					while ((! feof($log_handle)) && ($current_position <= ($_GET['offset'] + $_GET['length'])) && (LineOutput::$displayed_lines < MAX_LINES))
 					{
 						$current_line = fgets($log_handle);
 						if ($current_line === FALSE) // Check if we are at EOF.
@@ -751,15 +764,11 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 							echo LineArchive::reset();
 						}
 
-						$line_display_count++;
-						echo "<div id='" . $line_start_position . "' class='log_line'>";
-						echo "[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start_position - 8192), 0) . "&length=12288#" . $line_start_position . "' name='" . $line_start_position . "'>" . $line_start_position .  "</a>] ";
-						echo format_line($current_line);
-						echo "</div>\n";
+						LineOutput::display($current_line, $line_start_position, $line_end_position);
 					}
 					echo LineArchive::reset();
 					
-					if ($line_display_count >= MAX_LINES)
+					if (LineOutput::$displayed_lines >= MAX_LINES)
 					{
 						echo "<div class='warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.</div>\n";
 					}
