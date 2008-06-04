@@ -1,10 +1,12 @@
 <?php
-// Default length is -1 * 16 Kb
-define('DEFAULT_LENGTH', -1 * 16 * 1024);
+// Default length is -1 * 64 Kb
+define('DEFAULT_LENGTH', -1 * 64 * 1024);
+
 
 // Maximum number of lines to ever display, the script will never display more
 // than this number of lines.
 define('MAX_LINES', 15000);
+
 
 $errors = array();
 $log_excerpt = array();
@@ -20,6 +22,30 @@ $log_sources = array
 );
 $warnings = array();
 
+
+function format_line($line)
+{
+	$fields = array();
+	if (! preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([\d./]+) +([^:]+:) +(.*)!i', $line, $fields))
+	{
+		return $line;
+	}
+	array_shift($fields);
+	$i = 0;
+	$fields[$i] = "<span class='date'>" . htmlspecialchars($fields[$i], ENT_QUOTES) . "</span>";
+	
+	$i++;
+	$fields[$i] = "<span class='host'>" . htmlspecialchars($fields[$i], ENT_QUOTES) . "</span>";
+	
+	$i++;
+	$fields[$i] = "<span class='source'>" . htmlspecialchars($fields[$i], ENT_QUOTES) . "</span>";
+	
+	for ($i = $i + 1; $i < count($fields); $i++)
+	{
+		$fields[$i] = htmlspecialchars($fields[$i], ENT_QUOTES);
+	}
+	return implode(' ', $fields);
+}
 
 function sanitize_length()
 {
@@ -217,8 +243,52 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				font-family: monospace;
 				margin-bottom: 10px;
 			}
+			div.log_line span.date
+			{
+				color: #888888;
+			}
+			div.log_line span.host
+			{
+				color: #888888;
+			}
+			div.log_line span.source
+			{
+				color: #888888;
+			}
 		</style>
 		<script type="text/javascript">
+			function highlight_named_anchor()
+			{
+				if (window.location.hash.match(/^#\d+$/))
+				{
+					div = document.getElementById(window.location.hash.substr(1));
+					if (div)
+					{
+						div.style.fontWeight = "bold";
+						div.style.background = "#444444";
+					}
+				}
+			}
+			
+			
+			function tail()
+			{
+				log = document.getElementById("log");
+				if (log)
+				{
+					log = log.value;
+				}
+				if (log)
+				{
+					window.location = "?log=" + log + "&timestamp=" + (new Date()).getTime() + "#tail";
+				}
+				else
+				{
+					alert('Invalid log selected, could not execute tail operation.')
+				}
+			}
+			
+			
 			function toggle_documentation()
 			{
 				documentation = document.getElementById('documentation');
@@ -234,7 +304,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			}
 		</script>
 	</head>
-	<body>
+	<body onload="highlight_named_anchor()">
 		<form action="<?php echo $_SERVER['SCRIPT_NAME']; ?>" method="get">
 			<table width="100%">
 				<tr>
@@ -268,7 +338,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						Filter: <input type='text' name='filter' size='20' maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
 					</td>
 					<td style="text-align: right;">
-						<input type='button' value='Tail' onclick='window.location = "?log=" + document.getElementById("log").value + "&timestamp=" + (new Date()).getTime() + "#tail";' />
+						<input type='button' value='Tail' onclick='tail()' />
 						<input type='submit' value='Submit' />
 					</td>
 				</tr>
@@ -285,7 +355,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			}
 		?>
 		<div>
-			[<a href="javascript:toggle_documentation()">Documentation</a>]
+			<input type='button' value='Documentation' onclick='toggle_documentation()' />
 			<table id="documentation" style="display: none" width="100%">
 				<thead>
 					<tr>
@@ -387,17 +457,10 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 							continue;
 						}
 
-						// Quote the line and add <wbr> elements so that the line will wrap nicely.
-						$current_line = str_split($current_line, 5);
-						foreach (array_keys($current_line) as $i)
-						{
-							$current_line[$i] = htmlspecialchars($current_line[$i], ENT_QUOTES);
-						}
-						
 						$line_display_count++;
-						echo "<div class='log_line'>";
+						echo "<div id='" . $line_start_position . "' class='log_line'>";
 						echo "[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start_position - 8192), 0) . "&length=12288#" . $line_start_position . "' name='" . $line_start_position . "'>" . $line_start_position .  "</a>] ";
-						echo implode('<wbr>', $current_line);
+						echo format_line($current_line);
 						echo "</div>\n";
 					}
 					
