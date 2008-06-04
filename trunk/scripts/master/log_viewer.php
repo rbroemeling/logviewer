@@ -223,7 +223,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			div#log_excerpt
 			{
 				font-family: monospace;
-				font-size: 10px;
+				font-size: 12px;
 				margin-top: 30px;
 			}
 
