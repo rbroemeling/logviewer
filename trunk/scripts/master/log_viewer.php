@@ -2,6 +2,10 @@
 // Default length is -1 * 16 Kb
 define('DEFAULT_LENGTH', -1 * 16 * 1024);
 
+// Maximum number of lines to ever display, the script will never display more
+// than this number of lines.
+define('MAX_LINES', 15000);
+
 $errors = array();
 $log_excerpt = array();
 $log_size = -1;
@@ -300,8 +304,9 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						fseek($log_handle, $current_position);
 					}
 
-					$filtered = 0;
-					while ((! feof($log_handle)) && ($current_position <= ($_GET['offset'] + $_GET['length'])))
+					$filter_count = 0;
+					$line_count = 0;
+					while ((! feof($log_handle)) && ($current_position <= ($_GET['offset'] + $_GET['length'])) && ($line_count < MAX_LINES))
 					{
 						$current_line = fgets($log_handle);
 
@@ -315,13 +320,13 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						// If we have a filter, skip lines that do not match it.
 						if ($_GET['filter'] && (stristr($current_line, $_GET['filter']) == FALSE))
 						{
-							$filtered++;
+							$filter_count++;
 							continue;
 						}
 
-						if ($filtered)
+						if ($filter_count)
 						{
-							echo "<div class='filtered'>Skipped " . number_format($filtered) . " log lines based on filters applied.</div>\n";
+							echo "<div class='filter_count_warning'>Skipped " . number_format($filter_count) . " log lines based on filters applied.</div>\n";
 						}
 
 						// If we have just hit the end of a file; we will have a line that is empty;
@@ -339,15 +344,21 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 							$current_line[$i] = htmlspecialchars($current_line[$i], ENT_QUOTES);
 						}
 						
+						$line_count++;
 						echo "<div class='log_line'>";
 						echo "[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start_position - 8192), 0) . "&length=12288#" . $line_start_position . "' name='" . $line_start_position . "'>" . $line_start_position .  "</a>] ";
 						echo implode('<wbr>', $current_line);
 						echo "</div>\n";
 					}
 					
+					if ($line_count >= MAX_LINES)
+					{
+						echo "<div class='line_count_warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.</div>\n";
+					}
+					
 					if (feof($log_handle))
 					{
-						echo "<div class='eof'>Encountered end of file at offset " . number_format($current_position) . ".</div>\n";
+						echo "<div class='eof_warning'>Encountered end of file at offset " . number_format($current_position) . ".</div>\n";
 					}
 
 					fclose($log_handle);
