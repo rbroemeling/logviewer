@@ -30,7 +30,7 @@ $warnings = array();
 class LineArchive
 {
 	protected static $archive = array();
-	protected static $count = 0;
+	public static $count = 0;
 	
 	
 	public static function add($line)
@@ -42,24 +42,27 @@ class LineArchive
 		self::$archive[] = $line;
 		self::$count++;
 	}
+		
 	
-	
-	public static function fetch_last($count)
+	public static function pop_last($count)
 	{
-		return array_slice(self::$archive, $count * -1, $count);
+		self::$count = max(self::$count - $count, 0);
+		return array_splice(self::$archive, $count * -1, $count);
+	}
+
+
+	public static function reset()
+	{
+		self::$archive = array();
+		self::$count = 0;
 	}
 	
 	
-	public static function reset()
+	public static function skip_warning()
 	{
-		$count = self::$count;
-		
-		self::$archive = array();
-		self::$count = 0;
-		
-		if ($count)
+		if (self::$count)
 		{
-			return "<div class='warning'>Skipped " . number_format($count) . " log line" . ($count > 1 ? 's' : '') . " based on filters applied.</div>\n";
+			return "<div class='warning'>Skipped " . number_format(self::$count) . " log line" . (self::$count > 1 ? 's' : '') . " based on filters applied.</div>\n";
 		}
 		return "";
 	}
@@ -737,7 +740,8 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						fseek($log_handle, $current_position);
 					}
 
-					echo LineArchive::reset();
+					LineArchive::reset();
+					$contextual_lines = 0;
 					while ((! feof($log_handle)) && ($current_position <= ($_GET['offset'] + $_GET['length'])) && (LineOutput::$displayed_lines < MAX_LINES))
 					{
 						$current_line = fgets($log_handle);
@@ -758,15 +762,32 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						{
 							if (stristr($current_line, $_GET['filter']) == FALSE)
 							{
-								LineArchive::add(array('line' => $current_line, 'start_position' => $line_start_position, 'end_position' => $line_end_position));
-								continue;
+								if ($contextual_lines >= $_GET['filter_context'])
+								{
+									LineArchive::add(array('line' => $current_line, 'start_position' => $line_start_position, 'end_position' => $line_end_position));
+									continue;
+								}
+								$contextual_lines++;
 							}
-							echo LineArchive::reset();
+							else
+							{
+								echo LineArchive::skip_warning();
+								if (LineArchive::$count)
+								{
+									foreach (LineArchive::pop_last($_GET['filter_context']) as $skipped_line)
+									{
+										LineOutput::display($skipped_line['line'], $skipped_line['start_position'], $skipped_line['end_position']);
+									}
+								}
+								$contextual_lines = 0;
+								LineArchive::reset();
+							}
 						}
 
 						LineOutput::display($current_line, $line_start_position, $line_end_position);
 					}
-					echo LineArchive::reset();
+					echo LineArchive::skip_warning();
+					LineArchive::reset();
 					
 					if (LineOutput::$displayed_lines >= MAX_LINES)
 					{
