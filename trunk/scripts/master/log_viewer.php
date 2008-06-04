@@ -160,28 +160,43 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 		$current_offset = $_GET['offset'];
 		foreach (array_keys($log_excerpt) as $i)
 		{
+			// Store the index of the first character of the line, for ease of use.
+			$line_start = $current_offset;
+			
+			// Store the index of the last character of the line, for ease of use.
+			$line_end = $current_offset + strlen($log_excerpt[$i]) - 1;
+			
+			// Advance our offset pointer to the beginning of the next line.
 			$current_offset += strlen($log_excerpt[$i]);
 			if ($i != (count($log_excerpt) - 1))
 			{
-				$current_offset++; // +1 for the newline that we snarfed.
+				// +1 if we skipped a newline (i.e. if there is another element after this one)
+				$current_offset++;
 			}
-			if (! $log_excerpt[$i]) // Empty line encountered.  Can happen if our data stream started or ended with '\n'.
+			
+			// Skip empty lines.  Can happen if our data stream started or ended with '\n'.
+			if (! $log_excerpt[$i])
 			{
 				unset($log_excerpt[$i]);
 				continue;
 			}
+			
+			// If we have a filter, skip lines that do not match it.
 			if ($_GET['filter'] && (stristr($log_excerpt[$i], $_GET['filter']) == FALSE))
 			{
 				unset($log_excerpt[$i]);
 				continue;
 			}
+			
+			// Quote the line and add <wbr> elements so that the line will wrap nicely.
 			$log_excerpt[$i] = str_split($log_excerpt[$i], 5);
 			foreach (array_keys($log_excerpt[$i]) as $j)
 			{
 				$log_excerpt[$i][$j] = htmlspecialchars($log_excerpt[$i][$j], ENT_QUOTES);
 			}
 			$log_excerpt[$i] = implode('<wbr>', $log_excerpt[$i]);
-			$log_excerpt[$i] = "<div class='log_line'>[<a href='?log=" . $_GET['log'] . "&offset=" . ($current_offset - 2) . "&length=-8192'>" . ($current_offset - 2) .  "</a>] " . $log_excerpt[$i] . "</div>";
+			
+			$log_excerpt[$i] = "<div class='log_line'>[<a href='?log=" . $_GET['log'] . "&offset=" . $line_end . "&length=-8192'>" . $line_start .  "</a>] " . $log_excerpt[$i] . "</div>";
 		}
 		$log_excerpt = array_reverse($log_excerpt);
 	}
