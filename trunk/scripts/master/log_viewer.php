@@ -261,7 +261,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				<tr>
 					<td>
 						Log File: 
-						<select name='log'>
+						<select id='log' name='log'>
 							<option></option>
 							<?php
 								foreach (array_keys($log_sources) as $log)
@@ -289,7 +289,8 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						Filter: <input type='text' name='filter' size='20' maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
 					</td>
 					<td style="text-align: right;">
-						<input type='submit' value='Refresh' />
+						<input type='button' value='Tail' onclick='window.location = "?log=" + document.getElementById("log").value + "#tail";' />
+						<input type='submit' value='Submit' />
 					</td>
 				</tr>
 			</table>
@@ -338,5 +339,6 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 		<div id="log_excerpt">
 			<?php echo implode("\n", $log_excerpt); ?>
 		</div>
+		<a name="tail">
 	</body>
 </html>
