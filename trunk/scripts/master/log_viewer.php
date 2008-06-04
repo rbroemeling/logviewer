@@ -23,29 +23,183 @@ $log_sources = array
 $warnings = array();
 
 
+class LogLine
+{
+	protected static $error_level;
+	protected static $fields;
+	protected static $line;
+	
+	
+	public static function display()
+	{
+		if (! self::$fields)
+		{
+			return self::$line;
+		}
+		
+		$string = '';
+		$i = 0;
+		$string .= "<span class='date'>" . htmlspecialchars(self::$fields[$i++], ENT_QUOTES) . "</span> ";
+		$string .= "<span class='host'>" . htmlspecialchars(self::$fields[$i++], ENT_QUOTES) . "</span> ";
+		$string .= "<span class='program'>" . htmlspecialchars(self::$fields[$i++], ENT_QUOTES) . "</span> ";
+		for ($i = $i; $i < count(self::$fields); $i++)
+		{
+			$string .= htmlspecialchars(self::$fields[$i], ENT_QUOTES);
+		}
+		return substr($string, 0, -1);
+	}
+
+
+	public static function parse($line)
+	{
+		self::$error_level = 'unknown';
+		self::$fields = array();
+		self::$line = $line;
+		
+		if (! preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([\d./]+) +([^:]+:) +(.*)!i', self::$line, self::$fields))
+		{
+			return false;
+		}
+		array_shift(self::$fields);
+		return true;		
+	}
+}
+
+
+class PHPLogLine extends LogLine
+{
+	protected static $php_fields;
+	
+	
+	public static function display()
+	{
+		$string = parent::display();
+		if (! self::$php_fields)
+		{
+			return $string;
+		}
+		
+
+		$i = 0;
+		
+		$string .= " " . htmlspecialchars(self::$php_fields[$i++], ENT_QUOTES) . " ";
+		
+		$string .= "<span class='errorlevel_" . parent::$error_level . "'>(" . htmlspecialchars(self::$php_fields[$i++], ENT_QUOTES) . ")</span> ";
+		
+		for ($i = $i; $i < count(self::$php_fields); $i++)
+		{
+			$string .= htmlspecialchars(self::$php_fields[$i], ENT_QUOTES);
+		}
+		return substr($string, 0, -1);
+	}
+
+	
+	public static function parse($line)
+	{
+		if (! parent::parse($line))
+		{
+			return false;
+		}
+		if (preg_match('!(\S+) +\((\w+ ?\w+)\) +(.*)!i', parent::$fields[count(LogLine::$fields) - 1], self::$php_fields))
+		{
+			array_pop(parent::$fields);
+			array_shift(self::$php_fields);
+			
+			switch (self::$php_fields[1])
+			{
+				case 'Error':
+				case 'User Error':
+					parent::$error_level = 'error';
+					break;
+				case 'Notice':
+				case 'User Notice':
+					parent::$error_level = 'info';
+					break;
+				case 'Warning':
+				case 'User Warning':
+					parent::$error_level = 'warning';
+					break;
+				case 'PHP Strict':
+					parent::$error_level = 'spam';
+					break;
+			}
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+}
+
+
+class RubyLogLine extends LogLine
+{
+	protected static $ruby_fields;
+
+
+	public static function display()
+	{
+		$string = parent::display();
+		if (! self::$ruby_fields)
+		{
+			return $string;
+		}
+		
+		$i = 0;
+		
+		$string .= " <span class='pid'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>.";
+		
+		$string .= htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . ".";
+		
+		$string .= "<span class='errorlevel_" . parent::$error_level . "'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>:";
+		
+		for ($i = $i; $i < count(self::$ruby_fields); $i++)
+		{
+			$string .= htmlspecialchars(self::$ruby_fields[$i], ENT_QUOTES);
+		}
+		return substr($string, 0, -1);
+	}
+	
+	
+	public static function parse($line)
+	{
+		if (! parent::parse($line))
+		{
+			return false;
+		}
+		if (preg_match('!(\d+)\.([^.]+)\.([^:]+):(.*)!i', parent::$fields[count(LogLine::$fields) - 1], self::$ruby_fields))
+		{
+			array_pop(parent::$fields);
+			array_shift(self::$ruby_fields);
+			
+			parent::$error_level = self::$ruby_fields[2];
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+}
+
+
 function format_line($line)
 {
-	$fields = array();
-	if (! preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([\d./]+) +([^:]+:) +(.*)!i', $line, $fields))
+	if (preg_match('/ PHP error: /', $line))
 	{
-		return $line;
+		PHPLogLine::parse($line);
+		return PHPLogLine::display();
 	}
-	array_shift($fields);
-	$i = 0;
-	$fields[$i] = "<span class='date'>" . htmlspecialchars($fields[$i], ENT_QUOTES) . "</span>";
-	
-	$i++;
-	$fields[$i] = "<span class='host'>" . htmlspecialchars($fields[$i], ENT_QUOTES) . "</span>";
-	
-	$i++;
-	$fields[$i] = "<span class='source'>" . htmlspecialchars($fields[$i], ENT_QUOTES) . "</span>";
-	
-	for ($i = $i + 1; $i < count($fields); $i++)
+	if (preg_match('/nexopia(-child|-parent|\.rb:)/', $line))
 	{
-		$fields[$i] = htmlspecialchars($fields[$i], ENT_QUOTES);
+		RubyLogLine::parse($line);
+		return RubyLogLine::display();
 	}
-	return implode(' ', $fields);
+	LogLine::parse($line);
+	return LogLine::display();
 }
+
 
 function sanitize_length()
 {
@@ -243,6 +397,8 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				font-family: monospace;
 				margin-bottom: 10px;
 			}
+			
+			/* General log line field coloring. */
 			div.log_line span.date
 			{
 				color: #888888;
@@ -251,9 +407,44 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			{
 				color: #888888;
 			}
-			div.log_line span.source
+			div.log_line span.pid
+			{
+				color: #ffffff;
+			}
+			div.log_line span.program
 			{
 				color: #888888;
+			}
+			
+			/* Error level log line coloring. */
+			div.log_line span.errorlevel_critical
+			{
+				background: #ff0000;
+				color: #ffff00;
+			}
+			div.log_line span.errorlevel_debug
+			{
+				color: #ffffff;
+			}
+			div.log_line span.errorlevel_error
+			{
+				color: #ff0000;
+			}
+			div.log_line span.errorlevel_info
+			{
+				color: #00ff00;
+			}
+			div.log_line span.errorlevel_spam
+			{
+				color: #888888;
+			}
+			div.log_line span.errorlevel_unknown
+			{
+				
+			}
+			div.log_line span.errorlevel_warning
+			{
+				color: #ffff00;	
 			}
 		</style>
 		<script type="text/javascript">
