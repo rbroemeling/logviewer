@@ -203,6 +203,29 @@ function format_line($line)
 }
 
 
+function sanitize_filter_context()
+{
+	global $errors;
+	
+	if (! strlen($_GET['filter_context']))
+	{
+		$_GET['filter_context'] = 0;
+	}
+	if (! is_numeric($_GET['filter_context']))
+	{
+		$errors[] = 'Filter context "' . $_GET['filter_context'] . '" is not a numeric value.  Context must be numeric.';
+		return 0;
+	}
+	$_GET['filter_context'] = intval($_GET['filter_context']);
+	if ($_GET['filter_context'] < 0)
+	{
+		$warnings[] = 'Filter context is symmetrical, treating context ' . number_format($_GET['filter_context']) . ' as ' . number_format($_GET['filter_context'] * -1) . '.';
+		$_GET['filter_context'] = $_GET['filter_context'] * -1;
+	}
+	return 1;
+}
+
+
 function sanitize_length()
 {
 	global $errors;
@@ -341,7 +364,7 @@ if (get_magic_quotes_gpc())
 }
 
 $log_handle = 0;
-if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_position())
+if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_position() && sanitize_filter_context())
 {
 	$log_handle = fopen($log_sources[$_GET['log']], 'r');
 	if (! $log_handle)
@@ -565,6 +588,9 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					</td>
 					<td style="text-align: center;">
 						Filter: <input type='text' name='filter' size='20' maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
+					</td>
+					<td style="text-align: center;">
+						Filter Context: <input type='text' name='filter_context' size='4' maxlength='4' value='<?php echo htmlspecialchars($_GET['filter_context'], ENT_QUOTES); ?>' />
 					</td>
 					<td style="text-align: right;">
 						<input type='button' value='Tail' onclick='tail()' />
