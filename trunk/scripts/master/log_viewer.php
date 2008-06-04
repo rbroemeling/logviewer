@@ -152,13 +152,13 @@ class RubyLogLine extends LogLine
 		
 		$string .= htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . ".";
 		
-		$string .= "<span class='errorlevel_" . parent::$error_level . "'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>:";
+		$string .= "<span class='errorlevel_" . parent::$error_level . "'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>:<span class='errorlevel_" . parent::$error_level . "'>";
 		
 		for ($i = $i; $i < count(self::$ruby_fields); $i++)
 		{
 			$string .= htmlspecialchars(self::$ruby_fields[$i], ENT_QUOTES);
 		}
-		return substr($string, 0, -1);
+		return substr($string, 0, -1) . "</span>";
 	}
 	
 	
