@@ -172,34 +172,70 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 	<head>
 		<title>Simple Online Log Viewer</title>
 		<style type='text/css'>
-			div#log_excerpt
+			body
 			{
-				font-family: monospace;
+				background: #000000;
+				color: #00ff00;
+				font-family: arial, sans-serif;
 				font-size: 12px;
-				margin-top: 30px;
 			}
 
+			a
+			{
+				color: #99cccc;	
+			}
+			
+			a:hover
+			{
+				color: #99ffff;	
+			}
+			
+			a:visited
+			{
+				color: #9933ff;	
+			}
+			
 			div.error
 			{
-				color: #660000;
+				color: #ff0000;
 				font-weight: bold;
 				margin-bottom: 10px;
 			}
 			div.warning
 			{
-				color: #c24e00;
+				color: #ffff00;
 				font-weight: bold;
 				margin-bottom: 10px;
 			}
+
+			div#log_excerpt
+			{
+				margin-top: 30px;
+			}
 			div.log_line
 			{
+				font-family: monospace;
 				margin-bottom: 10px;
-				text-align: justify;
 			}
 		</style>
+		<script type="text/javascript">
+			function toggle_documentation()
+			{
+				documentation = document.getElementById('documentation');
+				
+				if (documentation.style.display == 'none')
+				{
+					documentation.style.display = 'block';	
+				}
+				else
+				{
+					documentation.style.display = 'none';	
+				}
+			}
+		</script>
 	</head>
 	<body>
-		<form>
+		<form action="<?php echo $_SERVER['SCRIPT_NAME']; ?>" method="get">
 			<table width="100%">
 				<tr>
 					<td>
@@ -238,37 +274,6 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				</tr>
 			</table>
 		</form>
-		<table width="100%">
-			<thead>
-				<tr>
-					<th>Field Name</th>
-					<th>Description</th>
-					<th>Default Value</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td>Log File</td>
-					<td>Which log file to retrieve data from.</td>
-					<td></td>
-				</tr>
-				<tr>
-					<td>Offset</td>
-					<td>The byte position to begin fetching data from within the log file.</td>
-					<td>The last byte position in the log file.</td>
-				</tr>
-				<tr>
-					<td>Length</td>
-					<td>The amount of data to read from the log file.  Reads forwards from the offset if positive and reads backwards from the offset if negative.</td>
-					<td><?php echo number_format(DEFAULT_LENGTH); ?></td>
-				</tr>
-				<tr>
-					<td>Filter</td>
-					<td>A string to look for within the data retrieved from the log file.  Only log lines containing the string will be displayed.</td>
-					<td></td>
-				</tr>
-			</tbody>
-		</table>
 		<?php
 			foreach ($errors as $error_message)
 			{
@@ -279,6 +284,47 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				echo '<div class="warning">' . htmlspecialchars($warning_message, ENT_QUOTES) . "</div>\n";
 			}
 		?>
+		<div>
+			[<a href="javascript:toggle_documentation()">Documentation</a>]
+			<table id="documentation" style="display: none" width="100%">
+				<thead>
+					<tr>
+						<th>Field</th>
+						<th>Description</th>
+						<th>Default</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><i>Log File</i></td>
+						<td>Which log file to retrieve data from.</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><i>Offset</i></td>
+						<td>
+							The byte position to begin fetching lines from within the log file.  If <i>offset</i> is a position in the
+							middle of a log line, the partial line is not displayed.
+						</td>
+						<td>The last byte position in the log file.</td>
+					</tr>
+					<tr>
+						<td><i>Length</i></td>
+						<td>
+							The amount of data to read from the log file.  If <i>length</i> is positive, read forward from <i>offset</i>.  If <i>length</i>
+							is negative, read backward from <i>offset</i>.  If (<i>offset</i> + <i>length</i>) terminates in the middle of a log line,
+							the entirety of that log line is displayed.
+						</td>
+						<td><?php echo number_format(DEFAULT_LENGTH); ?></td>
+					</tr>
+					<tr>
+						<td><i>Filter</i></td>
+						<td>A string to look for within the data retrieved from the log file.  Only log lines containing the string will be displayed.</td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 		<div id="log_excerpt">
 			<?php
 				if ($log_handle)
@@ -305,8 +351,8 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					}
 
 					$filter_count = 0;
-					$line_count = 0;
-					while ((! feof($log_handle)) && ($current_position <= ($_GET['offset'] + $_GET['length'])) && ($line_count < MAX_LINES))
+					$line_display_count = 0;
+					while ((! feof($log_handle)) && ($current_position <= ($_GET['offset'] + $_GET['length'])) && ($line_display_count < MAX_LINES))
 					{
 						$current_line = fgets($log_handle);
 
@@ -315,24 +361,28 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						$line_end_position = $current_position - 1;
 
 						// Remove any trailing newline character.
-						$current_line = rtrim($current_line, "\n");
+						if ($current_line !== FALSE)
+						{
+							$current_line = rtrim($current_line, "\n");
+						}
 
 						// If we have a filter, skip lines that do not match it.
-						if ($_GET['filter'] && (stristr($current_line, $_GET['filter']) == FALSE))
+						if ($_GET['filter'])
 						{
-							$filter_count++;
-							continue;
+							if (($current_line !== FALSE) && (stristr($current_line, $_GET['filter']) == FALSE))
+							{
+								$filter_count++;
+								continue;
+							}
+							if ($filter_count)
+							{
+								echo "<div class='warning'>Skipped " . number_format($filter_count) . " log lines based on filters applied.</div>\n";
+								$filter_count = 0;
+							}
 						}
 
-						if ($filter_count)
-						{
-							echo "<div class='filter_count_warning'>Skipped " . number_format($filter_count) . " log lines based on filters applied.</div>\n";
-						}
-
-						// If we have just hit the end of a file; we will have a line that is empty;
-						// there is nothing between the last newline of the file and EOF.  Skip that
-						// line if/when we encounter it.
-						if (! strlen($current_line))
+						// Check if we are at EOF.
+						if ($current_line === FALSE)
 						{
 							continue;
 						}
@@ -344,27 +394,32 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 							$current_line[$i] = htmlspecialchars($current_line[$i], ENT_QUOTES);
 						}
 						
-						$line_count++;
+						$line_display_count++;
 						echo "<div class='log_line'>";
 						echo "[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start_position - 8192), 0) . "&length=12288#" . $line_start_position . "' name='" . $line_start_position . "'>" . $line_start_position .  "</a>] ";
 						echo implode('<wbr>', $current_line);
 						echo "</div>\n";
 					}
 					
-					if ($line_count >= MAX_LINES)
+					if ($line_display_count >= MAX_LINES)
 					{
-						echo "<div class='line_count_warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.</div>\n";
+						echo "<div class='warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.</div>\n";
 					}
 					
+					if ($current_position > ($_GET['offset'] + $_GET['length']))
+					{
+						echo "<div class='warning'>Encountered end of requested data at offset " . number_format($current_position) . ".</div>\n";
+					}
+
 					if (feof($log_handle))
 					{
-						echo "<div class='eof_warning'>Encountered end of file at offset " . number_format($current_position) . ".</div>\n";
+						echo "<div class='warning'>Encountered end of file at offset " . number_format($current_position) . ".</div>\n";
 					}
 
 					fclose($log_handle);
 				}
 			?>
+			<a name="tail"></a>
 		</div>
-		<a name="tail">
 	</body>
 </html>
