@@ -206,7 +206,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			}
 			$log_excerpt[$i] = implode('<wbr>', $log_excerpt[$i]);
 			
-			$log_excerpt[$i] = "<div class='log_line'><a name='" . $line_start . "'>[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start - 4096), 0) . "&length=8192#" . $line_start . "'>" . $line_start .  "</a>] " . $log_excerpt[$i] . "</div>";
+			$log_excerpt[$i] = "<div class='log_line'><a name='" . $line_start . "'>[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start - 8192), 0) . "&length=12288#" . $line_start . "'>" . $line_start .  "</a>] " . $log_excerpt[$i] . "</div>";
 		}
 	}
 	else
