@@ -771,10 +771,11 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 							}
 							else
 							{
+								$context_lines = LineArchive::pop_last($_GET['filter_context']);
 								echo LineArchive::skip_warning();
 								if (LineArchive::$count)
 								{
-									foreach (LineArchive::pop_last($_GET['filter_context']) as $skipped_line)
+									foreach ($context_lines as $skipped_line)
 									{
 										LineOutput::display($skipped_line['line'], $skipped_line['start_position'], $skipped_line['end_position']);
 									}
