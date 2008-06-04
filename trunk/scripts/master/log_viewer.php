@@ -167,6 +167,28 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 		fseek($log_handle, $_GET['offset']);
 		$log_excerpt = fread($log_handle, $_GET['length']);
 		$log_excerpt = explode("\n", $log_excerpt);
+		
+		// We drop the first line if it is a partial line.  It is a partial line
+		// unless we started reading at the beginning of the log file or the
+		// character immediately before our read was a newline.
+		//
+		// Thus we drop the line if we have $_GET['offset'] and if the character
+		// at $_GET['offset'] - 1 != "\n".
+		if ($_GET['offset'])
+		{
+			fseek($log_handle, $_GET['offset'] - 1);
+			if (strcmp(fread($log_handle, 1), "\n"))
+			{
+				array_shift($log_excerpt);
+			}
+		}
+		fclose($log_handle);
+
+		// We always drop the last element.  If we read a complete log line at the
+		// end of the read; then this will be an empty entry and if we didn't then
+		// it is a partial log line.
+		array_pop($log_excerpt);
+
 		$current_offset = $_GET['offset'];
 		foreach (array_keys($log_excerpt) as $i)
 		{
@@ -177,20 +199,8 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			$line_end = $current_offset + strlen($log_excerpt[$i]);
 			
 			// Advance our offset pointer to the beginning of the next line.
-			$current_offset += strlen($log_excerpt[$i]);
-			if ($i != (count($log_excerpt) - 1))
-			{
-				// +1 if we skipped a newline (i.e. if there is another element after this one)
-				$current_offset++;
-			}
-			
-			// Skip empty lines.  Can happen if our data stream started or ended with '\n'.
-			if (! $log_excerpt[$i])
-			{
-				unset($log_excerpt[$i]);
-				continue;
-			}
-			
+			$current_offset += strlen($log_excerpt[$i]) + 1; // +1 to make up for the newline that we skipped.
+
 			// If we have a filter, skip lines that do not match it.
 			if ($_GET['filter'] && (stristr($log_excerpt[$i], $_GET['filter']) == FALSE))
 			{
