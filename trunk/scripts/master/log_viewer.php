@@ -3,6 +3,10 @@
 define('DEFAULT_LENGTH', -1 * 64 * 1024);
 
 
+// Maximum number of lines that is allowed in filter context.
+define('MAX_CONTEXT', 100);
+
+
 // Maximum number of lines to ever display, the script will never display more
 // than this number of lines.
 define('MAX_LINES', 15000);
@@ -21,6 +25,45 @@ $log_sources = array
 	'ruby-stage' => '/var/log/ruby-stage.log'
 );
 $warnings = array();
+
+
+class LineArchive
+{
+	protected static $archive = array();
+	protected static $count = 0;
+	
+	
+	public static function add($line)
+	{
+		if (count(self::$archive) > (MAX_CONTEXT * 1.5))
+		{
+			array_splice(self::$archive, 0, (count(self::$archive) - MAX_CONTEXT));
+		}
+		self::$archive[] = $line;
+		self::$count++;
+	}
+	
+	
+	public static function fetch_last($count)
+	{
+		return array_slice(self::$archive, $count * -1, $count);
+	}
+	
+	
+	public static function reset()
+	{
+		$count = self::$count;
+		
+		self::$archive = array();
+		self::$count = 0;
+		
+		if ($count)
+		{
+			return "<div class='warning'>Skipped " . number_format($count) . " log lines based on filters applied.</div>\n";
+		}
+		return "";
+	}
+}
 
 
 class LogLine
@@ -221,6 +264,11 @@ function sanitize_filter_context()
 	{
 		$warnings[] = 'Filter context is symmetrical, treating context ' . number_format($_GET['filter_context']) . ' as ' . number_format($_GET['filter_context'] * -1) . '.';
 		$_GET['filter_context'] = $_GET['filter_context'] * -1;
+	}
+	if ($_GET['filter_context'] > MAX_CONTEXT)
+	{
+		$warnings[] = 'Filter context is limited to ' . number_format(MAX_CONTEXT) . ' lines.';
+		$_GET['filter_context'] = MAX_CONTEXT;
 	}
 	return 1;
 }
@@ -590,7 +638,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						Filter: <input type='text' name='filter' size='20' maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
 					</td>
 					<td style="text-align: center;">
-						Filter Context: <input type='text' name='filter_context' size='4' maxlength='4' value='<?php echo htmlspecialchars($_GET['filter_context'], ENT_QUOTES); ?>' />
+						Filter Context: <input type='text' name='filter_context' size='4' maxlength='3' value='<?php echo htmlspecialchars($_GET['filter_context'], ENT_QUOTES); ?>' />
 					</td>
 					<td style="text-align: right;">
 						<input type='button' value='Tail' onclick='tail()' />
@@ -675,41 +723,32 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						fseek($log_handle, $current_position);
 					}
 
-					$filter_count = 0;
 					$line_display_count = 0;
+					echo LineArchive::reset();
 					while ((! feof($log_handle)) && ($current_position <= ($_GET['offset'] + $_GET['length'])) && ($line_display_count < MAX_LINES))
 					{
 						$current_line = fgets($log_handle);
-
+						if ($current_line === FALSE) // Check if we are at EOF.
+						{
+							continue;
+						}
+						
 						$line_start_position = $current_position;
 						$current_position += strlen($current_line);
 						$line_end_position = $current_position - 1;
 
 						// Remove any trailing newline character.
-						if ($current_line !== FALSE)
-						{
-							$current_line = rtrim($current_line, "\n");
-						}
+						$current_line = rtrim($current_line, "\n");
 
 						// If we have a filter, skip lines that do not match it.
 						if ($_GET['filter'])
 						{
-							if (($current_line !== FALSE) && (stristr($current_line, $_GET['filter']) == FALSE))
+							if (stristr($current_line, $_GET['filter']) == FALSE)
 							{
-								$filter_count++;
+								LineArchive::add(array('line' => $current_line, 'start_position' => $line_start_position, 'end_position' => $line_end_position));
 								continue;
 							}
-							if ($filter_count)
-							{
-								echo "<div class='warning'>Skipped " . number_format($filter_count) . " log lines based on filters applied.</div>\n";
-								$filter_count = 0;
-							}
-						}
-
-						// Check if we are at EOF.
-						if ($current_line === FALSE)
-						{
-							continue;
+							echo LineArchive::reset();
 						}
 
 						$line_display_count++;
@@ -718,6 +757,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						echo format_line($current_line);
 						echo "</div>\n";
 					}
+					echo LineArchive::reset();
 					
 					if ($line_display_count >= MAX_LINES)
 					{
