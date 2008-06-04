@@ -174,7 +174,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			$line_start = $current_offset;
 			
 			// Store the index of the last character of the line, for ease of use.
-			$line_end = $current_offset + strlen($log_excerpt[$i]) - 1;
+			$line_end = $current_offset + strlen($log_excerpt[$i]);
 			
 			// Advance our offset pointer to the beginning of the next line.
 			$current_offset += strlen($log_excerpt[$i]);
