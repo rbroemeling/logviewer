@@ -99,6 +99,7 @@ function sanitize_offset()
 
 function sanitize_position()
 {
+	global $errors;
 	global $log_size;
 	global $warnings;
 
@@ -116,9 +117,18 @@ function sanitize_position()
 	$_GET['length'] = $_GET['length'] * -1;
 	if ($_GET['length'] > $_GET['offset'])
 	{
-		$warnings[] = 'Impossible to read ' . number_format($_GET['length']) . ' bytes before offset ' . number_format($_GET['offset']) . '.  Adjusting length to ' . number_format($_GET['offset'] * -1) . '.';
-		$_GET['length'] = $_GET['offset'];
-		$_GET['offset'] = 0;
+		if ($_GET['offset'] > 0)
+		{
+			$warnings[] = 'Impossible to read ' . number_format($_GET['length']) . ' bytes before offset ' . number_format($_GET['offset']) . '.  Adjusting length to ' . number_format($_GET['offset'] * -1) . '.';
+			$_GET['length'] = $_GET['offset'];
+			$_GET['offset'] = 0;
+		}
+		else
+		{
+			$errors[] = 'Impossible to read ' . number_format($_GET['length']) . ' bytes before offset 0.';
+			$_GET['length'] = $_GET['length'] * -1;
+			return 0;
+		}
 	}
 	else
 	{
