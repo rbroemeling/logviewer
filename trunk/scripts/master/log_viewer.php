@@ -236,11 +236,11 @@ class LineOutput
 {
 	public static $displayed_lines = 0;
 	
-	public static function display($line, $line_start_position, $line_end_position)
+	public static function display($line, $line_start_position, $line_end_position, $div_class = 'log_line')
 	{
 		self::$displayed_lines++;
 
-		echo "<div id='" . $line_start_position . "' class='log_line'>";
+		echo "<div id='" . $line_start_position . "' class='" . $div_class . "'>";
 		echo "[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start_position - 8192), 0) . "&length=12288#" . $line_start_position . "' name='" . $line_start_position . "'>" . $line_start_position .  "</a>] ";
 			
 		if (preg_match('/ PHP error: /', $line))
@@ -484,6 +484,12 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			}
 			div.log_line
 			{
+				font-family: monospace;
+				margin-bottom: 10px;
+			}
+			div.log_line_context
+			{
+				background: #333333;
 				font-family: monospace;
 				margin-bottom: 10px;
 			}
@@ -777,7 +783,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 								{
 									foreach ($context_lines as $skipped_line)
 									{
-										LineOutput::display($skipped_line['line'], $skipped_line['start_position'], $skipped_line['end_position']);
+										LineOutput::display($skipped_line['line'], $skipped_line['start_position'], $skipped_line['end_position'], 'log_line_context');
 									}
 								}
 								$contextual_lines = 0;
@@ -785,7 +791,14 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 							}
 						}
 
-						LineOutput::display($current_line, $line_start_position, $line_end_position);
+						if ($contextual_lines < $_GET['filter_context'])
+						{
+							LineOutput::display($current_line, $line_start_position, $line_end_position, 'log_line_context');
+						}
+						else
+						{
+							LineOutput::display($current_line, $line_start_position, $line_end_position);
+						}
 					}
 					echo LineArchive::skip_warning();
 					LineArchive::reset();
