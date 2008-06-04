@@ -167,7 +167,8 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 		fseek($log_handle, $_GET['offset']);
 		$log_excerpt = fread($log_handle, $_GET['length']);
 		$log_excerpt = explode("\n", $log_excerpt);
-		
+		$current_offset = $_GET['offset'];
+
 		// We drop the first line if it is a partial line.  It is a partial line
 		// unless we started reading at the beginning of the log file or the
 		// character immediately before our read was a newline.
@@ -179,7 +180,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			fseek($log_handle, $_GET['offset'] - 1);
 			if (strcmp(fread($log_handle, 1), "\n"))
 			{
-				array_shift($log_excerpt);
+				$current_offset += strlen(array_shift($log_excerpt)) + 1;
 			}
 		}
 		fclose($log_handle);
@@ -189,7 +190,6 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 		// it is a partial log line.
 		array_pop($log_excerpt);
 
-		$current_offset = $_GET['offset'];
 		foreach (array_keys($log_excerpt) as $i)
 		{
 			// Store the index of the first character of the line, for ease of use.
