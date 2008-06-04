@@ -161,6 +161,11 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 		foreach (array_keys($log_excerpt) as $i)
 		{
 			$current_offset += strlen($log_excerpt[$i]) + 1; // +1 for the newline that we snarfed.
+			if (! $log_excerpt[$i]) // Empty line encountered.  Can happen if our data stream started or ended with '\n'.
+			{
+				unset($log_excerpt[$i]);
+				continue;
+			}
 			if ($_GET['filter'] && (stristr($log_excerpt[$i], $_GET['filter']) == FALSE))
 			{
 				unset($log_excerpt[$i]);
