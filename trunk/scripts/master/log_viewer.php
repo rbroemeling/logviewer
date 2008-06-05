@@ -750,7 +750,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						<td><i>Filter</i></td>
 						<td>
 							A regular expression to match against the data retrieved from the log file.
-							Only log lines matching the string (or their context, see <i>filter context</i>)
+							Only log lines matching the pattern (or their context, see <i>filter context</i>)
 							will be displayed.
 						</td>
 						<td></td>
