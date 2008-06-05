@@ -236,11 +236,11 @@ class LineOutput
 {
 	public static $displayed_lines = 0;
 	
-	public static function display($line, $line_start_position, $line_end_position, $div_class = 'log_line')
+	public static function display($line, $line_start_position, $line_end_position, $extra_classes = '')
 	{
 		self::$displayed_lines++;
 
-		echo "<div id='" . $line_start_position . "' class='" . $div_class . "'>";
+		echo "<div id='" . $line_start_position . "' class='log_line " . $extra_classes . "'>";
 		echo "[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start_position - 8192), 0) . "&length=12288#" . $line_start_position . "' name='" . $line_start_position . "'>" . $line_start_position .  "</a>] ";
 			
 		if (preg_match('/ PHP error: /', $line))
@@ -487,11 +487,9 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				font-family: monospace;
 				padding-bottom: 10px;
 			}
-			div.log_line_context
+			div.log_context
 			{
 				background: #222222;
-				font-family: monospace;
-				padding-bottom: 10px;
 			}
 			
 			/* General log line field coloring. */
@@ -747,7 +745,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					}
 
 					LineArchive::reset();
-					$contextual_lines = $_GET['filter_context'];
+					$contextual_lines = $_GET['filter_context'] + 1;
 					while ((! feof($log_handle)) && ($current_position <= ($_GET['offset'] + $_GET['length'])) && (LineOutput::$displayed_lines < MAX_LINES))
 					{
 						$current_line = fgets($log_handle);
@@ -783,7 +781,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 								{
 									foreach ($context_lines as $skipped_line)
 									{
-										LineOutput::display($skipped_line['line'], $skipped_line['start_position'], $skipped_line['end_position'], 'log_line_context');
+										LineOutput::display($skipped_line['line'], $skipped_line['start_position'], $skipped_line['end_position'], 'log_context');
 									}
 								}
 								$contextual_lines = 0;
@@ -791,9 +789,9 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 							}
 						}
 
-						if ($contextual_lines < $_GET['filter_context'])
+						if ((0 < $contextual_lines) && ($contextual_lines <= $_GET['filter_context']))
 						{
-							LineOutput::display($current_line, $line_start_position, $line_end_position, 'log_line_context');
+							LineOutput::display($current_line, $line_start_position, $line_end_position, 'log_context');
 						}
 						else
 						{
