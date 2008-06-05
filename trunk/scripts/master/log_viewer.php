@@ -92,7 +92,7 @@ class LogLine
 		{
 			$string .= htmlspecialchars(self::$fields[$i], ENT_QUOTES);
 		}
-		return substr($string, 0, -1);
+		return $string;
 	}
 
 
@@ -136,7 +136,7 @@ class PHPLogLine extends LogLine
 		{
 			$string .= htmlspecialchars(self::$php_fields[$i], ENT_QUOTES);
 		}
-		return substr($string, 0, -1);
+		return $string;
 	}
 
 	
@@ -199,13 +199,16 @@ class RubyLogLine extends LogLine
 		
 		$string .= "<span class='ruby_component_" . self::$component . "'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>.";
 		
-		$string .= "<span class='errorlevel_" . parent::$error_level . "'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>:<span class='errorlevel_" . parent::$error_level . "'>";
+		$string .= "<span class='errorlevel_" . parent::$error_level . "'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>:";
 		
+		$string .= "<span class='errorlevel_" . parent::$error_level . "'>";
 		for ($i = $i; $i < count(self::$ruby_fields); $i++)
 		{
 			$string .= htmlspecialchars(self::$ruby_fields[$i], ENT_QUOTES);
 		}
-		return substr($string, 0, -1) . "</span>";
+		$string .= "</span>";
+		
+		return $string;
 	}
 	
 	
