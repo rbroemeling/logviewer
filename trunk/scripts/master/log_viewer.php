@@ -694,6 +694,9 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						Filter: <input type='text' name='filter' size='20' maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
 					</td>
 					<td style="text-align: center;">
+						Negate Filter <input type='checkbox' name='negate_filter' value='1' <?php if ($_GET['negate_filter']) { echo 'checked'; } ?> />
+					</td>
+					<td style="text-align: center;">
 						Filter Context: <input type='text' name='filter_context' size='4' maxlength='3' value='<?php echo htmlspecialchars($_GET['filter_context'], ENT_QUOTES); ?>' />
 					</td>
 					<td style="text-align: right;">
@@ -808,16 +811,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						// If we have a filter, skip lines that do not match it.
 						if ($_GET['filter'])
 						{
-							if (! preg_match($_GET['filter'], $current_line))
-							{
-								if ($contextual_lines >= $_GET['filter_context'])
-								{
-									LineArchive::add(array('line' => $current_line, 'start_position' => $line_start_position, 'end_position' => $line_end_position));
-									continue;
-								}
-								$contextual_lines++;
-							}
-							else
+							if (preg_match($_GET['filter'], $current_line) XOR $_GET['negate_filter'])
 							{
 								$context_lines = LineArchive::pop_last($_GET['filter_context']);
 								echo LineArchive::skip_warning();
@@ -827,6 +821,15 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 								}
 								$contextual_lines = 0;
 								LineArchive::reset();
+							}
+							else
+							{
+								if ($contextual_lines >= $_GET['filter_context'])
+								{
+									LineArchive::add(array('line' => $current_line, 'start_position' => $line_start_position, 'end_position' => $line_end_position));
+									continue;
+								}
+								$contextual_lines++;
 							}
 						}
 
