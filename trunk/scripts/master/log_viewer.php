@@ -759,6 +759,14 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						<td></td>
 					</tr>
 					<tr>
+						<td><i>Negate Filter</i></td>
+						<td>
+							This flag reverses the effect of <i>filter</i>.  When this is checked, the script will only
+							display lines that do not match <i>filter</i>.
+						</td>
+						<td>FALSE</td>
+					</tr>
+					<tr>
 						<td><i>Filter Context</i></td>
 						<td>How many lines of context you would like to be displayed around the lines that match <i>filter</i>.</td>
 						<td>0</td>
