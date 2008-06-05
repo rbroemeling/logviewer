@@ -275,6 +275,12 @@ function sanitize_filter($errno = null, $errstr = null)
 	}
 	if (strlen($_GET['filter']))
 	{
+		if (preg_match('/^[A-Z0-9]+$/i', $_GET['filter']))
+		{
+			// Assume that this is a plaintext match to be carried out, transform
+			// it into a regular expression.
+			$_GET['filter'] = '/' . $_GET['filter'] . '/';
+		}
 		set_error_handler('sanitize_filter');
 		preg_match($_GET['filter'], '');
 		restore_error_handler();
