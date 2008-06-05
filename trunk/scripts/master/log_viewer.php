@@ -712,9 +712,9 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			<table id="documentation" style="display: none" width="100%">
 				<thead>
 					<tr>
-						<th>Field</th>
+						<th width='125px'>Field</th>
 						<th>Description</th>
-						<th>Default</th>
+						<th width='125px'>Default</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -742,8 +742,17 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					</tr>
 					<tr>
 						<td><i>Filter</i></td>
-						<td>A string to look for within the data retrieved from the log file.  Only log lines containing the string will be displayed.</td>
+						<td>
+							A regular expression to match against the data retrieved from the log file.
+							Only log lines matching the string (or their context, see <i>filter context</i>)
+							will be displayed.
+						</td>
 						<td></td>
+					</tr>
+					<tr>
+						<td><i>Filter Context</i></td>
+						<td>How many lines of context you would like to be displayed around the lines that match <i>filter</i>.</td>
+						<td>0</td>
 					</tr>
 				</tbody>
 			</table>
