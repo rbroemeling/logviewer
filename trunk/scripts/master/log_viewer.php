@@ -496,13 +496,15 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			{
 				color: #ff0000;
 				font-weight: bold;
-				margin-bottom: 10px;
+				margin-bottom: 5px;
+				margin-top: 5px;
 			}
 			div.warning
 			{
 				color: #ffff00;
 				font-weight: bold;
-				margin-bottom: 10px;
+				margin-bottom: 5px;
+				margin-top: 5px;
 			}
 
 			div#log_excerpt
