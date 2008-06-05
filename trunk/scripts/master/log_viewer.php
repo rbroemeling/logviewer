@@ -278,7 +278,7 @@ function sanitize_filter($errno = null, $errstr = null)
 	}
 	if (strlen($_GET['filter']))
 	{
-		if (preg_match('/^[A-Z0-9_-]+$/i', $_GET['filter']))
+		if (preg_match('/^[ A-Z0-9_-]+$/i', $_GET['filter']))
 		{
 			// Assume that this is a plaintext match to be carried out, transform
 			// it into a regular expression.
