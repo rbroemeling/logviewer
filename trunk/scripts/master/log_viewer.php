@@ -266,7 +266,8 @@ class LineOutput
 function sanitize_filter_context()
 {
 	global $errors;
-	
+	global $warnings;
+
 	if (! strlen($_GET['filter_context']))
 	{
 		$_GET['filter_context'] = 0;
