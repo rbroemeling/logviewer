@@ -263,6 +263,32 @@ class LineOutput
 }
 
 
+function sanitize_filter($errno = null, $errstr = null)
+{
+	global $errors;
+	static $regular_expression_errstr = '';
+
+	if ($errstr)
+	{
+		$regular_expression_errstr = $errstr;
+		return;
+	}
+	if (strlen($_GET['filter']))
+	{
+		set_error_handler('sanitize_filter');
+		preg_match($_GET['filter'], '');
+		restore_error_handler();
+		if ($regular_expression_errstr)
+		{
+			$regular_expression_errstr = explode(':', $regular_expression_errstr);
+			$errors[] = 'Regular expression "' . $_GET['filter'] . '" is not valid: ' . $regular_expression_errstr[1] . '.';
+			return 0;
+		}
+	}
+	return 1;
+}
+
+
 function sanitize_filter_context()
 {
 	global $errors;
@@ -430,7 +456,7 @@ if (get_magic_quotes_gpc())
 }
 
 $log_handle = 0;
-if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_position() && sanitize_filter_context())
+if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_position() && sanitize_filter() && sanitize_filter_context())
 {
 	$log_handle = fopen($log_sources[$_GET['log']], 'r');
 	if (! $log_handle)
@@ -765,7 +791,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						// If we have a filter, skip lines that do not match it.
 						if ($_GET['filter'])
 						{
-							if (stristr($current_line, $_GET['filter']) == FALSE)
+							if (! preg_match($_GET['filter'], $current_line))
 							{
 								if ($contextual_lines >= $_GET['filter_context'])
 								{
