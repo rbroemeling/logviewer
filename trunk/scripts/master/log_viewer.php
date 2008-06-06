@@ -922,12 +922,12 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					
 					if (LineOutput::$displayed_lines >= MAX_LINES)
 					{
-						echo "<div class='warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.</div>\n";
+						echo "<div class='warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.  End of file is " . number_format($log_size - $current_position) . " bytes further.</div>\n";
 					}
 					
 					if ($current_position > ($_GET['offset'] + $_GET['length']))
 					{
-						echo "<div class='warning'>Encountered end of requested data at offset " . number_format($current_position) . ".</div>\n";
+						echo "<div class='warning'>Encountered end of requested data at offset " . number_format($current_position) . ".  End of file is " . number_format($log_size - $current_position) . " bytes further.</div>\n";
 					}
 
 					if (feof($log_handle))
