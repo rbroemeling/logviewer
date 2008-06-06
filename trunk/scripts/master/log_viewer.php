@@ -620,7 +620,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			{
 				if (window.location.hash.match(/^#\d+$/))
 				{
-					div = document.getElementById(window.location.hash.substr(1));
+					var div = document.getElementById(window.location.hash.substr(1));
 					if (div)
 					{
 						div.style.fontWeight = "bold";
@@ -630,27 +630,87 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			}
 			
 			
+			function reset_log_file_form()
+			{
+				var inputs = document.getElementsByTagName('input');
+				
+				for (var i = 0; i < inputs.length; i++)
+				{
+					if (inputs[i].type == 'text' || inputs[i].type == 'hidden')
+					{
+						inputs[i].value = '';
+					}
+					else if (inputs[i].type == 'checkbox')
+					{
+						inputs[i].checked = false;
+					}
+					else if (inputs[i].type == 'button' || inputs[i].type == 'submit')
+					{
+						/* Skip this input, it doesn't need to be reset. */
+					}
+					else
+					{
+						alert("reset_log_file_form(): do not know how to clear an input of type " + inputs[i].type)
+					}
+				}
+			}
+			
+			
+			function submit_log_file_form()
+			{
+				var log_file_form = document.getElementById('log_file_form');
+				var timestamp_input = document.getElementById('timestamp_input');
+				
+				if (timestamp_input)
+				{
+					var timestamp = new Date();
+					timestamp_input.value = timestamp.getTime();
+				}
+				if (log_file_form)
+				{
+					log_file_form.submit();
+				}
+			}
+			
+			
 			function tail()
 			{
-				log = document.getElementById("log");
-				if (log)
+				var length_input = document.getElementById('length_input');
+				var log_file_form = document.getElementById('log_file_form');
+				var offset_input = document.getElementById('offset_input');
+
+				if (length_input)
 				{
-					log = log.value;
+					var length = parseInt(length_input.value);
+					if (isNaN(length))
+					{
+						length = '';
+					}
+					else if (length == 0)
+					{
+						length = '';
+					}
+					else
+					{
+						length = Math.abs(length) * -1;
+					}
+					length_input.value = length.toString();
 				}
-				if (log)
+				if (offset_input)
 				{
-					window.location = "?log=" + log + "&timestamp=" + (new Date()).getTime() + "#tail";
+					offset_input.value = '';
 				}
-				else
+				if (log_file_form)
 				{
-					alert('Invalid log selected, could not execute tail operation.')
+					log_file_form.action = log_file_form.action + '#tail';
+					submit_log_file_form();
 				}
 			}
 			
 			
 			function toggle_documentation()
 			{
-				documentation = document.getElementById('documentation');
+				var documentation = document.getElementById('documentation_table');
 				
 				if (documentation.style.display == 'none')
 				{
@@ -663,13 +723,14 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			}
 		</script>
 	</head>
-	<body onload="highlight_named_anchor()">
-		<form action="<?php echo $_SERVER['SCRIPT_NAME']; ?>" method="get">
-			<table width="100%">
+	<body onload='highlight_named_anchor();'>
+		<form id='log_file_form' action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get">
+			<input type='hidden' id='timestamp_input' name='timestamp' value='' />
+			<table width='100%'>
 				<tr>
 					<td>
 						Log File: 
-						<select id='log' name='log'>
+						<select name='log'>
 							<option></option>
 							<?php
 								foreach (array_keys($log_sources) as $log)
@@ -688,10 +749,10 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						</select>
 					</td>
 					<td style="text-align: center;">
-						Offset: <input type="text" name="offset" size="11" maxlength="10" value='<?php echo htmlspecialchars($_GET['offset'], ENT_QUOTES); ?>' />
+						Offset: <input type="text" id="offset_input" name="offset" size="11" maxlength="10" value='<?php echo htmlspecialchars($_GET['offset'], ENT_QUOTES); ?>' />
 					</td>
 					<td style="text-align: center;">
-						Length: <input type="text" name="length" size="9" maxlength="8" value='<?php echo htmlspecialchars($_GET['length'], ENT_QUOTES); ?>' />
+						Length: <input type="text" id="length_input" name="length" size="9" maxlength="8" value='<?php echo htmlspecialchars($_GET['length'], ENT_QUOTES); ?>' />
 					</td>
 					<td style="text-align: center;">
 						Filter: <input type='text' name='filter' size='20' maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
@@ -702,9 +763,12 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					<td style="text-align: center;">
 						Filter Context: <input type='text' name='filter_context' size='4' maxlength='3' value='<?php echo htmlspecialchars($_GET['filter_context'], ENT_QUOTES); ?>' />
 					</td>
-					<td style="text-align: right;">
-						<input type='button' value='Tail' onclick='tail()' />
-						<input type='submit' value='Submit' />
+				</tr>
+				<tr>
+					<td colspan="6" style="text-align: right;">
+						<input style="margin-right: 10px;" type='button' value='Reset' onclick='reset_log_file_form();' />
+						<input style="margin-right: 10px;" type='button' value='Tail' onclick='tail();' />
+						<input type='button' value='Submit' onclick='submit_log_file_form();' />
 					</td>
 				</tr>
 			</table>
@@ -721,7 +785,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 		?>
 		<div>
 			<input type='button' value='Documentation' onclick='toggle_documentation()' />
-			<table id="documentation" style="display: none" width="100%">
+			<table id='documentation_table' style="display: none" width="100%">
 				<thead>
 					<tr>
 						<th width='125px'>Field</th>
