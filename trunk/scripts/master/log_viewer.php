@@ -766,6 +766,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				</tr>
 				<tr>
 					<td colspan="6" style="text-align: right;">
+						<input style="margin-right: 10px;" type='button' value='Documentation' onclick='toggle_documentation();' />
 						<input style="margin-right: 10px;" type='button' value='Reset' onclick='reset_log_file_form();' />
 						<input style="margin-right: 10px;" type='button' value='Tail' onclick='tail();' />
 						<input type='button' value='Submit' onclick='submit_log_file_form();' />
@@ -784,7 +785,6 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			}
 		?>
 		<div>
-			<input type='button' value='Documentation' onclick='toggle_documentation()' />
 			<table id='documentation_table' style="display: none" width="100%">
 				<thead>
 					<tr>
