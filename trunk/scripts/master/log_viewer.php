@@ -726,7 +726,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 	<body onload='highlight_named_anchor();'>
 		<form id='log_file_form' action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get">
 			<input type='hidden' id='timestamp_input' name='timestamp' value='' />
-			<table width='100%'>
+			<table width="100%">
 				<tr>
 					<td>
 						Log File: 
@@ -755,19 +755,28 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						Length: <input type="text" id="length_input" name="length" size="9" maxlength="8" value='<?php echo htmlspecialchars($_GET['length'], ENT_QUOTES); ?>' />
 					</td>
 					<td style="text-align: center;">
-						Filter: <input type='text' name='filter' size='20' maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
-					</td>
-					<td style="text-align: center;">
-						Negate Filter <input type='checkbox' name='negate_filter' value='1' <?php if ($_GET['negate_filter']) { echo 'checked'; } ?> />
-					</td>
-					<td style="text-align: center;">
 						Filter Context: <input type='text' name='filter_context' size='4' maxlength='3' value='<?php echo htmlspecialchars($_GET['filter_context'], ENT_QUOTES); ?>' />
 					</td>
+					<td style="text-align: right;">
+						<input type='button' value='Add Filter' onclick='alert("Add a filter!");' />
+						<input type='button' value='?' onclick='toggle_documentation();' />
+					</td>
 				</tr>
+			</table>
+			<div id="filter_list">
+				<div>
+					<!-- This is an invisible div that simply serves as a template for the HTML that defines a filter. -->
+					<input type="button" style="margin-right: 10px;" value="-" onclick='alert("Remove this filter!");' />
+					Filter: <input type='text' name='filter' size='20' style="margin-right: 10px;" maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
+					Negate Filter <input type='checkbox' name='negate_filter' style="margin-right: 10px;" value='1' <?php if ($_GET['negate_filter']) { echo 'checked'; } ?> />
+				</div>
+			</div>
+			<table width="100%">
 				<tr>
-					<td colspan="6" style="text-align: right;">
-						<input style="margin-right: 10px;" type='button' value='Documentation' onclick='toggle_documentation();' />
-						<input style="margin-right: 10px;" type='button' value='Reset' onclick='reset_log_file_form();' />
+					<td>
+						<input type='button' value='Reset' onclick='reset_log_file_form();' />
+					</td>
+					<td style="text-align: right;">
 						<input style="margin-right: 10px;" type='button' value='Tail' onclick='tail();' />
 						<input type='button' value='Submit' onclick='submit_log_file_form();' />
 					</td>
