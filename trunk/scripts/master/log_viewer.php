@@ -630,7 +630,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			}
 			
 			
-			function reset_log_file_form()
+			function reset_form()
 			{
 				var inputs = document.getElementsByTagName('input');
 				
@@ -650,7 +650,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					}
 					else
 					{
-						alert("reset_log_file_form(): do not know how to clear an input of type " + inputs[i].type)
+						alert("reset_form(): do not know how to clear an input of type " + inputs[i].type)
 					}
 				}
 			}
@@ -777,7 +777,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			<table width="100%">
 				<tr>
 					<td>
-						<input type='button' value='Reset' onclick='reset_log_file_form();' />
+						<input type='button' value='Reset' onclick='reset_form();' />
 					</td>
 					<td style="text-align: right;">
 						<input style="margin-right: 10px;" type='button' value='Tail' onclick='tail();' />
