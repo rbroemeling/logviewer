@@ -708,18 +708,21 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			}
 			
 			
-			function toggle_documentation()
+			function toggle_display(id)
 			{
-				var documentation = document.getElementById('documentation_table');
+				var element = document.getElementById(id);
 				
-				if (documentation.style.display == 'none')
+				if (! element)
 				{
-					documentation.style.display = 'block';	
+					return -1;
 				}
-				else
+				if (element.style.display == 'none')
 				{
-					documentation.style.display = 'none';	
+					element.style.display = 'block';
+					return 1;
 				}
+				element.style.display = 'none';	
+				return 0;
 			}
 		</script>
 	</head>
@@ -759,7 +762,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					</td>
 					<td style="text-align: right;">
 						<input type='button' value='Add Filter' onclick='alert("Add a filter!");' />
-						<input type='button' value='?' onclick='toggle_documentation();' />
+						<input type='button' value='?' onclick='toggle_display("documentation_table");' />
 					</td>
 				</tr>
 			</table>
