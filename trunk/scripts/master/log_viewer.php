@@ -656,7 +656,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			}
 			
 			
-			function submit_log_file_form()
+			function submit_form()
 			{
 				var log_file_form = document.getElementById('log_file_form');
 				var timestamp_input = document.getElementById('timestamp_input');
@@ -703,8 +703,8 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				if (log_file_form)
 				{
 					log_file_form.action = log_file_form.action + '#tail';
-					submit_log_file_form();
 				}
+				submit_form();
 			}
 			
 			
@@ -781,7 +781,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					</td>
 					<td style="text-align: right;">
 						<input style="margin-right: 10px;" type='button' value='Tail' onclick='tail();' />
-						<input type='button' value='Submit' onclick='submit_log_file_form();' />
+						<input type='button' value='Submit' onclick='submit_form();' />
 					</td>
 				</tr>
 			</table>
