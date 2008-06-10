@@ -266,35 +266,105 @@ class LineOutput
 }
 
 
+function filter_form_string($filter = null, $negate_filter = 0, $logic_filter = 'OR')
+{
+	$s = '';
+	$s .= '<input type="button" style="margin-right: 10px;" value="-" onclick="this.parentNode.parentNode.removeChild(this.parentNode);" />';
+	$s .= 'Filter: <input type="text" name="filter[]" size="20" style="margin-right: 10px;" maxlength="100" value="' . htmlspecialchars($filter, ENT_QUOTES) . '" />';
+	$s .= '<select name="negate_filter[]" style="margin-right: 10px;"><option value="0" ' . ($negate_filter ? '' : 'selected') . '>Normal Match</option><option value="1" ' . ($negate_filter ? 'selected' : '') . '>Inverted Match</option></select>';
+	$s .= '<select name="logic_filter[]"><option ' . ($logic_filter == 'AND' ? 'selected' : '') . '>AND</option><option ' . ($logic_filter == 'OR' ? 'selected' : '') . '>OR</option></select>';
+	return $s;
+}
+
+
+function filter_match($line)
+{
+	$filter_results = array();
+
+	for ($i = 0; $i < count($_GET['filter']); $i++)
+	{
+		if (! $_GET['filter'][$i])
+		{
+			$filter_results[$i] = (1 XOR $_GET['negate_filter'][$i]);
+		}
+		elseif (preg_match($_GET['filter'][$i], $line) XOR $_GET['negate_filter'][$i])
+		{
+			$filter_results[$i] = 1;
+		}
+		else
+		{
+			$filter_results[$i] = 0;
+		}
+	}
+	
+	$k = count($filter_results);
+	for ($i = 0; $i < $k; $i++)
+	{
+		if ($_GET['logic_filter'][$i] == 'AND')
+		{
+			$filter_results[$i + 1] = $filter_results[$i] && $filter_results[$i + 1];
+			unset($filter_results[$i]);
+		}
+	}
+	
+	return (array_sum($filter_results) > 0);
+}
+
+
 function sanitize_filter($errno = null, $errstr = null)
 {
 	global $errors;
+	$regular_expression_errors = 0;
 	static $regular_expression_errstr = '';
+	global $warnings;
 
 	if ($errstr)
 	{
 		$regular_expression_errstr = $errstr;
 		return;
 	}
-	if (strlen($_GET['filter']))
+	if (! is_array($_GET['filter']))
 	{
-		if (preg_match('/^[ A-Z0-9_-]+$/i', $_GET['filter']))
+		if (isset($_GET['filter']))
+		{
+			$_GET['filter'] = array($_GET['filter']);
+		}
+		else
+		{
+			$_GET['filter'] = array();
+		}
+	}
+	for ($i = 0; $i < count($_GET['filter']); $i++)
+	{
+		if (! strlen($_GET['filter'][$i]))
+		{
+			$warnings[] = 'Regular expression #' . ($i + 1) . ' is empty.  Empty regular expressions will match any string.';
+			continue;
+		}
+		if (! is_string($_GET['filter'][$i]))
+		{
+			$errors[] = 'Regular expression #' . ($i + 1) . ' is not a string.';
+			$regular_expression_errors++;
+			continue;
+		}
+		if (preg_match('/^[ A-Z0-9_-]+$/i', $_GET['filter'][$i]))
 		{
 			// Assume that this is a plaintext match to be carried out, transform
 			// it into a regular expression.
-			$_GET['filter'] = '/' . $_GET['filter'] . '/';
+			$_GET['filter'][$i] = '/' . $_GET['filter'][$i] . '/';
 		}
 		set_error_handler('sanitize_filter');
-		preg_match($_GET['filter'], '');
+		preg_match($_GET['filter'][$i], '');
 		restore_error_handler();
 		if ($regular_expression_errstr)
 		{
 			$regular_expression_errstr = explode(':', $regular_expression_errstr);
-			$errors[] = 'Regular expression "' . $_GET['filter'] . '" is not valid: ' . $regular_expression_errstr[1] . '.';
-			return 0;
+			$errors[] = 'Regular expression #' . ($i + 1) . ' ("' . $_GET['filter'][$i] . '") is not valid: ' . $regular_expression_errstr[1] . '.';
+			$regular_expression_errstr = '';
+			$regular_expression_errors++;
 		}
 	}
-	return 1;
+	return ($regular_expression_errors == 0);
 }
 
 
@@ -303,7 +373,7 @@ function sanitize_filter_context()
 	global $errors;
 	global $warnings;
 
-	if (! strlen($_GET['filter_context']))
+	if ((! is_string($_GET['filter_context'])) || (! strlen($_GET['filter_context'])))
 	{
 		$_GET['filter_context'] = 0;
 	}
@@ -331,7 +401,7 @@ function sanitize_length()
 {
 	global $errors;
 
-	if (! strlen($_GET['length']))
+	if ((! is_string($_GET['length'])) || (! strlen($_GET['length'])))
 	{
 		$_GET['length'] = DEFAULT_LENGTH;
 	}
@@ -356,7 +426,7 @@ function sanitize_log()
 	global $log_size;
 	global $log_sources;
 
-	if (! $log_sources[$_GET['log']])
+	if ((! is_string($_GET['log'])) || (! $log_sources[$_GET['log']]))
 	{
 		$errors[] = 'Log name "' . $_GET['log'] . '" is not known to this interface.';
 		return 0;
@@ -376,12 +446,75 @@ function sanitize_log()
 }
 
 
+function sanitize_logic_filter()
+{
+	global $errors;
+	$error_count = 0;
+	
+	if (! is_array($_GET['logic_filter']))
+	{
+		if (isset($_GET['logic_filter']))
+		{
+			$_GET['logic_filter'] = array($_GET['logic_filter']);
+		}
+		else
+		{
+			$_GET['logic_filter'] = array();
+		}
+	}
+	for ($i = 0; $i < count($_GET['filter']); $i++)
+	{
+		if (is_string($_GET['logic_filter'][$i]))
+		{
+			$_GET['logic_filter'][$i] = strtoupper($_GET['logic_filter'][$i]);
+		}
+		if (($_GET['logic_filter'][$i] != 'AND') && ($_GET['logic_filter'][$i] != 'OR'))
+		{
+			$error_count++;
+			$errors[] = 'Filter #' . ($i + 1) . ' logic operator must be either "AND" or "OR".';
+		}
+	}
+	return ($error_count == 0);
+}
+
+
+function sanitize_negate_filter()
+{
+	global $warnings;
+	
+	if (! is_array($_GET['negate_filter']))
+	{
+		if (isset($_GET['negate_filter']))
+		{
+			$_GET['negate_filter'] = array($_GET['negate_filter']);
+		}
+		else
+		{
+			$_GET['negate_filter'] = array();
+		}
+		
+	}
+	for ($i = 0; $i < count($_GET['filter']); $i++)
+	{
+		if (! $_GET['negate_filter'][$i])
+		{
+			$_GET['negate_filter'][$i] = 0;
+		}
+		else
+		{
+			$_GET['negate_filter'][$i] = 1;
+		}
+	}
+	return 1;
+}
+
+
 function sanitize_offset()
 {
 	global $errors;
 	global $log_size;
 
-	if (! strlen($_GET['offset']))
+	if ((! is_string($_GET['offset'])) || (! strlen($_GET['offset'])))
 	{
 		// Default offset is the bottom of the file
 		$_GET['offset'] = $log_size;
@@ -465,7 +598,7 @@ if (get_magic_quotes_gpc())
 }
 
 $log_handle = 0;
-if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_position() && sanitize_filter() && sanitize_filter_context())
+if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_position() && sanitize_filter_context() && sanitize_filter() && sanitize_negate_filter() && sanitize_logic_filter())
 {
 	$log_handle = fopen($log_sources[$_GET['log']], 'r');
 	if (! $log_handle)
@@ -516,6 +649,12 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				margin-top: 5px;
 			}
 
+			div#filter_list div
+			{
+				margin-bottom: 5px;
+				margin-top: 5px;
+			}
+			
 			div#filter_template
 			{
 				display: none;
@@ -528,7 +667,8 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			div.log_line
 			{
 				font-family: monospace;
-				padding-bottom: 10px;
+				padding-bottom: 5px;
+				padding-top: 5px;
 			}
 			div.log_context
 			{
@@ -762,9 +902,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 	<body onload='highlight_named_anchor();'>
 		<div id='filter_template'>
 			<!-- This is an invisible div that simply serves as a template for the HTML that defines a filter. -->
-			<input type="button" style="margin-right: 10px;" value="-" onclick='this.parentNode.parentNode.removeChild(this.parentNode);' />
-			Filter: <input type='text' name='filter[]' size='20' style="margin-right: 10px;" maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
-			Negate Filter <input type='checkbox' name='negate_filter[]' style="margin-right: 10px;" value='1' <?php if ($_GET['negate_filter']) { echo 'checked'; } ?> />
+			<?php echo filter_form_string(); ?>
 		</div>
 		<form id='log_file_form' action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get">
 			<input type='hidden' id='timestamp_input' name='timestamp' value='' />
@@ -805,7 +943,16 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					</td>
 				</tr>
 			</table>
-			<div id="filter_list"></div>
+			<div id="filter_list">
+				<?php
+					for ($i = 0; $i < count($_GET['filter']); $i++)
+					{
+						echo '<div>';
+						echo filter_form_string($_GET['filter'][$i], $_GET['negate_filter'][$i], $_GET['logic_filter'][$i]);
+						echo '</div>';
+					}
+				?>
+			</div>
 			<table width="100%">
 				<tr>
 					<td>
@@ -927,10 +1074,10 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						// Remove any trailing newline character.
 						$current_line = rtrim($current_line, "\n");
 
-						// If we have a filter, skip lines that do not match it.
+						// If we have filters, skip lines that do not match them.
 						if ($_GET['filter'])
 						{
-							if (preg_match($_GET['filter'], $current_line) XOR $_GET['negate_filter'])
+							if (filter_match($current_line))
 							{
 								$context_lines = LineArchive::pop_last($_GET['filter_context']);
 								echo LineArchive::skip_warning();
