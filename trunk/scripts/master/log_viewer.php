@@ -516,6 +516,11 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				margin-top: 5px;
 			}
 
+			div#filter_template
+			{
+				display: none;
+			}
+			
 			div#log_excerpt
 			{
 				margin-top: 30px;
@@ -616,6 +621,22 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			}
 		</style>
 		<script type="text/javascript">
+			function add_filter()
+			{
+				var filter_list = document.getElementById('filter_list');
+				var filter_template = document.getElementById('filter_template');
+				
+				if (filter_list && filter_template)
+				{
+					var new_filter = filter_template.cloneNode(true);
+					new_filter.id = '';
+					filter_list.appendChild(new_filter);
+					return 1;
+				}
+				return 0;
+			}
+			
+			
 			function highlight_named_anchor()
 			{
 				if (window.location.hash.match(/^#\d+$/))
@@ -653,6 +674,16 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						alert("reset_form(): do not know how to clear an input of type " + inputs[i].type)
 					}
 				}
+				
+				// Remove all filters.
+				var filter_list = document.getElementById('filter_list');
+				if (filter_list)
+				{
+					while (filter_list.hasChildNodes())
+					{
+						filter_list.removeChild(filter_list.firstChild);
+					}
+				}
 			}
 			
 			
@@ -666,6 +697,8 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					var timestamp = new Date();
 					timestamp_input.value = timestamp.getTime();
 				}
+
+				// Submit the form.
 				if (log_file_form)
 				{
 					log_file_form.submit();
@@ -727,6 +760,12 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 		</script>
 	</head>
 	<body onload='highlight_named_anchor();'>
+		<div id='filter_template'>
+			<!-- This is an invisible div that simply serves as a template for the HTML that defines a filter. -->
+			<input type="button" style="margin-right: 10px;" value="-" onclick='this.parentNode.parentNode.removeChild(this.parentNode);' />
+			Filter: <input type='text' name='filter[]' size='20' style="margin-right: 10px;" maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
+			Negate Filter <input type='checkbox' name='negate_filter[]' style="margin-right: 10px;" value='1' <?php if ($_GET['negate_filter']) { echo 'checked'; } ?> />
+		</div>
 		<form id='log_file_form' action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get">
 			<input type='hidden' id='timestamp_input' name='timestamp' value='' />
 			<table width="100%">
@@ -761,19 +800,12 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						Filter Context: <input type='text' name='filter_context' size='4' maxlength='3' value='<?php echo htmlspecialchars($_GET['filter_context'], ENT_QUOTES); ?>' />
 					</td>
 					<td style="text-align: right;">
-						<input type='button' value='Add Filter' onclick='alert("Add a filter!");' />
+						<input type='button' value='Add Filter' onclick='add_filter();' />
 						<input type='button' value='?' onclick='toggle_display("documentation_table");' />
 					</td>
 				</tr>
 			</table>
-			<div id="filter_list">
-				<div>
-					<!-- This is an invisible div that simply serves as a template for the HTML that defines a filter. -->
-					<input type="button" style="margin-right: 10px;" value="-" onclick='alert("Remove this filter!");' />
-					Filter: <input type='text' name='filter' size='20' style="margin-right: 10px;" maxlength='100' value='<?php echo htmlspecialchars($_GET['filter'], ENT_QUOTES); ?>' />
-					Negate Filter <input type='checkbox' name='negate_filter' style="margin-right: 10px;" value='1' <?php if ($_GET['negate_filter']) { echo 'checked'; } ?> />
-				</div>
-			</div>
+			<div id="filter_list"></div>
 			<table width="100%">
 				<tr>
 					<td>
