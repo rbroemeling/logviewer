@@ -651,6 +651,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 	<head>
 		<title>Simple Online Log Viewer</title>
 		<style type='text/css'>
+			/* Global Styling ************************************************/
 			body
 			{
 				background: #000000;
@@ -673,7 +674,9 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			{
 				color: #9933ff;	
 			}
-			
+
+
+			/* Error and Status Message Styling ******************************/
 			div.error
 			{
 				color: #ff0000;
@@ -689,17 +692,47 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				margin-top: 5px;
 			}
 
+
+			/* Input Form Styling ********************************************/
 			div#filter_list div
 			{
 				margin-bottom: 5px;
 				margin-top: 5px;
 			}
-			
 			div#filter_template
 			{
 				display: none;
 			}
-			
+
+
+			/* Documentation Table Styling ***********************************/
+			table#documentation_table
+			{
+				font-size: 0.9em;
+				border-spacing: 0px;
+			}
+			table#documentation_table td
+			{
+				border-width: 1px 0px 1px 0px;
+				border-spacing: 0px;
+				border-style: solid none solid none;
+				border-collapse: collapse;
+			}
+			table#documentation_table th
+			{
+				background: #003300;
+				border-width: 1px 0px 1px 0px;
+				border-spacing: 0px;
+				border-style: solid none solid none;
+				border-collapse: collapse;
+			}
+
+
+			/* Log Excerpt Styling *******************************************/
+			div.log_context
+			{
+				background: #222222;
+			}
 			div#log_excerpt
 			{
 				margin-top: 30px;
@@ -710,12 +743,8 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				padding-bottom: 5px;
 				padding-top: 5px;
 			}
-			div.log_context
-			{
-				background: #222222;
-			}
-			
-			/* General log line field coloring. */
+
+			/* LogLine generalized field colouring. */
 			div.log_line span.date
 			{
 				color: #888888;
@@ -724,16 +753,47 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			{
 				color: #888888;
 			}
-			div.log_line span.pid
-			{
-				color: #ffffff;
-			}
 			div.log_line span.program
 			{
 				color: #888888;
 			}
+
+			/* Global error level coloring. */
+			div.log_line span.errorlevel_critical
+			{
+				background: #ff0000;
+				color: #ffff00;
+			}
+			div.log_line span.errorlevel_debug
+			{
+				color: #ffffff;
+			}
+			div.log_line span.errorlevel_error
+			{
+				color: #ff0000;
+			}
+			div.log_line span.errorlevel_info
+			{
+				color: #00ff00;
+			}
+			div.log_line span.errorlevel_spam
+			{
+				color: #888888;
+			}
+			div.log_line span.errorlevel_unknown
+			{
+				
+			}
+			div.log_line span.errorlevel_warning
+			{
+				color: #ffff00;	
+			}
 			
-			/* Ruby component coloring. */
+			/* RubyLogLine field coloring. */
+			div.log_line span.pid
+			{
+				color: #ffffff;
+			}
 			div.log_line span.ruby_component_files
 			{
 				color: #ffffff;
@@ -767,37 +827,6 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			div.log_line span.ruby_component_worker
 			{
 				color: #00ff00;
-			}
-
-			/* Error level log line coloring. */
-			div.log_line span.errorlevel_critical
-			{
-				background: #ff0000;
-				color: #ffff00;
-			}
-			div.log_line span.errorlevel_debug
-			{
-				color: #ffffff;
-			}
-			div.log_line span.errorlevel_error
-			{
-				color: #ff0000;
-			}
-			div.log_line span.errorlevel_info
-			{
-				color: #00ff00;
-			}
-			div.log_line span.errorlevel_spam
-			{
-				color: #888888;
-			}
-			div.log_line span.errorlevel_unknown
-			{
-				
-			}
-			div.log_line span.errorlevel_warning
-			{
-				color: #ffff00;	
 			}
 		</style>
 		<script type="text/javascript">
@@ -1019,6 +1048,9 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			<table id='documentation_table' style="display: none" width="100%">
 				<thead>
 					<tr>
+						<th colspan="3">General Controls</th>
+					</tr>
+					<tr>
 						<th width='125px'>Field</th>
 						<th>Description</th>
 						<th width='125px'>Default</th>
@@ -1028,7 +1060,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					<tr>
 						<td><i>Log File</i></td>
 						<td>Which log file to retrieve data from.</td>
-						<td></td>
+						<td>&nbsp;</td>
 					</tr>
 					<tr>
 						<td><i>Offset</i></td>
@@ -1048,26 +1080,74 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						<td><?php echo number_format(DEFAULT_LENGTH); ?></td>
 					</tr>
 					<tr>
+						<td><i>Filter Context</i></td>
+						<td>How many lines of context you would like to be displayed around the lines that match the given filters.</td>
+						<td>0</td>
+					</tr>
+					<tr>
+						<td><i>Add Filter</i></td>
+						<td>Use this button to add a filter to the current list of filters.</td>
+						<td>&nbsp;</td>
+					</tr>
+				</tbody>
+				<thead>
+					<tr>
+						<th colspan="3">Per-Filter Controls</th>
+					</tr>
+					<tr>
+						<th width='125px'>Field</th>
+						<th>Description</th>
+						<th width='125px'>Default</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><i>-</i></td>
+						<td>Use this button to remove the filter from the current list of filters.</td>
+						<td>&nbsp;</td>
+					</tr>
+					<tr>
 						<td><i>Filter</i></td>
 						<td>
 							A regular expression to match against the data retrieved from the log file.
-							Only log lines matching the pattern (or their context, see <i>filter context</i>)
-							will be displayed.
+							Only log lines matching satisfying the list of filters (or their context,
+							see <i>filter context</i>) will be displayed.
 						</td>
-						<td></td>
+						<td>&nbsp;</td>
 					</tr>
 					<tr>
-						<td><i>Negate Filter</i></td>
+						<td><i>Match Type</i></td>
 						<td>
-							This flag reverses the effect of <i>filter</i>.  When this is checked, the script will only
-							display lines that do not match <i>filter</i>.
+							A flag stating whether to match normally or to reverse the effect of <i>filter</i>.
+							<dl>
+								<dt>Normal Match
+								<dd>Match normally -- lines that match the <i>filter</i> regular expression will
+									satisfy it.
+								<dt>Inverted Match
+								<dd>Invert the match -- only lines that do not match the <i>filter</i>
+									regular expression will satisfy it.
+							</dl>
 						</td>
-						<td>FALSE</td>
+						<td>Normal Match</td>
 					</tr>
 					<tr>
-						<td><i>Filter Context</i></td>
-						<td>How many lines of context you would like to be displayed around the lines that match <i>filter</i>.</td>
-						<td>0</td>
+						<td><i>Logical Operator</i></td>
+						<td>
+							A boolean operator that controls how this <i>filter</i> will relate to the
+							others within the filter list.  All 'AND' logical operations are executed
+							first, after which the results are 'OR'ed.
+							<dl>
+								<dt>OR
+								<dd>If the left-hand-side or the right-hand-side is true, consider
+									the filter list satisfied.  Note that 'OR' is considered to
+									be lower precedence than 'AND'.
+								<dt>AND
+								<dd>If the left-hand-side and the right-hand-side are both true,
+									consider the filter list satisfied.  Note that 'AND' is
+									considered to be a higher precedence than 'OR'.
+							</dl>
+						</td>
+						<td>OR</td>
 					</tr>
 				</tbody>
 			</table>
