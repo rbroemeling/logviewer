@@ -1,20 +1,36 @@
 <?php
-// Default length is -1 * 64 Kb
+/**
+ * log_viewer.php
+ *
+ * A monolithic script that allows web access to select log files.
+ *
+ * This script is monolithic for the simplicity of installation that such a
+ * design entails.  It has no dependencies.  Simply drop it into a directory,
+ * perhaps modify some of the configuration variables, and it is ready to go.
+ **/
+
+/******************************************************************************
+ * Configuration Constants
+ ******************************************************************************/
+// Default length for the interface to use, if the user does not supply one.
 define('DEFAULT_LENGTH', -1 * 64 * 1024);
 
-
-// Maximum number of lines that is allowed in filter context.
+// A limit on the maximum number of lines that is allowed in filter context.
+// This limitation is necessary as we need to archive all of the lines that
+// we are hiding so that they can be recalled for the filter context if
+// necessary.  Thus this restriction helps keep memory usage down.
 define('MAX_CONTEXT', 100);
 
-
 // Maximum number of lines to ever display, the script will never display more
-// than this number of lines.
+// than this number of lines.  This is a simple sanity check only, to prevent
+// run-away log data display.
 define('MAX_LINES', 15000);
 
 
-$errors = array();
-$log_excerpt = array();
-$log_size = -1;
+/******************************************************************************
+ * Configuration Variables
+ ******************************************************************************/
+// An array of all of the log sources that this script can be used to view.
 $log_sources = array
 (
 	'php-beta' => '/var/log/php-beta.log',
@@ -24,9 +40,21 @@ $log_sources = array
 	'ruby-live' => '/var/log/ruby-live.log',
 	'ruby-stage' => '/var/log/ruby-stage.log'
 );
-$warnings = array();
 
 
+/******************************************************************************
+ * Classes
+ ******************************************************************************/
+/**
+ * LineArchive
+ *
+ * A simple class that is used to maintain an archive of lines that we have
+ * encountered in the log file but that we do not yet wish to display.  This
+ * can happen if we are using filters and the line in question does not match
+ * the filters.  We need to save the lines, rather than disposing of them and
+ * ignoring the result, so that we can display them if they are needed as
+ * context for a later match.
+ **/
 class LineArchive
 {
 	protected static $archive = array();
@@ -35,6 +63,7 @@ class LineArchive
 	
 	public static function add($line)
 	{
+		// We trim the archive whenever it gets larger than 150% of MAX_CONTEXT,
 		if (count(self::$archive) > (MAX_CONTEXT * 1.5))
 		{
 			array_splice(self::$archive, 0, (count(self::$archive) - MAX_CONTEXT));
@@ -266,6 +295,9 @@ class LineOutput
 }
 
 
+/******************************************************************************
+ * Utility Functions
+ ******************************************************************************/
 function filter_form_string($filter = null, $negate_filter = 0, $logic_filter = 'OR')
 {
 	$s = '';
@@ -590,6 +622,14 @@ function slash_machine(&$data)
 	}
 }
 
+
+/******************************************************************************
+ * Global Variables and Executable Code
+ ******************************************************************************/
+$errors = array();
+$log_excerpt = array();
+$log_size = -1;
+$warnings = array();
 
 set_magic_quotes_runtime(0);
 if (get_magic_quotes_gpc())
