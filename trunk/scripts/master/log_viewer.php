@@ -117,6 +117,8 @@ class LogLine
 		$string .= "<span class='date'>" . htmlspecialchars(self::$fields[$i++], ENT_QUOTES) . "</span> ";
 		$string .= "<span class='host'>" . htmlspecialchars(self::$fields[$i++], ENT_QUOTES) . "</span> ";
 		$string .= "<span class='program'>" . htmlspecialchars(self::$fields[$i++], ENT_QUOTES) . "</span> ";
+		$string .= "[<span class='uid'>" . htmlspecialchars(self::$fields[$i++], ENT_QUOTES) . "</span>/";
+		$string .= "<span class='ip'>" . htmlspecialchars(self::$fields[$i++], ENT_QUOTES) . "]</span> ";
 		for ($i = $i; $i < count(self::$fields); $i++)
 		{
 			$string .= htmlspecialchars(self::$fields[$i], ENT_QUOTES);
@@ -136,6 +138,22 @@ class LogLine
 			return false;
 		}
 		array_shift(self::$fields);
+		
+		$matches = array();
+		if (preg_match('!\[([0-9]+)/([0-9.]+)\] +(.*)!', self::$fields[count(self::$fields) - 1], $matches))
+		{
+			array_shift($matches);
+			array_splice(self::$fields, -1, 1, $matches);
+		}
+		elseif (preg_match('!\[([0-9.]+)\] +(.*)!', self::$fields[count(self::$fields) - 1], $matches))
+		{
+			$matches[0] = '';
+			array_splice(self::$fields, -1, 1, $matches);
+		}
+		else
+		{
+			array_splice(self::$fields, -1, 0, array('', ''));
+		}
 		return true;		
 	}
 }
@@ -756,6 +774,14 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			div.log_line span.program
 			{
 				color: #888888;
+			}
+			div.log_line span.uid
+			{
+				color: #666666;
+			}
+			div.log_line span.ip
+			{
+				color: #666666;
 			}
 
 			/* Global error level coloring. */
