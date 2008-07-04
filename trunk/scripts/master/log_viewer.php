@@ -265,7 +265,7 @@ class RubyLogLine extends LogLine
 		{
 			return false;
 		}
-		if (preg_match('!(\d+)\.([^.]+)\.([^:]+):(.*)!i', parent::$fields[count(LogLine::$fields) - 1], self::$ruby_fields))
+		if (preg_match('!(\d+)\.([^.]+)\.([^:]+): +(.*)!i', parent::$fields[count(LogLine::$fields) - 1], self::$ruby_fields))
 		{
 			array_pop(parent::$fields);
 			array_shift(self::$ruby_fields);
