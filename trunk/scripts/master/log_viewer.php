@@ -118,7 +118,7 @@ class LogLine
 		$string .= "<span class='host'>" . htmlspecialchars(self::$fields[$i++], ENT_QUOTES) . "</span> ";
 		$string .= "<span class='program'>" . htmlspecialchars(self::$fields[$i++], ENT_QUOTES) . "</span> ";
 		$string .= "[<span class='uid'>" . htmlspecialchars(self::$fields[$i++], ENT_QUOTES) . "</span>/";
-		$string .= "<span class='ip'>" . htmlspecialchars(self::$fields[$i++], ENT_QUOTES) . "]</span> ";
+		$string .= "<span class='ip'>" . htmlspecialchars(self::$fields[$i++], ENT_QUOTES) . "</span>] ";
 		for ($i = $i; $i < count(self::$fields); $i++)
 		{
 			$string .= htmlspecialchars(self::$fields[$i], ENT_QUOTES);
