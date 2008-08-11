@@ -140,7 +140,7 @@ class LogLine
 		array_shift(self::$fields);
 		
 		$matches = array();
-		if (preg_match('!(\[[0-9]+/)([0-9.]+\]) +(.*)!', self::$fields[count(self::$fields) - 1], $matches))
+		if (preg_match('!(\[[0-9-]+/)([0-9.]+\]) +(.*)!', self::$fields[count(self::$fields) - 1], $matches))
 		{
 			array_shift($matches);
 			array_splice(self::$fields, -1, 1, $matches);
