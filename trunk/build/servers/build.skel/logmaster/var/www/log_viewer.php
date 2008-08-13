@@ -1277,5 +1277,8 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			?>
 			<a name="tail"></a>
 		</div>
+		<div style="text-align: right;">
+			<input style="margin-right: 10px;" type='button' value='Tail' onclick='tail();' />
+		</div>
 	</body>
 </html>
