@@ -59,8 +59,8 @@ class LineArchive
 {
 	protected static $archive = array();
 	public static $count = 0;
-	
-	
+
+
 	public static function add($line)
 	{
 		// We trim the archive whenever it gets larger than 150% of MAX_CONTEXT,
@@ -71,8 +71,8 @@ class LineArchive
 		self::$archive[] = $line;
 		self::$count++;
 	}
-		
-	
+
+
 	public static function pop_last($count)
 	{
 		self::$count = max(self::$count - $count, 0);
@@ -85,8 +85,8 @@ class LineArchive
 		self::$archive = array();
 		self::$count = 0;
 	}
-	
-	
+
+
 	public static function skip_warning()
 	{
 		if (self::$count)
@@ -103,15 +103,15 @@ class LogLine
 	protected static $error_level;
 	protected static $fields;
 	protected static $line;
-	
-	
+
+
 	public static function display()
 	{
 		if (! self::$fields)
 		{
 			return self::$line;
 		}
-		
+
 		$string = '';
 		$i = 0;
 		$string .= "<span class='date'>" . htmlspecialchars(self::$fields[$i++], ENT_QUOTES) . "</span> ";
@@ -132,13 +132,13 @@ class LogLine
 		self::$error_level = 'unknown';
 		self::$fields = array();
 		self::$line = $line;
-		
+
 		if (! preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([\d./]+) +([^:]+:) +(.*)!i', self::$line, self::$fields))
 		{
 			return false;
 		}
 		array_shift(self::$fields);
-		
+
 		$matches = array();
 		if (preg_match('!(\[[0-9-]+/)([0-9.]+\]) +(.*)!', self::$fields[count(self::$fields) - 1], $matches))
 		{
@@ -154,7 +154,7 @@ class LogLine
 		{
 			array_splice(self::$fields, -1, 0, array('', ''));
 		}
-		return true;		
+		return true;
 	}
 }
 
@@ -162,8 +162,8 @@ class LogLine
 class PHPLogLine extends LogLine
 {
 	protected static $php_fields;
-	
-	
+
+
 	public static function display()
 	{
 		$string = parent::display();
@@ -171,14 +171,14 @@ class PHPLogLine extends LogLine
 		{
 			return $string;
 		}
-		
+
 
 		$i = 0;
-		
+
 		$string .= " " . htmlspecialchars(self::$php_fields[$i++], ENT_QUOTES) . " ";
-		
+
 		$string .= "<span class='errorlevel_" . parent::$error_level . "'>(" . htmlspecialchars(self::$php_fields[$i++], ENT_QUOTES) . ")</span> ";
-		
+
 		for ($i = $i; $i < count(self::$php_fields); $i++)
 		{
 			$string .= htmlspecialchars(self::$php_fields[$i], ENT_QUOTES);
@@ -186,7 +186,7 @@ class PHPLogLine extends LogLine
 		return $string;
 	}
 
-	
+
 	public static function parse($line)
 	{
 		if (! parent::parse($line))
@@ -197,7 +197,7 @@ class PHPLogLine extends LogLine
 		{
 			array_pop(parent::$fields);
 			array_shift(self::$php_fields);
-			
+
 			switch (self::$php_fields[1])
 			{
 				case 'Error':
@@ -239,37 +239,37 @@ class RubyLogLine extends LogLine
 		{
 			return $string;
 		}
-		
+
 		$i = 0;
-		
+
 		$string .= " <span class='pid'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>.";
-		
+
 		$string .= "<span class='ruby_component_" . self::$component . "'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>.";
-		
+
 		$string .= "<span class='errorlevel_" . parent::$error_level . "'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>:";
-		
+
 		$string .= "<span class='errorlevel_" . parent::$error_level . "'>";
 		for ($i = $i; $i < count(self::$ruby_fields); $i++)
 		{
 			$string .= htmlspecialchars(self::$ruby_fields[$i], ENT_QUOTES);
 		}
 		$string .= "</span>";
-		
+
 		return $string;
 	}
-	
-	
+
+
 	public static function parse($line)
 	{
 		if (! parent::parse($line))
 		{
 			return false;
 		}
-		if (preg_match('!(\d+)\.([^.]+)\.([^:]+): +(.*)!i', parent::$fields[count(LogLine::$fields) - 1], self::$ruby_fields))
+		if (preg_match('!(\d+)\.([a-z]+)\.([a-z]+)( +\(req:\d+:\d+(:[^)]+)?\))?: +(.*)!i', parent::$fields[count(LogLine::$fields) - 1], self::$ruby_fields))
 		{
 			array_pop(parent::$fields);
 			array_shift(self::$ruby_fields);
-			
+
 			self::$component = htmlspecialchars(self::$ruby_fields[1], ENT_QUOTES);
 			parent::$error_level = htmlspecialchars(self::$ruby_fields[2], ENT_QUOTES);
 			return true;
@@ -285,14 +285,14 @@ class RubyLogLine extends LogLine
 class LineOutput
 {
 	public static $displayed_lines = 0;
-	
+
 	public static function display($line, $line_start_position, $line_end_position, $extra_classes = '')
 	{
 		self::$displayed_lines++;
 
 		echo "<div id='" . $line_start_position . "' class='log_line " . $extra_classes . "'>";
 		echo "[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start_position - 8192), 0) . "&length=12288#" . $line_start_position . "' name='" . $line_start_position . "'>" . $line_start_position .  "</a>] ";
-			
+
 		if (preg_match('/ PHP error: /', $line))
 		{
 			PHPLogLine::parse($line);
@@ -346,7 +346,7 @@ function filter_match($line)
 			$filter_results[$i] = 0;
 		}
 	}
-	
+
 	$k = count($filter_results);
 	for ($i = 0; $i < $k; $i++)
 	{
@@ -356,7 +356,7 @@ function filter_match($line)
 			unset($filter_results[$i]);
 		}
 	}
-	
+
 	return (array_sum($filter_results) > 0);
 }
 
@@ -500,7 +500,7 @@ function sanitize_logic_filter()
 {
 	global $errors;
 	$error_count = 0;
-	
+
 	if (! is_array($_GET['logic_filter']))
 	{
 		if (isset($_GET['logic_filter']))
@@ -531,7 +531,7 @@ function sanitize_logic_filter()
 function sanitize_negate_filter()
 {
 	global $warnings;
-	
+
 	if (! is_array($_GET['negate_filter']))
 	{
 		if (isset($_GET['negate_filter']))
@@ -542,7 +542,7 @@ function sanitize_negate_filter()
 		{
 			$_GET['negate_filter'] = array();
 		}
-		
+
 	}
 	for ($i = 0; $i < count($_GET['filter']); $i++)
 	{
@@ -599,7 +599,7 @@ function sanitize_position()
 	{
 		return 1;
 	}
-	
+
 	// Negative length.
 	$_GET['length'] = $_GET['length'] * -1;
 	if ($_GET['length'] > $_GET['offset'])
@@ -680,17 +680,17 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 
 			a
 			{
-				color: #99cccc;	
+				color: #99cccc;
 			}
-			
+
 			a:hover
 			{
-				color: #99ffff;	
+				color: #99ffff;
 			}
-			
+
 			a:visited
 			{
-				color: #9933ff;	
+				color: #9933ff;
 			}
 
 
@@ -808,13 +808,13 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			}
 			div.log_line span.errorlevel_unknown
 			{
-				
+
 			}
 			div.log_line span.errorlevel_warning
 			{
-				color: #ffff00;	
+				color: #ffff00;
 			}
-			
+
 			/* RubyLogLine field coloring. */
 			div.log_line span.pid
 			{
@@ -860,7 +860,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			{
 				var filter_list = document.getElementById('filter_list');
 				var filter_template = document.getElementById('filter_template');
-				
+
 				if (filter_list && filter_template)
 				{
 					var new_filter = filter_template.cloneNode(true);
@@ -870,8 +870,8 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				}
 				return 0;
 			}
-			
-			
+
+
 			function highlight_named_anchor()
 			{
 				if (window.location.hash.match(/^#\d+$/))
@@ -884,12 +884,12 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					}
 				}
 			}
-			
-			
+
+
 			function reset_form()
 			{
 				var inputs = document.getElementsByTagName('input');
-				
+
 				for (var i = 0; i < inputs.length; i++)
 				{
 					if (inputs[i].type == 'text' || inputs[i].type == 'hidden')
@@ -909,7 +909,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						alert("reset_form(): do not know how to clear an input of type " + inputs[i].type)
 					}
 				}
-				
+
 				// Remove all filters.
 				var filter_list = document.getElementById('filter_list');
 				if (filter_list)
@@ -920,13 +920,13 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					}
 				}
 			}
-			
-			
+
+
 			function submit_form()
 			{
 				var log_file_form = document.getElementById('log_file_form');
 				var timestamp_input = document.getElementById('timestamp_input');
-				
+
 				if (timestamp_input)
 				{
 					var timestamp = new Date();
@@ -939,8 +939,8 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					log_file_form.submit();
 				}
 			}
-			
-			
+
+
 			function tail()
 			{
 				var length_input = document.getElementById('length_input');
@@ -974,12 +974,12 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				}
 				submit_form();
 			}
-			
-			
+
+
 			function toggle_display(id)
 			{
 				var element = document.getElementById(id);
-				
+
 				if (! element)
 				{
 					return -1;
@@ -989,7 +989,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					element.style.display = 'block';
 					return 1;
 				}
-				element.style.display = 'none';	
+				element.style.display = 'none';
 				return 0;
 			}
 		</script>
@@ -1004,7 +1004,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			<table width="100%">
 				<tr>
 					<td>
-						Log File: 
+						Log File:
 						<select name='log'>
 							<option></option>
 							<?php
@@ -1212,7 +1212,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						{
 							continue;
 						}
-						
+
 						$line_start_position = $current_position;
 						$current_position += strlen($current_line);
 						$line_end_position = $current_position - 1;
@@ -1256,12 +1256,12 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					}
 					echo LineArchive::skip_warning();
 					LineArchive::reset();
-					
+
 					if (LineOutput::$displayed_lines >= MAX_LINES)
 					{
 						echo "<div class='warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.  End of file is " . number_format($log_size - $current_position) . " bytes further.</div>\n";
 					}
-					
+
 					if ($current_position > ($_GET['offset'] + $_GET['length']))
 					{
 						echo "<div class='warning'>Encountered end of requested data at offset " . number_format($current_position) . ".  End of file is " . number_format($log_size - $current_position) . " bytes further.</div>\n";
