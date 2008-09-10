@@ -247,12 +247,13 @@ class RubyLogLine extends LogLine
 
 		$string .= "<span class='ruby_component_" . self::$component . "'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>.";
 
-		$string .= "<span class='errorlevel_" . parent::$error_level . "'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>";
+		$string .= "<span class='errorlevel_" . parent::$error_level . "'>";
+		$string .= htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES);
 		if (self::$request_identifier)
 		{
-			$string .= " (" . implode(':', self::$request_identifier) . ")";
+			$string .= " (" . htmlspecialchars(implode(':', self::$request_identifier), ENT_QUOTES) . ")";
 		}
-		$string .= ": ";
+		$string .= ":</span> ";
 
 		$string .= "<span class='errorlevel_" . parent::$error_level . "'>";
 		for ($i = $i; $i < count(self::$ruby_fields); $i++)
