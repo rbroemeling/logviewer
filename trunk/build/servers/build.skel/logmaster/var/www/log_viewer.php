@@ -229,6 +229,7 @@ class PHPLogLine extends LogLine
 class RubyLogLine extends LogLine
 {
 	protected static $component;
+	protected static $request_identifier;
 	protected static $ruby_fields;
 
 
@@ -248,6 +249,11 @@ class RubyLogLine extends LogLine
 
 		$string .= "<span class='errorlevel_" . parent::$error_level . "'>" . htmlspecialchars(self::$ruby_fields[$i++], ENT_QUOTES) . "</span>:";
 
+		if (self::$request_identifier)
+		{
+			$string .= " (" . implode(':', self::$request_identifier) . ") ";
+		}
+
 		$string .= "<span class='errorlevel_" . parent::$error_level . "'>";
 		for ($i = $i; $i < count(self::$ruby_fields); $i++)
 		{
@@ -265,13 +271,26 @@ class RubyLogLine extends LogLine
 		{
 			return false;
 		}
-		if (preg_match('!(\d+)\.([a-z]+)\.([a-z]+)( +\(req:\d+:\d+(:[^)]+)?\))?: +(.*)!i', parent::$fields[count(LogLine::$fields) - 1], self::$ruby_fields))
+		if (preg_match('!(\d+)\.([a-z]+)\.([a-z]+)( +\(req:\d+:\d+.*?\))?: *(.*)!i', parent::$fields[count(LogLine::$fields) - 1], self::$ruby_fields))
 		{
 			array_pop(parent::$fields);
 			array_shift(self::$ruby_fields);
 
 			self::$component = htmlspecialchars(self::$ruby_fields[1], ENT_QUOTES);
 			parent::$error_level = htmlspecialchars(self::$ruby_fields[2], ENT_QUOTES);
+			if (preg_match('!\((req):(\d+):(\d+):?([^)]*)\)!', self::$ruby_fields[3], self::$request_identifier))
+			{
+				array_shift(self::$request_identifier);
+				if (! self::$request_identifier[3])
+				{
+					array_pop(self::$request_identifier);
+				}
+				array_splice(self::$ruby_fields, 3, 1);
+			}
+			else
+			{
+				self::$request_identifier = null;
+			}
 			return true;
 		}
 		else
@@ -293,15 +312,15 @@ class LineOutput
 		echo "<div id='" . $line_start_position . "' class='log_line " . $extra_classes . "'>";
 		echo "[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start_position - 8192), 0) . "&length=12288#" . $line_start_position . "' name='" . $line_start_position . "'>" . $line_start_position .  "</a>] ";
 
-		if (preg_match('/ PHP error: /', $line))
-		{
-			PHPLogLine::parse($line);
-			echo PHPLogLine::display();
-		}
-		elseif (preg_match('/nexopia(-child|-parent|\.rb:)/', $line))
+		if (preg_match('/ \d+\.[a-z]+\.[a-z]+\W/', $line))
 		{
 			RubyLogLine::parse($line);
 			echo RubyLogLine::display();
+		}
+		elseif (preg_match('/ PHP error: /', $line))
+		{
+			PHPLogLine::parse($line);
+			echo PHPLogLine::display();
 		}
 		else
 		{
