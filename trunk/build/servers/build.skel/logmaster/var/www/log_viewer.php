@@ -269,6 +269,8 @@ class RubyLogLine extends LogLine
 		$string .= "<span class='errorlevel_" . parent::$error_level . "'>";
 		for ($i = $i; $i < count(self::$ruby_fields); $i++)
 		{
+			# Regular Expression Map:
+			#  'pagerequest.rb:253:in `'
 			if (preg_match('/\w+\.rb:\d+:in `/', self::$ruby_fields[$i]))
 			{
 				# Treat this line as a backtrace, and format it nicely.
