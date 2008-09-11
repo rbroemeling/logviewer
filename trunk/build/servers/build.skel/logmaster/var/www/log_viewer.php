@@ -138,6 +138,7 @@ class LogLine
 		#	'(Sep 11 13:07:27) (10.0.3.8/10.0.0.16) (nexopia-parent - initializing:) (.*)'
 		if (! preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([\d./]+) +([^:]+:) +(.*)!i', self::$line, self::$fields))
 		{
+			# We don't know what this log is; it doesn't appear to be a default syslog line format.
 			return false;
 		}
 		array_shift(self::$fields);
@@ -200,6 +201,9 @@ class PHPLogLine extends LogLine
 		{
 			return false;
 		}
+		# Regular Expression Map:
+		#  '(/prefs.php) ((User Notice)) (.*)'
+		#  '(/prefs.php) ((Warning)) (.*)'
 		if (preg_match('!(\S+) +\((\w+ ?\w+)\) +(.*)!i', parent::$fields[count(LogLine::$fields) - 1], self::$php_fields))
 		{
 			array_pop(parent::$fields);
