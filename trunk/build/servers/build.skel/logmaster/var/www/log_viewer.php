@@ -260,8 +260,8 @@ class RubyLogLine extends LogLine
 		{
 			if (preg_match('/\w+\.rb:\d+:in `/', self::$ruby_fields[$i]))
 			{
-				$backtrace_line_suffix = ":<br>\n<spacer type='block' width='40'/>in ";
 				# Treat this line as a backtrace, and format it nicely.
+				$backtrace_line_suffix = ":<br>\n<spacer type='block' width='40'/>in ";
 				foreach (explode(':in ', self::$ruby_fields[$i]) as $backtrace_entry)
 				{
 					$string .= htmlspecialchars($backtrace_entry, ENT_QUOTES) . $backtrace_line_suffix;
@@ -326,16 +326,21 @@ class LineOutput
 		echo "<div id='" . $line_start_position . "' class='log_line " . $extra_classes . "'>";
 		echo "[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start_position - 8192), 0) . "&length=12288#" . $line_start_position . "' name='" . $line_start_position . "'>" . $line_start_position .  "</a>] ";
 
+		# We treat the line as a ruby logline if it contains something that
+		# looks like '12291.general.error '.
 		if (preg_match('/ \d+\.[a-z]+\.[a-z]+\W/', $line))
 		{
 			RubyLogLine::parse($line);
 			echo RubyLogLine::display();
 		}
-		elseif (preg_match('/ PHP error: /', $line))
+		# Otherwise, we treat the line as a php logline if it contains the text
+		# ' PHP error: '.
+		elseif (strpos($line, ' PHP error: ') !== FALSE)
 		{
 			PHPLogLine::parse($line);
 			echo PHPLogLine::display();
 		}
+		# Otherwise we don't know what it is, so just dump it.
 		else
 		{
 			LogLine::parse($line);
