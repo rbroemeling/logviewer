@@ -258,7 +258,20 @@ class RubyLogLine extends LogLine
 		$string .= "<span class='errorlevel_" . parent::$error_level . "'>";
 		for ($i = $i; $i < count(self::$ruby_fields); $i++)
 		{
-			$string .= htmlspecialchars(self::$ruby_fields[$i], ENT_QUOTES);
+			if (preg_match('/\w+\.rb:\d+:in `/', self::$ruby_fields[$i]))
+			{
+				$backtrace_line_suffix = ":<br>\n<spacer type='block' width='40'/>in ";
+				# Treat this line as a backtrace, and format it nicely.
+				foreach (explode(':in ', self::$ruby_fields[$i]) as $backtrace_entry)
+				{
+					$string .= htmlspecialchars($backtrace_entry, ENT_QUOTES) . $backtrace_line_suffix;
+				}
+				$string = substr($string, 0, -1 * strlen($backtrace_line_suffix));
+			}
+			else
+			{
+				$string .= htmlspecialchars(self::$ruby_fields[$i], ENT_QUOTES);
+			}
 		}
 		$string .= "</span>";
 
