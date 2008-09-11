@@ -133,18 +133,25 @@ class LogLine
 		self::$fields = array();
 		self::$line = $line;
 
+		# Regular Expression Map:
+		#	'(Sep 11 13:07:27) (10.0.3.8) (PHP error:) (.*)'
+		#	'(Sep 11 13:07:27) (10.0.3.8/10.0.0.16) (nexopia-parent - initializing:) (.*)'
 		if (! preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([\d./]+) +([^:]+:) +(.*)!i', self::$line, self::$fields))
 		{
 			return false;
 		}
 		array_shift(self::$fields);
 
+		# Regular Expression Map:
+		#  '([3443893/)(68.149.93.179]) (.*)'
 		$matches = array();
 		if (preg_match('!(\[[0-9-]+/)([0-9.]+\]) +(.*)!', self::$fields[count(self::$fields) - 1], $matches))
 		{
 			array_shift($matches);
 			array_splice(self::$fields, -1, 1, $matches);
 		}
+		# Regular Expression Map:
+		#  '([68.149.93.179]) (.*)'
 		elseif (preg_match('!(\[[0-9.]+\]) +(.*)!', self::$fields[count(self::$fields) - 1], $matches))
 		{
 			$matches[0] = '';
