@@ -274,8 +274,8 @@ class RubyLogLine extends LogLine
 			if (preg_match('/\w+\.rb:\d+:in `/', self::$ruby_fields[$i]))
 			{
 				# Treat this line as a backtrace, and format it nicely.
-				$backtrace_line_suffix = ":<br>\n<spacer type='block' width='40'/>in ";
-				foreach (explode(':in ', self::$ruby_fields[$i]) as $backtrace_entry)
+				$backtrace_line_suffix = "<br>\n<spacer type='block' width='40'/> ./";
+				foreach (explode(' ./', self::$ruby_fields[$i]) as $backtrace_entry)
 				{
 					$string .= htmlspecialchars($backtrace_entry, ENT_QUOTES) . $backtrace_line_suffix;
 				}
