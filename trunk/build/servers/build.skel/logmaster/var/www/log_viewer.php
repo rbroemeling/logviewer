@@ -332,31 +332,31 @@ class LineOutput
 {
 	public static $displayed_lines = 0;
 
-	public static function display($line, $line_start_position, $line_end_position, $extra_classes = '')
+	public static function display($line, $extra_classes = '')
 	{
 		self::$displayed_lines++;
 
-		echo "<div id='" . $line_start_position . "' class='log_line " . $extra_classes . "'>";
-		echo "[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line_start_position - 8192), 0) . "&length=12288#" . $line_start_position . "' name='" . $line_start_position . "'>" . $line_start_position .  "</a>] ";
+		echo "<div id='" . $line['start_position'] . "' class='log_line " . $extra_classes . "'>";
+		echo "[<a href='?log=" . $_GET['log'] . "&offset=" . max(($line['start_position'] - 8192), 0) . "&length=12288#" . $line['start_position'] . "' name='" . $line['start_position'] . "'>" . $line['start_position'] .  "</a>] ";
 
 		# We treat the line as a ruby logline if it contains something that
 		# looks like '12291.general.error '.
-		if (preg_match('/ \d+\.[a-z]+\.[a-z]+\W/', $line))
+		if (preg_match('/ \d+\.[a-z]+\.[a-z]+\W/', $line['line']))
 		{
-			RubyLogLine::parse($line);
+			RubyLogLine::parse($line['line']);
 			echo RubyLogLine::display();
 		}
 		# Otherwise, we treat the line as a php logline if it contains the text
 		# ' PHP error: '.
-		elseif (strpos($line, ' PHP error: ') !== FALSE)
+		elseif (strpos($line['line'], ' PHP error: ') !== FALSE)
 		{
-			PHPLogLine::parse($line);
+			PHPLogLine::parse($line['line']);
 			echo PHPLogLine::display();
 		}
 		# Otherwise we don't know what it is, so just dump it.
 		else
 		{
-			LogLine::parse($line);
+			LogLine::parse($line['line']);
 			echo LogLine::display();
 		}
 		echo "</div>\n";
@@ -409,6 +409,26 @@ function filter_match($line)
 	}
 
 	return (array_sum($filter_results) > 0);
+}
+
+
+function read_log_line()
+{
+	global $current_position;
+	global $log_handle;
+
+	$current_line = FALSE;
+	while (! feof($log_handle))
+	{
+		$data = fgets($log_handle);
+		if ($data !== FALSE)
+		{
+			$current_line = array('line' => rtrim($data, "\n"), 'start_position' => $current_position);
+			$current_position += strlen($data);
+		}
+		break;
+	}
+	return $current_line;
 }
 
 
@@ -1256,31 +1276,18 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 
 					LineArchive::reset();
 					$contextual_lines = $_GET['filter_context'] + 1;
-					while ((! feof($log_handle)) && ($current_position <= ($_GET['offset'] + $_GET['length'])) && (LineOutput::$displayed_lines < MAX_LINES))
+					while (($current_line = read_log_line()) && ($current_position <= ($_GET['offset'] + $_GET['length'])) && (LineOutput::$displayed_lines < MAX_LINES))
 					{
-						$current_line = fgets($log_handle);
-						if ($current_line === FALSE) // Check if we are at EOF.
-						{
-							continue;
-						}
-
-						$line_start_position = $current_position;
-						$current_position += strlen($current_line);
-						$line_end_position = $current_position - 1;
-
-						// Remove any trailing newline character.
-						$current_line = rtrim($current_line, "\n");
-
 						// If we have filters, skip lines that do not match them.
 						if ($_GET['filter'])
 						{
-							if (filter_match($current_line))
+							if (filter_match($current_line['line']))
 							{
 								$context_lines = LineArchive::pop_last($_GET['filter_context']);
 								echo LineArchive::skip_warning();
 								foreach ($context_lines as $skipped_line)
 								{
-									LineOutput::display($skipped_line['line'], $skipped_line['start_position'], $skipped_line['end_position'], 'log_context');
+									LineOutput::display($skipped_line, 'log_context');
 								}
 								$contextual_lines = 0;
 								LineArchive::reset();
@@ -1289,7 +1296,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 							{
 								if ($contextual_lines >= $_GET['filter_context'])
 								{
-									LineArchive::add(array('line' => $current_line, 'start_position' => $line_start_position, 'end_position' => $line_end_position));
+									LineArchive::add($current_line);
 									continue;
 								}
 								$contextual_lines++;
@@ -1298,11 +1305,11 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 
 						if ((0 < $contextual_lines) && ($contextual_lines <= $_GET['filter_context']))
 						{
-							LineOutput::display($current_line, $line_start_position, $line_end_position, 'log_context');
+							LineOutput::display($current_line, 'log_context');
 						}
 						else
 						{
-							LineOutput::display($current_line, $line_start_position, $line_end_position);
+							LineOutput::display($current_line);
 						}
 					}
 					echo LineArchive::skip_warning();
