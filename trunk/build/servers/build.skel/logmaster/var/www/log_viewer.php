@@ -1276,7 +1276,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 
 					LineArchive::reset();
 					$contextual_lines = $_GET['filter_context'] + 1;
-					while (($current_line = read_log_line()) && ($current_position <= ($_GET['offset'] + $_GET['length'])) && (LineOutput::$displayed_lines < MAX_LINES))
+					while (($current_position <= ($_GET['offset'] + $_GET['length'])) && ($current_line = read_log_line()) && (LineOutput::$displayed_lines < MAX_LINES))
 					{
 						// If we have filters, skip lines that do not match them.
 						if ($_GET['filter'])
