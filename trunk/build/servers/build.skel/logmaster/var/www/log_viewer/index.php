@@ -66,7 +66,7 @@ function read_log_line()
 		$data = fgets($log_handle);
 		if ($data !== FALSE)
 		{
-			$current_line = LogLine::factory($data);
+			$current_line = Log::factory($data);
 			$current_line->set_offset($current_position);
 			$current_position += strlen($data);
 		}
@@ -361,7 +361,7 @@ function slash_machine(&$data)
  ******************************************************************************/
 include_once(dirname(__FILE__) . '/lib/LineArchive.class.php');
 include_once(dirname(__FILE__) . '/lib/LineOutput.class.php');
-include_once(dirname(__FILE__) . '/lib/LogLine.class.php');
+include_once(dirname(__FILE__) . '/lib/Log.class.php');
 
 
 /******************************************************************************

@@ -1,5 +1,5 @@
 <?php
-class LogLine
+class Log
 {
 	private static $subclasses = null;
 
@@ -84,15 +84,15 @@ class LogLine
 	public static function factory($line)
 	{
 		$owner = array();
-		$owner['priority'] = LogLine::priority();
+		$owner['priority'] = Log::priority();
 		$owner['class'] = __CLASS__;
 
-		if (is_null(LogLine::$subclasses))
+		if (is_null(Log::$subclasses))
 		{
-			LogLine::initialize();
+			Log::initialize();
 		}
 
-		foreach (LogLine::$subclasses as $subclass)
+		foreach (Log::$subclasses as $subclass)
 		{
 			if (call_user_func(array($subclass, 'handles'), $line))
 			{
@@ -107,7 +107,7 @@ class LogLine
 
 		if ($owner['class'] == __CLASS__)
 		{
-			return new LogLine($line);
+			return new Log($line);
 		}
 		return call_user_func(array($owner['class'], 'factory'), $line);
 	}
@@ -127,21 +127,21 @@ class LogLine
 
 	private static function initialize()
 	{
-		foreach (scandir(dirname(__FILE__) . '/LogLine') as $file)
+		foreach (scandir(dirname(__FILE__) . '/Log') as $file)
 		{
-			if (! is_file(dirname(__FILE__) . '/LogLine/' . $file))
+			if (! is_file(dirname(__FILE__) . '/Log/' . $file))
 			{
 				continue;
 			}
-			include_once(dirname(__FILE__) . '/LogLine/' . $file);
+			include_once(dirname(__FILE__) . '/Log/' . $file);
 		}
 
-		LogLine::$subclasses = array();
+		Log::$subclasses = array();
 		foreach (get_declared_classes() as $class)
 		{
-			if (is_subclass_of($class, 'LogLine'))
+			if (is_subclass_of($class, 'Log'))
 			{
-				array_push(LogLine::$subclasses, $class);
+				array_push(Log::$subclasses, $class);
 			}
 		}
 	}
