@@ -1,5 +1,5 @@
 <?php
-class PHPLogLine extends LogLine
+class PHPLog extends Log
 {
 	protected $php_error_level = null;
 	protected $php_error_message = null;
@@ -71,7 +71,7 @@ class PHPLogLine extends LogLine
 
 	public static function factory($line)
 	{
-		return new PHPLogLine($line);
+		return new PHPLog($line);
 	}
 
 

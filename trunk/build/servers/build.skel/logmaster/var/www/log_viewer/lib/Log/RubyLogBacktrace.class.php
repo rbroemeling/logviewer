@@ -1,5 +1,5 @@
 <?php
-class RubyLogBacktrace extends RubyLogLine
+class RubyLogBacktrace extends RubyLog
 {
 	protected $ruby_backtrace = null;
 
@@ -52,7 +52,7 @@ class RubyLogBacktrace extends RubyLogLine
 
 	public static function priority()
 	{
-		# Over-ride RubyLogLine for backtraces.
+		# Over-ride RubyLog for backtraces.
 		return parent::priority() + 1;
 	}
 

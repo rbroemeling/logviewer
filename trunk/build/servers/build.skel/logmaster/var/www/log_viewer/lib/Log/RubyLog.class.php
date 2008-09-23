@@ -1,5 +1,5 @@
 <?php
-class RubyLogLine extends LogLine
+class RubyLog extends Log
 {
 	protected $ruby_component = null;
 	protected $ruby_error_level = null;
@@ -83,7 +83,7 @@ class RubyLogLine extends LogLine
 
 	public static function factory($line)
 	{
-		return new RubyLogLine($line);
+		return new RubyLog($line);
 	}
 
 
@@ -100,10 +100,10 @@ class RubyLogLine extends LogLine
 
 	public static function priority()
 	{
-		# This class must be a higher priority than PHPLogLine, because they are
+		# This class must be a higher priority than PHPLog, because they are
 		# siblings and will often match the same lines.
 		# We want this class to take priority when they do.
-		return PHPLogLine::priority() + 1;
+		return PHPLog::priority() + 1;
 	}
 }
 ?>
