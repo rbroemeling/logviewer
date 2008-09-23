@@ -21,13 +21,13 @@ class Log
 		$fields = array();
 		$matches = array();
 
-		$this->line = rtrim($line, "\n");
+		$this->line = $line;
 		$this->error_level = 'unknown';
 
 		# Regular Expression Map:
 		#	'(Sep 11 13:07:27) (10.0.3.8) (PHP error:) (.*)'
 		#	'(Sep 11 13:07:27) (10.0.3.8/10.0.0.16) (nexopia-parent - initializing:) (.*)'
-		if (preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([0-9./]+) +([^:]+:) +(.*)!i', $this->line, $fields))
+		if (preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([0-9./]+) +([^:]+:) +(.*)\n?$!i', $this->line, $fields))
 		{
 			# Alright, this appears to be a log in the default syslog format.
 			$this->syslog_date = strtotime($fields[1]);
@@ -113,6 +113,12 @@ class Log
 	}
 
 
+	public function get_length()
+	{
+		return strlen($this->line);
+	}
+
+
 	public function get_offset()
 	{
 		return $this->line_offset;
@@ -178,6 +184,12 @@ class Log
 		}
 
 		return (array_sum($filter_results) > 0);
+	}
+
+
+	public function merge()
+	{
+		trigger_error('merge() function has not been implemented for class ' . __CLASS__, E_USER_ERROR);
 	}
 
 
