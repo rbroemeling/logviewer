@@ -1,5 +1,5 @@
 <?php
-class RubyLogLine extends LogLine implements iLogLine
+class RubyLogLine extends LogLine
 {
 	protected $ruby_component = null;
 	protected $ruby_error_level = null;

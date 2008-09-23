@@ -1,5 +1,5 @@
 <?php
-class LogLine implements iLogLine
+class LogLine
 {
 	private static $subclasses = null;
 

@@ -1,5 +1,5 @@
 <?php
-class PHPLogLine extends LogLine implements iLogLine
+class PHPLogLine extends LogLine
 {
 	protected $php_error_level = null;
 	protected $php_error_message = null;
