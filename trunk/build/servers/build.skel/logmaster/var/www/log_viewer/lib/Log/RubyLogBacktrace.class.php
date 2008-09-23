@@ -50,6 +50,13 @@ class RubyLogBacktrace extends RubyLog
 	}
 
 
+	public function merge($other)
+	{
+		$this->ruby_backtrace .= $other->ruby_backtrace;
+		$this->line .= $other->line;
+	}
+
+
 	public static function priority()
 	{
 		# Over-ride RubyLog for backtraces.
