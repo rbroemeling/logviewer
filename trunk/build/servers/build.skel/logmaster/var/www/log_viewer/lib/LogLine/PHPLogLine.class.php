@@ -77,7 +77,10 @@ class PHPLogLine extends LogLine implements iLogLine
 
 	public static function handles($line)
 	{
-		return (strpos($line, ' PHP error: ') !== FALSE);
+		if (parent::handles($line))
+		{
+			return (strpos($line, ' PHP error: ') !== FALSE);
+		}
 	}
 
 

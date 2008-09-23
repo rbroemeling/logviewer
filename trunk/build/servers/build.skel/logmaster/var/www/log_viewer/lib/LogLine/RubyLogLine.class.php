@@ -71,22 +71,7 @@ class RubyLogLine extends LogLine implements iLogLine
 			$string .= " " . htmlspecialchars($this->ruby_request_identifier, ENT_QUOTES);
 		}
 		$string .= ": ";
-
-		if ($this->isBacktrace())
-		{
-			# Treat this line as a backtrace, and format it nicely.
-			$backtrace_line_suffix = "<br>\n<spacer type='block' width='40'/>";
-			$backtrace = preg_split('! (\.?/)!', $this->ruby_error_message, -1, PREG_SPLIT_DELIM_CAPTURE);
-			for ($i = 0; $i < count($backtrace);)
-			{
-				$string .= htmlspecialchars($backtrace[$i++], ENT_QUOTES);
-				if (($i % 2) && ($i < (count($backtrace) - 1)))
-				{
-					$string .= $backtrace_line_suffix;
-				}
-			}
-		}
-		else
+		if (! is_null($this->ruby_error_message))
 		{
 			$string .= htmlspecialchars($this->ruby_error_message, ENT_QUOTES);
 		}
@@ -104,66 +89,21 @@ class RubyLogLine extends LogLine implements iLogLine
 
 	public static function handles($line)
 	{
-		# Regular Expression Map:
-		#  ' 31564.general.critical:'
-		return preg_match('/ \d+\.[a-z]+\.[a-z]+\W/', $line);
-	}
-
-
-	protected function isBacktrace()
-	{
-		static $is_backtrace = null;
-
-		if (is_null($is_backtrace))
+		if (parent::handles($line))
 		{
-			var_dump($this->ruby_error_message);
 			# Regular Expression Map:
-			#  'pagerequest.rb:253:in `'
-			if (preg_match('/\w+\.rb:\d+:in `/', $this->ruby_error_message))
-			{
-				$is_backtrace = true;
-			}
-			else
-			{
-				$is_backtrace = false;
-			}
+			#  ' 31564.general.critical:'
+			return preg_match('/ \d+\.[a-z]+\.[a-z]+\W/', $line);
 		}
-		return $is_backtrace;
 	}
 
 
 	public static function priority()
 	{
-		# This class must be a higher priority than PHPLogLine, because they will
-		# often match the same lines and we want this class to take priority when
-		# they do.
+		# This class must be a higher priority than PHPLogLine, because they are
+		# siblings and will often match the same lines.
+		# We want this class to take priority when they do.
 		return PHPLogLine::priority() + 1;
-	}
-
-
-	public function related($other)
-	{
-		if (! is_a($other, __CLASS__))
-		{
-			return false;
-		}
-		if (strcmp($other->syslog_host, $this->syslog_host))
-		{
-			return false;
-		}
-		if (abs($other->syslog_date - $this->syslog_date) > 5)
-		{
-			return false;
-		}
-		if (! $this->isBacktrace())
-		{
-			return false;
-		}
-		if (! $other->isBacktrace())
-		{
-			return false;
-		}
-		return true;
 	}
 }
 ?>
