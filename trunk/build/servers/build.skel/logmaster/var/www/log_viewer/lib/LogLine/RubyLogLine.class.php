@@ -116,6 +116,7 @@ class RubyLogLine extends LogLine implements iLogLine
 
 		if (is_null($is_backtrace))
 		{
+			var_dump($this->ruby_error_message);
 			# Regular Expression Map:
 			#  'pagerequest.rb:253:in `'
 			if (preg_match('/\w+\.rb:\d+:in `/', $this->ruby_error_message))
@@ -140,7 +141,7 @@ class RubyLogLine extends LogLine implements iLogLine
 	}
 
 
-	public static function related($other)
+	public function related($other)
 	{
 		if (! is_a($other, __CLASS__))
 		{

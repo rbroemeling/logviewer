@@ -187,7 +187,7 @@ class LogLine implements iLogLine
 	}
 
 
-	public static function related($other)
+	public function related($other)
 	{
 		return false;
 	}
