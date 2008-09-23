@@ -30,7 +30,7 @@ class LogLine implements iLogLine
 		if (preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([0-9./]+) +([^:]+:) +(.*)!i', $this->line, $fields))
 		{
 			# Alright, this appears to be a log in the default syslog format.
-			$this->syslog_date = $fields[1];
+			$this->syslog_date = strtotime($fields[1]);
 			$this->syslog_host = $fields[2];
 			$this->syslog_program = $fields[3];
 
@@ -65,7 +65,7 @@ class LogLine implements iLogLine
 		}
 
 		$string  = '';
-		$string .= "<span class='date'>" . htmlspecialchars($this->syslog_date, ENT_QUOTES) . "</span> ";
+		$string .= "<span class='date'>" . htmlspecialchars(strftime("%b %e %H:%M:%S", $this->syslog_date), ENT_QUOTES) . "</span> ";
 		$string .= "<span class='host'>" . htmlspecialchars($this->syslog_host, ENT_QUOTES) . "</span> ";
 		$string .= "<span class='program'>" . htmlspecialchars($this->syslog_program, ENT_QUOTES) . "</span> ";
 		if (! is_null($this->client_uid))
