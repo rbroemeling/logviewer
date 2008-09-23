@@ -1,0 +1,185 @@
+/* Global Styling ************************************************/
+body
+{
+	background: #000000;
+	color: #00ff00;
+	font-family: arial, sans-serif;
+	font-size: 12px;
+}
+
+a
+{
+	color: #99cccc;
+}
+
+a:hover
+{
+	color: #99ffff;
+}
+
+a:visited
+{
+	color: #9933ff;
+}
+
+
+/* Error and Status Message Styling ******************************/
+div.error
+{
+	color: #ff0000;
+	font-weight: bold;
+	margin-bottom: 5px;
+	margin-top: 5px;
+}
+div.warning
+{
+	color: #ffff00;
+	font-weight: bold;
+	margin-bottom: 5px;
+	margin-top: 5px;
+}
+
+
+/* Input Form Styling ********************************************/
+div#filter_list div
+{
+	margin-bottom: 5px;
+	margin-top: 5px;
+}
+div#filter_template
+{
+	display: none;
+}
+
+
+/* Documentation Table Styling ***********************************/
+table#documentation_table
+{
+	font-size: 0.9em;
+	border-spacing: 0px;
+}
+table#documentation_table td
+{
+	border-width: 1px 0px 1px 0px;
+	border-spacing: 0px;
+	border-style: solid none solid none;
+	border-collapse: collapse;
+}
+table#documentation_table th
+{
+	background: #003300;
+	border-width: 1px 0px 1px 0px;
+	border-spacing: 0px;
+	border-style: solid none solid none;
+	border-collapse: collapse;
+}
+
+
+/* Log Excerpt Styling *******************************************/
+div.log_context
+{
+	background: #222222;
+}
+div#log_excerpt
+{
+	margin-top: 30px;
+}
+div.log_line
+{
+	font-family: monospace;
+	padding-bottom: 5px;
+	padding-top: 5px;
+}
+
+/* LogLine generalized field colouring. */
+div.log_line span.date
+{
+	color: #888888;
+}
+div.log_line span.host
+{
+	color: #888888;
+}
+div.log_line span.program
+{
+	color: #888888;
+}
+div.log_line span.uid
+{
+	color: #666666;
+}
+div.log_line span.ip
+{
+	color: #666666;
+}
+
+/* Global error level coloring. */
+div.log_line span.errorlevel_critical
+{
+	background: #ff0000;
+	color: #ffff00;
+}
+div.log_line span.errorlevel_debug
+{
+	color: #ffffff;
+}
+div.log_line span.errorlevel_error
+{
+	color: #ff0000;
+}
+div.log_line span.errorlevel_info
+{
+	color: #00ff00;
+}
+div.log_line span.errorlevel_spam
+{
+	color: #888888;
+}
+div.log_line span.errorlevel_unknown
+{
+
+}
+div.log_line span.errorlevel_warning
+{
+	color: #ffff00;
+}
+
+/* RubyLogLine field coloring. */
+div.log_line span.pid
+{
+	color: #ffffff;
+}
+div.log_line span.ruby_component_files
+{
+	color: #ffffff;
+}
+div.log_line span.ruby_component_general
+{
+	color: #ffff00;
+	font-weight: bold;
+}
+div.log_line span.ruby_component_memcache
+{
+	color: #0000ff;
+}
+div.log_line span.ruby_component_pagehandler
+{
+	color: #ff00ff;
+}
+div.log_line span.ruby_component_site_module
+{
+	color: #ffff00;
+}
+div.log_line span.ruby_component_sql
+{
+	color: #0000ff;
+	font-weight: bold;
+}
+div.log_line span.ruby_component_template
+{
+	color: #00ffff;
+}
+div.log_line span.ruby_component_worker
+{
+	color: #00ff00;
+}
