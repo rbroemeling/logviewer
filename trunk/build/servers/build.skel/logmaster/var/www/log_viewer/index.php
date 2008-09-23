@@ -57,17 +57,18 @@ function filter_form_string($filter = null, $negate_filter = 0, $logic_filter = 
 
 function read_log_line()
 {
+	global $current_position;
 	global $log_handle;
 
 	$current_line = FALSE;
 	while (! feof($log_handle))
 	{
-		$data_offset = ftell($log_handle);
 		$data = fgets($log_handle);
 		if ($data !== FALSE)
 		{
 			$current_line = Log::factory($data);
-			$current_line->set_offset($data_offset);
+			$current_line->set_offset($current_position);
+			$current_position += strlen($data);
 		}
 		break;
 	}
@@ -596,10 +597,11 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 							fgets($log_handle);
 						}
 					}
+					$current_position = ftell($log_handle);
 
 					LineArchive::reset();
 					$contextual_lines = $_GET['filter_context'] + 1;
-					while ((ftell($log_handle) <= ($_GET['offset'] + $_GET['length'])) && ($current_line = read_log_line()) && (LineOutput::$displayed_lines < MAX_LINES))
+					while (($current_position <= ($_GET['offset'] + $_GET['length'])) && ($current_line = read_log_line()) && (LineOutput::$displayed_lines < MAX_LINES))
 					{
 						// If we have filters, skip lines that do not match them.
 						if ($_GET['filter'])
@@ -640,17 +642,17 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 
 					if (LineOutput::$displayed_lines >= MAX_LINES)
 					{
-						echo "<div class='warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.  End of file is " . number_format($log_size - ftell($log_handle)) . " bytes further.</div>\n";
+						echo "<div class='warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.  End of file is " . number_format($log_size - $current_position) . " bytes further.</div>\n";
 					}
 
-					if (ftell($log_handle) > ($_GET['offset'] + $_GET['length']))
+					if ($current_position > ($_GET['offset'] + $_GET['length']))
 					{
-						echo "<div class='warning'>Encountered end of requested data at offset " . number_format(ftell($log_handle)) . ".  End of file is " . number_format($log_size - ftell($log_handle)) . " bytes further.</div>\n";
+						echo "<div class='warning'>Encountered end of requested data at offset " . number_format($current_position) . ".  End of file is " . number_format($log_size - $current_position) . " bytes further.</div>\n";
 					}
 
 					if (feof($log_handle))
 					{
-						echo "<div class='warning'>Encountered end of file at offset " . number_format(ftell($log_handle)) . ".</div>\n";
+						echo "<div class='warning'>Encountered end of file at offset " . number_format($current_position) . ".</div>\n";
 					}
 
 					fclose($log_handle);
