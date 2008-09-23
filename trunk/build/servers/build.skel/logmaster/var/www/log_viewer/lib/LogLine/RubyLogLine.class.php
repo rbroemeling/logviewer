@@ -29,15 +29,11 @@ class RubyLogLine extends LogLine implements iLogLine
 			$this->ruby_pid = $matches[1];
 			$this->ruby_component = $matches[2];
 			$this->ruby_error_level = $matches[3];
-			if (count($matches) == 6)
+			if (strlen($matches[4]))
 			{
 				$this->ruby_request_identifier = trim($matches[4]);
-				$this->ruby_error_message = $matches[5];
 			}
-			else
-			{
-				$this->ruby_error_message = $matches[4];
-			}
+			$this->ruby_error_message = $matches[5];
 
 			switch ($this->ruby_error_level)
 			{

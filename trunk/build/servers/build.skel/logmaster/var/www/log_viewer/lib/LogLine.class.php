@@ -27,7 +27,7 @@ class LogLine implements iLogLine
 		# Regular Expression Map:
 		#	'(Sep 11 13:07:27) (10.0.3.8) (PHP error:) (.*)'
 		#	'(Sep 11 13:07:27) (10.0.3.8/10.0.0.16) (nexopia-parent - initializing:) (.*)'
-		if (! preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([\d./]+) +([^:]+:) +(.*)!i', $this->line, $fields))
+		if (preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([0-9./]+) +([^:]+:) +(.*)!i', $this->line, $fields))
 		{
 			# Alright, this appears to be a log in the default syslog format.
 			$this->syslog_date = $fields[1];
