@@ -187,6 +187,12 @@ class LogLine implements iLogLine
 	}
 
 
+	public static function related($other)
+	{
+		return false;
+	}
+
+
 	public function set_offset($line_offset)
 	{
 		$this->line_offset = $line_offset;
