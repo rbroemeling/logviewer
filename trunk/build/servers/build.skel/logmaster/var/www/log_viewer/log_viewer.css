@@ -91,7 +91,7 @@ div.log_line
 	padding-top: 5px;
 }
 
-/* LogLine generalized field colouring. */
+/* Log generalized field colouring. */
 div.log_line span.date
 {
 	color: #888888;
@@ -144,7 +144,7 @@ div.log_line span.errorlevel_warning
 	color: #ffff00;
 }
 
-/* RubyLogLine field coloring. */
+/* RubyLog field coloring. */
 div.log_line span.pid
 {
 	color: #ffffff;
