@@ -630,9 +630,9 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						{
 							if ($current_line->matches_filters())
 							{
-								$context_lines = LineArchive::pop_last($_GET['filter_context']);
+								$archived_lines = LineArchive::pop_last($_GET['filter_context']);
 								echo LineArchive::skip_warning();
-								foreach ($context_lines as $skipped_line)
+								foreach ($archived_lines as $skipped_line)
 								{
 									LineOutput::display($skipped_line, 'log_context');
 								}
