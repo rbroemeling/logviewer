@@ -77,12 +77,16 @@ class RubyLogLine extends LogLine implements iLogLine
 		if (preg_match('/\w+\.rb:\d+:in `/', $this->ruby_error_message))
 		{
 			# Treat this line as a backtrace, and format it nicely.
-			$backtrace_line_suffix = "<br>\n<spacer type='block' width='40'/> ./";
-			foreach (explode(' ./', $this->ruby_error_message) as $backtrace_entry)
+			$backtrace_line_suffix = "<br>\n<spacer type='block' width='40'/>";
+			$backtrace = preg_split('! (\.?/)!', $this->ruby_error_message, -1, PREG_SPLIT_DELIM_CAPTURE);
+			for ($i = 0; $i < count($backtrace);)
 			{
-				$string .= htmlspecialchars($backtrace_entry, ENT_QUOTES) . $backtrace_line_suffix;
+				$string .= htmlspecialchars($backtrace[$i++], ENT_QUOTES);
+				if (($i % 2) && ($i < (count($backtrace) - 1)))
+				{
+					$string .= $backtrace_line_suffix;
+				}
 			}
-			$string = substr($string, 0, -1 * strlen($backtrace_line_suffix));
 		}
 		else
 		{
