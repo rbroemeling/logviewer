@@ -613,7 +613,6 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 
 					LineArchive::reset();
 					$contextual_lines = $_GET['filter_context'] + 1;
-					$current_line = null;
 					while ($current_line = read_log_line())
 					{
 						if ($current_line->get_offset() > ($_GET['offset'] + $_GET['length']))
@@ -658,8 +657,6 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						{
 							LineOutput::display($current_line);
 						}
-
-
 					}
 					echo LineArchive::skip_warning();
 					LineArchive::reset();
