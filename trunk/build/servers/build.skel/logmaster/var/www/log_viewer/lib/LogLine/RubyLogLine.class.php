@@ -72,9 +72,7 @@ class RubyLogLine extends LogLine implements iLogLine
 		}
 		$string .= ": ";
 
-		# Regular Expression Map:
-		#  'pagerequest.rb:253:in `'
-		if (preg_match('/\w+\.rb:\d+:in `/', $this->ruby_error_message))
+		if ($this->isBacktrace())
 		{
 			# Treat this line as a backtrace, and format it nicely.
 			$backtrace_line_suffix = "<br>\n<spacer type='block' width='40'/>";
@@ -112,12 +110,59 @@ class RubyLogLine extends LogLine implements iLogLine
 	}
 
 
+	protected function isBacktrace()
+	{
+		static $is_backtrace = null;
+
+		if (is_null($is_backtrace))
+		{
+			# Regular Expression Map:
+			#  'pagerequest.rb:253:in `'
+			if (preg_match('/\w+\.rb:\d+:in `/', $this->ruby_error_message))
+			{
+				$is_backtrace = true;
+			}
+			else
+			{
+				$is_backtrace = false;
+			}
+		}
+		return $is_backtrace;
+	}
+
+
 	public static function priority()
 	{
 		# This class must be a higher priority than PHPLogLine, because they will
 		# often match the same lines and we want this class to take priority when
 		# they do.
 		return PHPLogLine::priority() + 1;
+	}
+
+
+	public static function related($other)
+	{
+		if (! is_a($other, __CLASS__))
+		{
+			return false;
+		}
+		if (strcmp($other->syslog_host, $this->syslog_host))
+		{
+			return false;
+		}
+		if (abs($other->syslog_date - $this->syslog_date) > 5)
+		{
+			return false;
+		}
+		if (! $this->isBacktrace())
+		{
+			return false;
+		}
+		if (! $other->isBacktrace())
+		{
+			return false;
+		}
+		return true;
 	}
 }
 ?>
