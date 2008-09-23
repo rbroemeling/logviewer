@@ -65,6 +65,7 @@ class Log
 		}
 
 		$string  = '';
+		$string .= '<!-- Begin ' . __CLASS__ . ' --!>';
 		$string .= "<span class='date'>" . htmlspecialchars(strftime("%b %e %H:%M:%S", $this->syslog_date), ENT_QUOTES) . "</span> ";
 		$string .= "<span class='host'>" . htmlspecialchars($this->syslog_host, ENT_QUOTES) . "</span> ";
 		$string .= "<span class='program'>" . htmlspecialchars($this->syslog_program, ENT_QUOTES) . "</span> ";
@@ -77,6 +78,7 @@ class Log
 			$string .= "<span class='ip'>" . htmlspecialchars($this->client_ip, ENT_QUOTES) . "</span> ";
 		}
 		$string .= htmlspecialchars($this->extra_data, ENT_QUOTES);
+		$string .= '<!-- End ' . __CLASS__ . ' --!>';
 		return $string;
 	}
 

@@ -10,12 +10,20 @@ class RubyLogBacktrace extends RubyLog
 
 		$this->ruby_backtrace = $this->ruby_error_message;
 		$this->ruby_error_message = null;
+
+		if (is_null($this->ruby_backtrace))
+		{
+			# If the line is a backtrace continuation, then RubyLog won't have
+			# parsed it, and the information is in $this->extra_data.
+			$this->ruby_backtrace = $this->extra_data;
+		}
 	}
 
 
 	public function __toString()
 	{
-		$string = parent::__toString();
+		$string  = parent::__toString();
+		$string .= '<!-- Begin ' . __CLASS__ . ' --!>';
 		if (! is_null($this->ruby_backtrace))
 		{
 			$string .= "<span class='errorlevel_" . $this->error_level . "'>";
@@ -30,6 +38,7 @@ class RubyLogBacktrace extends RubyLog
 			}
 			$string .= "</span>";
 		}
+		$string .= '<!-- End ' . __CLASS__ . ' --!>';
 		return $string;
 	}
 

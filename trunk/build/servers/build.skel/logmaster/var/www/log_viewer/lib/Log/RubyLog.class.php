@@ -52,7 +52,8 @@ class RubyLog extends Log
 
 	public function __toString()
 	{
-		$string = parent::__toString();
+		$string  = parent::__toString();
+		$string .= '<!-- Begin ' . __CLASS__ . ' --!>';
 		if (! is_null($this->ruby_pid))
 		{
 			$string .= " <span class='pid'>" . htmlspecialchars($this->ruby_pid, ENT_QUOTES) . "</span>.";
@@ -76,6 +77,7 @@ class RubyLog extends Log
 			$string .= htmlspecialchars($this->ruby_error_message, ENT_QUOTES);
 		}
 		$string .= "</span>";
+		$string .= '<!-- End ' . __CLASS__ . ' --!>';
 
 		return $string;
 	}
@@ -93,7 +95,7 @@ class RubyLog extends Log
 		{
 			# Regular Expression Map:
 			#  ' 31564.general.critical:'
-			return preg_match('/ \d+\.[a-z]+\.[a-z]+\W/', $line);
+			return (preg_match('/ \d+\.[a-z]+\.[a-z]+\W/', $line) || preg_match('/\w+\.rb:\d+:in `/', $line));
 		}
 	}
 

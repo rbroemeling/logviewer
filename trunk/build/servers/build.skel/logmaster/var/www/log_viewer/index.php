@@ -57,18 +57,31 @@ function filter_form_string($filter = null, $negate_filter = 0, $logic_filter = 
 
 function read_log_line()
 {
-	global $current_position;
 	global $log_handle;
 
-	$current_line = FALSE;
+	static $data = false;
+	$current_line = $data;
+	$data = false;
+
 	while (! feof($log_handle))
 	{
+		$data_offset = ftell($log_handle);
 		$data = fgets($log_handle);
-		if ($data !== FALSE)
+		if ($data === false)
 		{
-			$current_line = Log::factory($data);
-			$current_line->set_offset($current_position);
-			$current_position += strlen($data);
+			break;
+		}
+		$data = Log::factory($data);
+		$data->set_offset($data_offset);
+		if ($current_line === false)
+		{
+			$current_line = $data;
+			continue;
+		}
+		if ($data->related($current_line))
+		{
+			$current_line->merge($data);
+			continue;
 		}
 		break;
 	}
@@ -597,12 +610,21 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 							fgets($log_handle);
 						}
 					}
-					$current_position = ftell($log_handle);
 
 					LineArchive::reset();
 					$contextual_lines = $_GET['filter_context'] + 1;
-					while (($current_position <= ($_GET['offset'] + $_GET['length'])) && ($current_line = read_log_line()) && (LineOutput::$displayed_lines < MAX_LINES))
+					$current_line = null;
+					while ($current_line = read_log_line())
 					{
+						if ($current_line->get_offset() > ($_GET['offset'] + $_GET['length']))
+						{
+							break;
+						}
+						if (LineOutput::$displayed_lines >= MAX_LINES)
+						{
+							break;
+						}
+
 						// If we have filters, skip lines that do not match them.
 						if ($_GET['filter'])
 						{
@@ -636,25 +658,28 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						{
 							LineOutput::display($current_line);
 						}
+
+
 					}
 					echo LineArchive::skip_warning();
 					LineArchive::reset();
 
-					if (LineOutput::$displayed_lines >= MAX_LINES)
+					if (! $current_line)
 					{
-						echo "<div class='warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.  End of file is " . number_format($log_size - $current_position) . " bytes further.</div>\n";
+						echo "<div class='warning'>Encountered end of file at offset " . number_format(ftell($log_handle)) . ".</div>\n";
 					}
-
-					if ($current_position > ($_GET['offset'] + $_GET['length']))
+					else
 					{
-						echo "<div class='warning'>Encountered end of requested data at offset " . number_format($current_position) . ".  End of file is " . number_format($log_size - $current_position) . " bytes further.</div>\n";
-					}
+						if (LineOutput::$displayed_lines >= MAX_LINES)
+						{
+							echo "<div class='warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.  End of file is " . number_format($log_size - $current_line->get_offset()) . " bytes further.</div>\n";
+						}
 
-					if (feof($log_handle))
-					{
-						echo "<div class='warning'>Encountered end of file at offset " . number_format($current_position) . ".</div>\n";
+						if ($current_line->get_offset() > ($_GET['offset'] + $_GET['length']))
+						{
+							echo "<div class='warning'>Encountered end of requested data at offset " . number_format($current_line->get_offset()) . ".  End of file is " . number_format($log_size - $current_line->get_offset()) . " bytes further.</div>\n";
+						}
 					}
-
 					fclose($log_handle);
 				}
 			?>
