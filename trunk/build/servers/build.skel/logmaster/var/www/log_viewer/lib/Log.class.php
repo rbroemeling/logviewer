@@ -115,12 +115,6 @@ class Log
 	}
 
 
-	public function get_length()
-	{
-		return strlen($this->line);
-	}
-
-
 	public function get_offset()
 	{
 		return $this->line_offset;
