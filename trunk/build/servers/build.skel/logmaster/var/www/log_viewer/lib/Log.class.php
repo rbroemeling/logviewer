@@ -67,7 +67,7 @@ class Log
 		$string  = '';
 		if (defined('DEBUG') && DEBUG)
 		{
-			$string .= '<!-- Begin ' . __CLASS__ . ' --!>';
+			$string .= '<span class="debug">Begin ' . __CLASS__ . '</span>';
 		}
 		$string .= "<span class='date'>" . htmlspecialchars(strftime("%b %e %H:%M:%S", $this->syslog_date), ENT_QUOTES) . "</span> ";
 		$string .= "<span class='host'>" . htmlspecialchars($this->syslog_host, ENT_QUOTES) . "</span> ";
@@ -83,7 +83,7 @@ class Log
 		$string .= htmlspecialchars($this->extra_data, ENT_QUOTES);
 		if (defined('DEBUG') && DEBUG)
 		{
-			$string .= '<!-- End ' . __CLASS__ . ' --!>';
+			$string .= '<span class="debug">End ' . __CLASS__ . '</span>';
 		}
 		return $string;
 	}
@@ -100,6 +100,10 @@ class Log
 		{
 			if (call_user_func(array($class_summary['class'], 'handles'), $line))
 			{
+				if (defined('DEBUG') && DEBUG)
+				{
+					echo '<div class="debug">Handler ' . $class_summary['class'] . ' chosen for line: "' . $line . '"</div>' . "\n";
+				}
 				return call_user_func(array($class_summary['class'], 'factory'), $line);
 			}
 		}

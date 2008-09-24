@@ -55,7 +55,7 @@ class RubyLog extends Log
 		$string  = parent::__toString();
 		if (defined('DEBUG') && DEBUG)
 		{
-			$string .= '<!-- Begin ' . __CLASS__ . ' --!>';
+			$string .= '<span class="debug">Begin ' . __CLASS__ . '</span>';
 		}
 		if (! is_null($this->ruby_pid))
 		{
@@ -82,7 +82,7 @@ class RubyLog extends Log
 		$string .= "</span>";
 		if (defined('DEBUG') && DEBUG)
 		{
-			$string .= '<!-- End ' . __CLASS__ . ' --!>';
+			$string .= '<span class="debug">End ' . __CLASS__ . '</span>';
 		}
 
 		return $string;
