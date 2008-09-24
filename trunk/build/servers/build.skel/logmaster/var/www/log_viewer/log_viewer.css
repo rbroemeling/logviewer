@@ -40,6 +40,31 @@ div.warning
 }
 
 
+/* Debug Message Styling *****************************************/
+div.debug
+{
+	border: 1px solid #777777;
+	color: #000000;
+	background: #ffffff;
+	margin-bottom: 2px;
+	margin-top: 2px;
+	padding: 2px;
+}
+span.debug
+{
+	color: #000000;
+	background: #ffffff;
+}
+span.debug:before
+{
+	content: "[";
+}
+span.debug:after
+{
+	content: "]";
+}
+
+
 /* Input Form Styling ********************************************/
 div#filter_list div
 {
