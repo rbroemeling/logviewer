@@ -108,6 +108,10 @@ class Log
 			}
 		}
 
+		if (defined('DEBUG') && DEBUG)
+		{
+			echo '<div class="debug">Handler ' . __CLASS__ . ' chosen for line: "' . $line . '"</div>' . "\n";
+		}
 		return new Log($line);
 	}
 
