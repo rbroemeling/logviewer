@@ -5,6 +5,7 @@ class Log
 
 	protected $line = null;
 	protected $line_offset = null;
+	protected $merged_offsets = array();
 
 	protected $client_ip = null;
 	protected $client_uid = null;
@@ -135,6 +136,12 @@ class Log
 	}
 
 
+	public function get_merged_offsets()
+	{
+		return $this->merged_offsets;
+	}
+
+
 	public static function handles($line)
 	{
 		return true;
@@ -218,6 +225,16 @@ class Log
 	public function merge()
 	{
 		trigger_error('merge() function has not been implemented for class ' . __CLASS__, E_USER_ERROR);
+	}
+
+
+	protected function merge_offsets($other)
+	{
+		array_push($this->merged_offsets, $other->line_offset);
+		if ($other->merged_offsets)
+		{
+			$this->merged_offsets = array_merge($this->merged_offsets, $other->merged_offsets);
+		}
 	}
 
 

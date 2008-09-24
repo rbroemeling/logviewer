@@ -19,10 +19,10 @@ function highlight_named_anchor()
 	if (window.location.hash.match(/^#\d+$/))
 	{
 		var element = document.getElementById(window.location.hash.substr(1));
-		if (element)
+		if (element && element.parentNode)
 		{
-			element.style.fontWeight = "bold";
-			element.style.background = "#444444";
+			element.parentNode.style.fontWeight = "bold";
+			element.parentNode.style.background = "#444444";
 		}
 	}
 }

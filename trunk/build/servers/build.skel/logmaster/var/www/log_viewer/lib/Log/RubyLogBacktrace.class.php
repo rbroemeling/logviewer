@@ -72,6 +72,7 @@ class RubyLogBacktrace extends RubyLog
 	{
 		$this->ruby_backtrace .= $other->ruby_backtrace;
 		$this->line .= $other->line;
+		$this->merge_offsets($other);
 	}
 
 
