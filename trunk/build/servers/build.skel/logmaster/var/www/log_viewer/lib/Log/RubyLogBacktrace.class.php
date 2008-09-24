@@ -59,6 +59,8 @@ class RubyLogBacktrace extends RubyLog
 	{
 		if (parent::handles($line))
 		{
+			# Regular Expression Map:
+			#  'pagehandler.rb:653:in `'
 			return preg_match('/\w+\.rb:\d+:in `/', $line);
 		}
 		return false;

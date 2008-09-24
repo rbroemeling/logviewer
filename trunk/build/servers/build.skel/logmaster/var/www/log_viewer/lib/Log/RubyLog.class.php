@@ -101,7 +101,17 @@ class RubyLog extends Log
 		{
 			# Regular Expression Map:
 			#  ' 31564.general.critical:'
-			return (preg_match('/ \d+\.[a-z]+\.[a-z]+\W/', $line) || preg_match('/\w+\.rb:\d+:in `/', $line));
+			if (preg_match('/ \d+\.[a-z]+\.[a-z]+\W/', $line))
+			{
+				return true;
+			}
+			# Regular Expression Map:
+			#  'pagehandler.rb:653:in `'
+			if (preg_match('/\w+\.rb:\d+:in `/', $line))
+			{
+				return true;
+			}
+			return false;
 		}
 	}
 
