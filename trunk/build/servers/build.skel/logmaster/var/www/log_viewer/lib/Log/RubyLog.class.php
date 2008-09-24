@@ -53,7 +53,10 @@ class RubyLog extends Log
 	public function __toString()
 	{
 		$string  = parent::__toString();
-		$string .= '<!-- Begin ' . __CLASS__ . ' --!>';
+		if (defined('DEBUG') && DEBUG)
+		{
+			$string .= '<!-- Begin ' . __CLASS__ . ' --!>';
+		}
 		if (! is_null($this->ruby_pid))
 		{
 			$string .= " <span class='pid'>" . htmlspecialchars($this->ruby_pid, ENT_QUOTES) . "</span>.";
@@ -77,7 +80,10 @@ class RubyLog extends Log
 			$string .= htmlspecialchars($this->ruby_error_message, ENT_QUOTES);
 		}
 		$string .= "</span>";
-		$string .= '<!-- End ' . __CLASS__ . ' --!>';
+		if (defined('DEBUG') && DEBUG)
+		{
+			$string .= '<!-- End ' . __CLASS__ . ' --!>';
+		}
 
 		return $string;
 	}

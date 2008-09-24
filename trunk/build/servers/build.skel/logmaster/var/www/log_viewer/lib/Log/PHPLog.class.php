@@ -53,7 +53,10 @@ class PHPLog extends Log
 	public function __toString()
 	{
 		$string  = parent::__toString();
-		$string .= '<!-- Begin ' . __CLASS__ . ' --!>';
+		if (defined('DEBUG') && DEBUG)
+		{
+			$string .= '<!-- Begin ' . __CLASS__ . ' --!>';
+		}
 		if (! is_null($this->php_script_name))
 		{
 			$string .= " " . htmlspecialchars($this->php_script_name, ENT_QUOTES) . " ";
@@ -66,7 +69,10 @@ class PHPLog extends Log
 		{
 			$string .= htmlspecialchars($this->php_error_message, ENT_QUOTES);
 		}
-		$string .= '<!-- End ' . __CLASS__ . ' --!>';
+		if (defined('DEBUG') && DEBUG)
+		{
+			$string .= '<!-- End ' . __CLASS__ . ' --!>';
+		}
 		return $string;
 	}
 

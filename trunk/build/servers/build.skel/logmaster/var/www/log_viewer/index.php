@@ -26,6 +26,16 @@ define('MAX_CONTEXT', 100);
 // run-away log data display.
 define('MAX_LINES', 15000);
 
+// Debug-mode: output extra information about the handlers being used.
+//define('DEBUG', true);
+if (! defined('DEBUG'))
+{
+	if ($_GET['debug'])
+	{
+		define('DEBUG', true);
+	}
+}
+
 
 /******************************************************************************
  * Configuration Variables

@@ -23,7 +23,10 @@ class RubyLogBacktrace extends RubyLog
 	public function __toString()
 	{
 		$string  = parent::__toString();
-		$string .= '<!-- Begin ' . __CLASS__ . ' --!>';
+		if (defined('DEBUG') && DEBUG)
+		{
+			$string .= '<!-- Begin ' . __CLASS__ . ' --!>';
+		}
 		if (! is_null($this->ruby_backtrace))
 		{
 			$string .= "<span class='errorlevel_" . $this->error_level . "'>";
@@ -38,7 +41,10 @@ class RubyLogBacktrace extends RubyLog
 			}
 			$string .= "</span>";
 		}
-		$string .= '<!-- End ' . __CLASS__ . ' --!>';
+		if (defined('DEBUG') && DEBUG)
+		{
+			$string .= '<!-- End ' . __CLASS__ . ' --!>';
+		}
 		return $string;
 	}
 
