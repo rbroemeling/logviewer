@@ -16,6 +16,7 @@ class RubyLogBacktrace extends RubyLog
 			# If the line is a backtrace continuation, then RubyLog won't have
 			# parsed it, and the information is in $this->extra_data.
 			$this->ruby_backtrace = $this->extra_data;
+			$this->extra_data = null;
 		}
 	}
 
