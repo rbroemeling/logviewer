@@ -65,21 +65,27 @@ class RubyLog extends Log
 		{
 			$string .= "<span class='ruby_component_" . $this->ruby_component . "'>" . htmlspecialchars($this->ruby_component, ENT_QUOTES) . "</span>.";
 		}
-		$string .= "<span class='errorlevel_" . $this->error_level . "'>";
-		if (! is_null($this->ruby_error_level))
+		if (! is_null($this->ruby_error_level) || ! is_null($this->ruby_request_identifier) || ! is_null($this->ruby_error_message))
 		{
-			$string .= htmlspecialchars($this->ruby_error_level, ENT_QUOTES);
+			$string .= "<span class='errorlevel_" . $this->error_level . "'>";
+			if (! is_null($this->ruby_error_level))
+			{
+				$string .= htmlspecialchars($this->ruby_error_level, ENT_QUOTES);
+			}
+			if (! is_null($this->ruby_request_identifier))
+			{
+				$string .= " " . htmlspecialchars($this->ruby_request_identifier, ENT_QUOTES);
+			}
+			if (! is_null($this->ruby_error_level) || ! is_null($this->ruby_request_identifier))
+			{
+				$string .= ": ";
+			}
+			if (! is_null($this->ruby_error_message))
+			{
+				$string .= htmlspecialchars($this->ruby_error_message, ENT_QUOTES);
+			}
+			$string .= "</span>";
 		}
-		if (! is_null($this->ruby_request_identifier))
-		{
-			$string .= " " . htmlspecialchars($this->ruby_request_identifier, ENT_QUOTES);
-		}
-		$string .= ": ";
-		if (! is_null($this->ruby_error_message))
-		{
-			$string .= htmlspecialchars($this->ruby_error_message, ENT_QUOTES);
-		}
-		$string .= "</span>";
 		if (defined('DEBUG') && DEBUG)
 		{
 			$string .= '<span class="debug">End ' . __CLASS__ . '</span>';
