@@ -18,11 +18,11 @@ function highlight_named_anchor()
 {
 	if (window.location.hash.match(/^#\d+$/))
 	{
-		var div = document.getElementById(window.location.hash.substr(1));
-		if (div)
+		var element = document.getElementById(window.location.hash.substr(1));
+		if (element)
 		{
-			div.style.fontWeight = "bold";
-			div.style.background = "#444444";
+			element.style.fontWeight = "bold";
+			element.style.background = "#444444";
 		}
 	}
 }
