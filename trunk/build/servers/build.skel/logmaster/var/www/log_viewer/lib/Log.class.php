@@ -1,7 +1,7 @@
 <?php
 class Log
 {
-	private static $subclasses = null;
+	private static $classes = null;
 
 	protected $line = null;
 	protected $line_offset = null;
@@ -85,33 +85,20 @@ class Log
 
 	public static function factory($line)
 	{
-		$owner = array();
-		$owner['priority'] = Log::priority();
-		$owner['class'] = __CLASS__;
-
-		if (is_null(Log::$subclasses))
+		if (is_null(Log::$classes))
 		{
 			Log::initialize();
 		}
 
-		foreach (Log::$subclasses as $subclass)
+		foreach (Log::$classes as $class_summary)
 		{
-			if (call_user_func(array($subclass, 'handles'), $line))
+			if (call_user_func(array($class_summary['class'], 'handles'), $line))
 			{
-				$subclass_priority = call_user_func(array($subclass, 'priority'));
-				if ($subclass_priority > $owner['priority'])
-				{
-					$owner['priority'] = $subclass_priority;
-					$owner['class'] = $subclass;
-				}
+				return call_user_func(array($class_summary['class'], 'factory'), $line);
 			}
 		}
 
-		if ($owner['class'] == __CLASS__)
-		{
-			return new Log($line);
-		}
-		return call_user_func(array($owner['class'], 'factory'), $line);
+		return new Log($line);
 	}
 
 
@@ -138,14 +125,32 @@ class Log
 			include_once(dirname(__FILE__) . '/Log/' . $file);
 		}
 
-		Log::$subclasses = array();
+		Log::$classes = array();
 		foreach (get_declared_classes() as $class)
 		{
-			if (is_subclass_of($class, 'Log'))
+			if (is_subclass_of($class, __CLASS__))
 			{
-				array_push(Log::$subclasses, $class);
+				$class_summary = array();
+				$class_summary['class'] = $class;
+				$class_summary['priority'] = call_user_func(array($class_summary['class'], 'priority'));
+				array_push(Log::$classes, $class_summary);
 			}
 		}
+		uasort
+		(
+			Log::$classes,
+			create_function
+			(
+				'$a,$b',
+				'
+					if ($a["priority"] == $b["priority"])
+					{
+						return 0;
+					}
+					return ($a["priority"] < $b["priority"]) ? 1 : -1;
+				'
+			)
+		);
 	}
 
 
