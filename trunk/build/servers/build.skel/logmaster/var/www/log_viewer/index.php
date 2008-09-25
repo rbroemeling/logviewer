@@ -88,7 +88,7 @@ function read_log_line()
 			$current_line = $data;
 			continue;
 		}
-		if ($data->related($current_line))
+		if ($current_line->related($data))
 		{
 			$current_line->merge($data);
 			continue;
