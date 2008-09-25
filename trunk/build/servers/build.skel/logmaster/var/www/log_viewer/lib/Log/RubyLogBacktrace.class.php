@@ -97,6 +97,11 @@ class RubyLogBacktrace extends RubyLog
 		{
 			return false;
 		}
+		if (! is_null($other->ruby_pid) || ! is_null($other->ruby_component) || ! is_null($other->ruby_error_level))
+		{
+			# The $other object is the start of a new log line, so it is definitely not related to this log line.
+			return false;
+		}
 		return true;
 	}
 }
