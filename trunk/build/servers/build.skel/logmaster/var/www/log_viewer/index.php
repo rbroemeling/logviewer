@@ -405,9 +405,9 @@ $log_handle = 0;
 if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_position() && sanitize_filter_context() && sanitize_filter() && sanitize_negate_filter() && sanitize_logic_filter())
 {
 	//
-	// Allow this script to run for 1 second for each megabyte of the requested log.
+	// Allow this script to run for 2 seconds for each megabyte of the requested log.
 	//
-	set_time_limit(ceil($log_size / 1048576));
+	set_time_limit(ceil($log_size / 1048576) * 2);
 
 	$log_handle = fopen($log_sources[$_GET['log']], 'r');
 	if (! $log_handle)
