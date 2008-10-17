@@ -44,11 +44,17 @@ if (! defined('DEBUG'))
 $log_sources = array
 (
 	'php-beta' => '/var/log/php-beta.log',
+	'php-beta' => '/var/log/php-beta.log.1',
 	'php-live' => '/var/log/php-live.log',
+	'php-live' => '/var/log/php-live.log.1',
 	'php-stage' => '/var/log/php-stage.log',
+	'php-stage' => '/var/log/php-stage.log.1',
 	'ruby-beta' => '/var/log/ruby-beta.log',
+	'ruby-beta' => '/var/log/ruby-beta.log.1',
 	'ruby-live' => '/var/log/ruby-live.log',
-	'ruby-stage' => '/var/log/ruby-stage.log'
+	'ruby-live' => '/var/log/ruby-live.log.1',
+	'ruby-stage' => '/var/log/ruby-stage.log',
+	'ruby-stage' => '/var/log/ruby-stage.log.1'
 );
 
 /******************************************************************************
