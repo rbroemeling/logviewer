@@ -43,18 +43,18 @@ if (! defined('DEBUG'))
 // An array of all of the log sources that this script can be used to view.
 $log_sources = array
 (
-	'php-beta (today)' => '/var/log/php-beta.log',
-	'php-beta (yesterday)' => '/var/log/php-beta.log.1',
-	'php-live (today)' => '/var/log/php-live.log',
-	'php-live (yesterday)' => '/var/log/php-live.log.1',
-	'php-stage (today)' => '/var/log/php-stage.log',
-	'php-stage (yesterday)' => '/var/log/php-stage.log.1',
-	'ruby-beta (today)' => '/var/log/ruby-beta.log',
-	'ruby-beta (yesterday)' => '/var/log/ruby-beta.log.1',
-	'ruby-live (today)' => '/var/log/ruby-live.log',
-	'ruby-live (yesterday)' => '/var/log/ruby-live.log.1',
-	'ruby-stage (today)' => '/var/log/ruby-stage.log',
-	'ruby-stage (yesterday)' => '/var/log/ruby-stage.log.1'
+	'php-beta-today' => '/var/log/php-beta.log',
+	'php-beta-yesterday' => '/var/log/php-beta.log.1',
+	'php-live-today' => '/var/log/php-live.log',
+	'php-live-yesterday' => '/var/log/php-live.log.1',
+	'php-stage-today' => '/var/log/php-stage.log',
+	'php-stage-yesterday' => '/var/log/php-stage.log.1',
+	'ruby-beta-today' => '/var/log/ruby-beta.log',
+	'ruby-beta-yesterday' => '/var/log/ruby-beta.log.1',
+	'ruby-live-today' => '/var/log/ruby-live.log',
+	'ruby-live-yesterday' => '/var/log/ruby-live.log.1',
+	'ruby-stage-today' => '/var/log/ruby-stage.log',
+	'ruby-stage-yesterday' => '/var/log/ruby-stage.log.1'
 );
 
 /******************************************************************************
