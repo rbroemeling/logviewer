@@ -458,10 +458,10 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 						</select>
 					</td>
 					<td style="text-align: center;">
-						Offset: <input type="text" id="offset_input" name="offset" size="11" maxlength="10" value='<?php echo htmlspecialchars($_GET['offset'], ENT_QUOTES); ?>' />
+						Offset: <input type="text" id="offset_input" name="offset" size="11" maxlength="11" value='<?php echo htmlspecialchars($_GET['offset'], ENT_QUOTES); ?>' />
 					</td>
 					<td style="text-align: center;">
-						Length: <input type="text" id="length_input" name="length" size="9" maxlength="8" value='<?php echo htmlspecialchars($_GET['length'], ENT_QUOTES); ?>' />
+						Length: <input type="text" id="length_input" name="length" size="9" maxlength="9" value='<?php echo htmlspecialchars($_GET['length'], ENT_QUOTES); ?>' />
 					</td>
 					<td style="text-align: center;">
 						Filter Context: <input type='text' name='filter_context' size='4' maxlength='3' value='<?php echo htmlspecialchars($_GET['filter_context'], ENT_QUOTES); ?>' />
