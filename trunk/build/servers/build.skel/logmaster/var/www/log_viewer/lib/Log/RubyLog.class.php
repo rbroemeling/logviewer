@@ -59,9 +59,13 @@ class RubyLog extends Log
 		{
 			$string .= '<span class="debug">Begin ' . __CLASS__ . '</span>';
 		}
+		if (! is_null($this->ruby_configuration))
+		{
+			$string .= " <span class='configuration'>" . htmlspecialchars($this->ruby_configuration, ENT_QUOTES) . "</span>.";
+		}
 		if (! is_null($this->ruby_pid))
 		{
-			$string .= " <span class='pid'>" . htmlspecialchars($this->ruby_pid, ENT_QUOTES) . "</span>.";
+			$string .= "<span class='pid'>" . htmlspecialchars($this->ruby_pid, ENT_QUOTES) . "</span>.";
 		}
 		if (! is_null($this->ruby_component))
 		{

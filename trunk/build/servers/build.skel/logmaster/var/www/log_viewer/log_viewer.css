@@ -170,6 +170,10 @@ div.log_line span.errorlevel_warning
 }
 
 /* RubyLog field coloring. */
+div.log_line span.configuration
+{
+	color: #666666;
+}
 div.log_line span.pid
 {
 	color: #ffffff;
