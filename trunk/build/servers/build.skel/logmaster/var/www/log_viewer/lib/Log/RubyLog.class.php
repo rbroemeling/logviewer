@@ -108,8 +108,8 @@ class RubyLog extends Log
 		if (parent::handles($line))
 		{
 			# Regular Expression Map:
-			#  ' 31564.general.critical:'
-			if (preg_match('/ \d+\.[a-z]+\.[a-z]+\W/', $line))
+			#  ' live.31564.general.critical:'
+			if (preg_match('/ [a-z]+\.\d+\.[a-z]+\.[a-z]+\W/', $line))
 			{
 				return true;
 			}
