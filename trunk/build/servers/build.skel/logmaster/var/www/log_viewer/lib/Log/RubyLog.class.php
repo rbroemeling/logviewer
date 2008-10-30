@@ -2,6 +2,7 @@
 class RubyLog extends Log
 {
 	protected $ruby_component = null;
+	protected $ruby_configuration = null;
 	protected $ruby_error_level = null;
 	protected $ruby_error_message = null;
 	protected $ruby_pid = null;
@@ -20,20 +21,21 @@ class RubyLog extends Log
 		}
 
 		# Regular Expression Map:
-		#  '(31564).(general).(critical): (.*)'
-		#  '(19426).(general).(error)( (req:19426:211)): (.*)'
-		if (preg_match('!(\d+)\.([a-z]+)\.([a-z]+)( +\(req:\d+:\d+.*?\))?: *(.*)!i', $this->extra_data, $matches))
+		#  '(live).(31564).(general).(critical): (.*)'
+		#  '(live).(19426).(general).(error)( (req:19426:211)): (.*)'
+		if (preg_match('!([a-z]+)\.(\d+)\.([a-z]+)\.([a-z]+)( +\(req:\d+:\d+.*?\))?: *(.*)!i', $this->extra_data, $matches))
 		{
 			$this->extra_data = null;
 
-			$this->ruby_pid = $matches[1];
-			$this->ruby_component = $matches[2];
-			$this->ruby_error_level = $matches[3];
-			if (strlen($matches[4]))
+			$this->ruby_configuration = $matches[1];
+			$this->ruby_pid = $matches[2];
+			$this->ruby_component = $matches[3];
+			$this->ruby_error_level = $matches[4];
+			if (strlen($matches[5]))
 			{
-				$this->ruby_request_identifier = trim($matches[4]);
+				$this->ruby_request_identifier = trim($matches[5]);
 			}
-			$this->ruby_error_message = $matches[5];
+			$this->ruby_error_message = $matches[6];
 
 			switch ($this->ruby_error_level)
 			{
