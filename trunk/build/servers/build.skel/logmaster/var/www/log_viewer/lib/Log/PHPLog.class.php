@@ -1,6 +1,7 @@
 <?php
 class PHPLog extends Log
 {
+	protected $php_configuration = null;
 	protected $php_error_level = null;
 	protected $php_error_message = null;
 	protected $php_script_name = null;
@@ -18,15 +19,19 @@ class PHPLog extends Log
 		}
 
 		# Regular Expression Map:
-		#  '(/prefs.php) ((User Notice)) (.*)'
-		#  '(/prefs.php) ((Warning)) (.*)'
-		if (preg_match('!(\S+) +\((\w+ ?\w+)\) +(.*)!i', $this->extra_data, $matches))
+		#  '((live)) (/prefs.php) ((User Notice)) (.*)'
+		#  '(()) (/prefs.php) ((Warning)) (.*)'
+		if (preg_match('!\(([a-z]*)\) (\S+) +\((\w+ ?\w+)\) +(.*)!i', $this->extra_data, $matches))
 		{
 			$this->extra_data = null;
 
-			$this->php_script_name = $matches[1];
-			$this->php_error_level = $matches[2];
-			$this->php_error_message = $matches[3];
+			if (strlen($matches[1]))
+			{
+				$this->php_configuration = $matches[1];
+			}
+			$this->php_script_name = $matches[2];
+			$this->php_error_level = $matches[3];
+			$this->php_error_message = $matches[4];
 
 			switch ($this->php_error_level)
 			{
@@ -57,9 +62,16 @@ class PHPLog extends Log
 		{
 			$string .= '<span class="debug">Begin ' . __CLASS__ . '</span>';
 		}
+
+		$string .= ' <span class="configuration">(';
+		if (! is_null($this->php_configuration))
+		{
+			$string .= $this->php_configuration;
+		}
+		$string .= ')</span> ';
 		if (! is_null($this->php_script_name))
 		{
-			$string .= " " . htmlspecialchars($this->php_script_name, ENT_QUOTES) . " ";
+			$string .= htmlspecialchars($this->php_script_name, ENT_QUOTES) . " ";
 		}
 		if (! is_null($this->php_error_level))
 		{
