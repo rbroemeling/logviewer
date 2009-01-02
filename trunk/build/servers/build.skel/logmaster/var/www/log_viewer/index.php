@@ -1,6 +1,6 @@
 <?php
 /**
- * log_viewer.php
+ * log_viewer index.php
  *
  * A monolithic script that allows web access to select log files.
  *
