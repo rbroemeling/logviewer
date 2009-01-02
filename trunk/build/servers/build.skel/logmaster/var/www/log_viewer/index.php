@@ -433,7 +433,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			<!-- This is an invisible div that simply serves as a template for the HTML that defines a filter. -->
 			<?php echo filter_form_string(); ?>
 		</div>
-		<form id='log_file_form' action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get">
+		<form id='log_file_form' method="get">
 			<input type='hidden' id='timestamp_input' name='timestamp' value='' />
 			<table width="100%">
 				<tr>
