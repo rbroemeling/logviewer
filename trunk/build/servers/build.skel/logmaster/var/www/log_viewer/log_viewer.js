@@ -22,7 +22,8 @@ function highlight_named_anchor()
 		if (element && element.parentNode)
 		{
 			element.parentNode.style.fontWeight = "bold";
-			element.parentNode.style.background = "#444444";
+			element.parentNode.style.background = "#222222";
+			element.parentNode.style.border = "2px dotted white";
 		}
 	}
 }
