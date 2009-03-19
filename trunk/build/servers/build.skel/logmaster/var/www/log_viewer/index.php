@@ -73,13 +73,13 @@ function filter_form_string($filter = null, $negate_filter = 0, $logic_filter = 
 
 function read_log_line($log_handle)
 {
-	if (feof($log_handle))
+	if (gzeof($log_handle))
 	{
 		return false;
 	}
 
-	$offset = ftell($log_handle);
-	$data = fgets($log_handle);
+	$offset = gztell($log_handle);
+	$data = gzgets($log_handle);
 	if ($data === false)
 	{
 		return false;
@@ -400,7 +400,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 	//
 	set_time_limit(ceil($log_size / 1048576) * 2);
 
-	$log_handle = fopen($log_sources[$_GET['log']], 'r');
+	$log_handle = gzopen($log_sources[$_GET['log']], 'rb');
 	if (! $log_handle)
 	{
 		$errors[] = $log_sources[$_GET['log']] . ' could not be opened for read.';
@@ -607,13 +607,13 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 					//
 					// Thus we ignore the line if we have $_GET['offset'] and if the character
 					// at $_GET['offset'] - 1 != "\n".
-					fseek($log_handle, 0);
+					gzseek($log_handle, 0);
 					if ($_GET['offset'])
 					{
-						fseek($log_handle, $_GET['offset'] - 1);
-						if (strcmp(fread($log_handle, 1), "\n"))
+						gzseek($log_handle, $_GET['offset'] - 1);
+						if (strcmp(gzread($log_handle, 1), "\n"))
 						{
-							fgets($log_handle);
+							gzgets($log_handle);
 						}
 					}
 
@@ -669,7 +669,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 
 					if (! $current_line)
 					{
-						echo "<div class='warning'>Encountered end of file at offset " . number_format(ftell($log_handle)) . ".</div>\n";
+						echo "<div class='warning'>Encountered end of file at offset " . number_format(gztell($log_handle)) . ".</div>\n";
 					}
 					else
 					{
@@ -683,7 +683,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 							echo "<div class='warning'>Encountered end of requested data at offset " . number_format($current_line->get_offset()) . ".  End of file is " . number_format($log_size - $current_line->get_offset()) . " bytes further.</div>\n";
 						}
 					}
-					fclose($log_handle);
+					gzclose($log_handle);
 				}
 			?>
 			<a name="tail"></a>
