@@ -8,18 +8,10 @@ class LineOutput
 		self::$displayed_lines++;
 
 		$offset = $line->get_offset();
-		$merged_offsets = $line->get_merged_offsets();
 
 		echo "<div class='log_line " . $extra_classes . "'>";
-		echo '(' . number_format(self::$displayed_lines) . ($merged_offsets ? '+' . number_format(count($merged_offsets)) : '' ) . ') ';
-		echo '[';
-			echo LineOutput::offset_link($offset);
-			foreach ($merged_offsets as $redirected_offset)
-			{
-				echo ', ';
-				echo LineOutput::offset_link($redirected_offset);
-			}
-		echo '] ';
+		echo '(' . number_format(self::$displayed_lines) . ') ';
+		echo '[' . LineOutput::offset_link($offset) . '] ';
 		echo (string)$line;
 		echo "</div>\n";
 	}

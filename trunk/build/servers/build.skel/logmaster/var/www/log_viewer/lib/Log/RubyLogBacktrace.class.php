@@ -76,41 +76,10 @@ class RubyLogBacktrace extends RubyLog
 	}
 
 
-	public function merge($other)
-	{
-		$this->ruby_backtrace .= $other->ruby_backtrace;
-		$this->line .= $other->line;
-		$this->merge_offsets($other);
-	}
-
-
 	public static function priority()
 	{
 		# Over-ride RubyLog for backtraces.
 		return parent::priority() + 1;
-	}
-
-
-	public function related($other)
-	{
-		if (! is_a($other, __CLASS__))
-		{
-			return false;
-		}
-		if (strcmp($other->syslog_host, $this->syslog_host))
-		{
-			return false;
-		}
-		if (abs($other->syslog_date - $this->syslog_date) > 5)
-		{
-			return false;
-		}
-		if (! is_null($other->ruby_pid) || ! is_null($other->ruby_component) || ! is_null($other->ruby_error_level))
-		{
-			# The $other object is the start of a new log line, so it is definitely not related to this log line.
-			return false;
-		}
-		return true;
 	}
 }
 ?>
