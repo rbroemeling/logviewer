@@ -71,37 +71,22 @@ function filter_form_string($filter = null, $negate_filter = 0, $logic_filter = 
 }
 
 
-function read_log_line()
+function read_log_line($log_handle)
 {
-	global $log_handle;
-
-	static $data = false;
-	$current_line = $data;
-	$data = false;
-
-	while (! feof($log_handle))
+	if (feof($log_handle))
 	{
-		$data_offset = ftell($log_handle);
-		$data = fgets($log_handle);
-		if ($data === false)
-		{
-			break;
-		}
-		$data = Log::factory($data);
-		$data->set_offset($data_offset);
-		if ($current_line === false)
-		{
-			$current_line = $data;
-			continue;
-		}
-		if ($current_line->related($data))
-		{
-			$current_line->merge($data);
-			continue;
-		}
-		break;
+		return false;
 	}
-	return $current_line;
+
+	$offset = ftell($log_handle);
+	$data = fgets($log_handle);
+	if ($data === false)
+	{
+		return false;
+	}
+	$data = Log::factory($data);
+	$data->set_offset($offset);
+	return $data;
 }
 
 
@@ -634,7 +619,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 
 					LineArchive::reset();
 					$contextual_lines = $_GET['filter_context'] + 1;
-					while ($current_line = read_log_line())
+					while ($current_line = read_log_line($log_handle))
 					{
 						if ($current_line->get_offset() > ($_GET['offset'] + $_GET['length']))
 						{
