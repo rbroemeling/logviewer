@@ -2,6 +2,7 @@
 class LogFile
 {
 	protected $handle = null;
+	protected $path = null;
 	protected $statistics = array();
 	protected $timestamp_lower_bound = null;
 
@@ -9,6 +10,7 @@ class LogFile
 	public function __construct()
 	{
 		$this->handle = null;
+		$this->path = null;
 		$this->statistics = array();
 	}
 
@@ -20,6 +22,7 @@ class LogFile
 			gzclose($this->handle);
 			$this->handle = null;
 		}
+		$this->path = null;
 		$this->statistics = array();
 	}
 
@@ -45,12 +48,14 @@ class LogFile
 
 	public function open($path)
 	{
+		$this->path = $path;
 		$this->statistics = stat($path);
 		$this->handle = gzopen($path, 'rb');
 
 		if ((! $this->statistics) || (! $this->handle))
 		{
 			$this->handle = null;
+			$this->path = null;
 			$this->statistics = array();
 			return false;
 		}
