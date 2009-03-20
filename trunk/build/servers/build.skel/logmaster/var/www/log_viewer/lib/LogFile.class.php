@@ -98,7 +98,6 @@ class LogFile
 			{
 				$this->seek($this->statistics['size'] - $i);
 				$c = gzgetc($this->handle);
-				echo '"' . $c . '"';
 				if ($c == "\n")
 				{
 					if ($data = gzgets($this->handle))
