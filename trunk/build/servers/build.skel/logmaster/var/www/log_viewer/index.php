@@ -373,7 +373,7 @@ if (get_magic_quotes_gpc())
 	slash_machine($_GET);
 }
 
-$log_file = LogFile();
+$log_file = new LogFile();
 if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_position() && sanitize_filter_context() && sanitize_filter() && sanitize_negate_filter() && sanitize_logic_filter())
 {
 	//
