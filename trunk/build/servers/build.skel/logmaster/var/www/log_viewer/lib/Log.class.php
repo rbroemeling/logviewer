@@ -181,6 +181,12 @@ class Log
 	}
 
 
+	public function log_timestamp()
+	{
+		return $this->syslog_date;
+	}
+
+
 	public function matches_filters()
 	{
 		$filter_results = array();

@@ -3,6 +3,7 @@ class LogFile
 {
 	protected $handle = null;
 	protected $statistics = array();
+	protected $timestamp_lower_bound = null;
 
 
 	public function __construct()
@@ -53,6 +54,24 @@ class LogFile
 			$this->statistics = array();
 			return false;
 		}
+
+		/**
+		 * Attempt to read and parse the first line of the log file
+		 * so that we can hopefully retrieve a timestamp that will
+		 * represent the first date/time that is available in this
+		 * log file.
+		 */
+		if ($data = gzgets($this->handle))
+		{
+			$data = Log::factory($data);
+			$timestamp = $data->log_timestamp();
+			if ($timestamp > 0)
+			{
+				$this->timestamp_lower_bound = $timestamp;
+			}
+		}
+		$this->seek(0);
+
 		return true;
 	}
 
