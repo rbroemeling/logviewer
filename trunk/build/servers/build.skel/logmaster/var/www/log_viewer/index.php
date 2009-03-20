@@ -27,7 +27,6 @@ define('MAX_CONTEXT', 100);
 define('MAX_LINES', 15000);
 
 // Debug-mode: output extra information about the handlers being used.
-//define('DEBUG', true);
 if (! defined('DEBUG'))
 {
 	if ($_GET['debug'])
@@ -68,25 +67,6 @@ function filter_form_string($filter = null, $negate_filter = 0, $logic_filter = 
 	$s .= '<select name="negate_filter[]" style="margin-right: 10px;"><option value="0" ' . ($negate_filter ? '' : 'selected') . '>Normal Match</option><option value="1" ' . ($negate_filter ? 'selected' : '') . '>Inverted Match</option></select>';
 	$s .= '<select name="logic_filter[]"><option ' . ($logic_filter == 'AND' ? 'selected' : '') . '>AND</option><option ' . ($logic_filter == 'OR' ? 'selected' : '') . '>OR</option></select>';
 	return $s;
-}
-
-
-function read_log_line($log_handle)
-{
-	if (gzeof($log_handle))
-	{
-		return false;
-	}
-
-	$offset = gztell($log_handle);
-	$data = gzgets($log_handle);
-	if ($data === false)
-	{
-		return false;
-	}
-	$data = Log::factory($data);
-	$data->set_offset($offset);
-	return $data;
 }
 
 
@@ -376,6 +356,7 @@ function slash_machine(&$data)
 include_once(dirname(__FILE__) . '/lib/LineArchive.class.php');
 include_once(dirname(__FILE__) . '/lib/LineOutput.class.php');
 include_once(dirname(__FILE__) . '/lib/Log.class.php');
+include_once(dirname(__FILE__) . '/lib/LogFile.class.php');
 
 
 /******************************************************************************
@@ -392,7 +373,7 @@ if (get_magic_quotes_gpc())
 	slash_machine($_GET);
 }
 
-$log_handle = 0;
+$log_file = LogFile();
 if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_position() && sanitize_filter_context() && sanitize_filter() && sanitize_negate_filter() && sanitize_logic_filter())
 {
 	//
@@ -400,11 +381,11 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 	//
 	set_time_limit(ceil($log_size / 1048576) * 2);
 
-	$log_handle = gzopen($log_sources[$_GET['log']], 'rb');
-	if (! $log_handle)
+	if (! $log_file->open($log_sources[$_GET['log']]))
 	{
 		$errors[] = $log_sources[$_GET['log']] . ' could not be opened for read.';
 	}
+	unset($log_file);
 }
 ?>
 <html>
@@ -599,27 +580,16 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 		</div>
 		<div id="log_excerpt">
 			<?php
-				if ($log_handle)
+				if ($log_file)
 				{
-					// We ignore the first line if it is a partial line.  It is a partial line
-					// unless we started reading at the beginning of the log file or the
-					// character immediately before our read was a newline.
-					//
-					// Thus we ignore the line if we have $_GET['offset'] and if the character
-					// at $_GET['offset'] - 1 != "\n".
-					gzseek($log_handle, 0);
 					if ($_GET['offset'])
 					{
-						gzseek($log_handle, $_GET['offset'] - 1);
-						if (strcmp(gzread($log_handle, 1), "\n"))
-						{
-							gzgets($log_handle);
-						}
+						$log_file->seek($_GET['offset']);
 					}
 
 					LineArchive::reset();
 					$contextual_lines = $_GET['filter_context'] + 1;
-					while ($current_line = read_log_line($log_handle))
+					while ($current_line = $log_file->gets())
 					{
 						if ($current_line->get_offset() > ($_GET['offset'] + $_GET['length']))
 						{
@@ -669,7 +639,7 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 
 					if (! $current_line)
 					{
-						echo "<div class='warning'>Encountered end of file at offset " . number_format(gztell($log_handle)) . ".</div>\n";
+						echo "<div class='warning'>Encountered end of file at offset " . number_format($log_file->tell()) . ".</div>\n";
 					}
 					else
 					{
@@ -683,7 +653,6 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 							echo "<div class='warning'>Encountered end of requested data at offset " . number_format($current_line->get_offset()) . ".  End of file is " . number_format($log_size - $current_line->get_offset()) . " bytes further.</div>\n";
 						}
 					}
-					gzclose($log_handle);
 				}
 			?>
 			<a name="tail"></a>
