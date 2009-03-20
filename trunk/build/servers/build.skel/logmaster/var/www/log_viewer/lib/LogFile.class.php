@@ -96,11 +96,12 @@ class LogFile
 		{
 			for ($i = 2; $i < $this->statistics['size']; $i++)
 			{
-				$this->seek($this->statistics['size'] - $i);
+				gzseek($this->handle, $this->statistics['size'] - $i);
 				$c = gzgetc($this->handle);
 				if ($c == "\n")
 				{
-					if ($data = gzgets($this->handle))
+					$data = gzgets($this->handle);
+					if ($data)
 					{
 						$data = Log::factory($data);
 						$timestamp = $data->log_timestamp();
