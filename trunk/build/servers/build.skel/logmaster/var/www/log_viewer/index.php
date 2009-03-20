@@ -373,7 +373,7 @@ if (get_magic_quotes_gpc())
 	slash_machine($_GET);
 }
 
-$log_file = new LogFile();
+$log_file = null;
 if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_position() && sanitize_filter_context() && sanitize_filter() && sanitize_negate_filter() && sanitize_logic_filter())
 {
 	//
@@ -381,11 +381,12 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 	//
 	set_time_limit(ceil($log_size / 1048576) * 2);
 
+	$log_file = new LogFile();
 	if (! $log_file->open($log_sources[$_GET['log']]))
 	{
 		$errors[] = $log_sources[$_GET['log']] . ' could not be opened for read.';
+		$log_file = null;
 	}
-	unset($log_file);
 }
 ?>
 <html>
