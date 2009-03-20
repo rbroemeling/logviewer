@@ -97,7 +97,9 @@ class LogFile
 			for ($i = 2; $i < $this->statistics['size']; $i++)
 			{
 				$this->seek($this->statistics['size'] - $i);
-				if (gzgetc($this->handle) == "\n")
+				$c = gzgetc($this->handle);
+				echo '"' . $c . '"';
+				if ($c == "\n")
 				{
 					if ($data = gzgets($this->handle))
 					{
