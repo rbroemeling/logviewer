@@ -1,3 +1,13 @@
+function adjust_date(date, adjustment)
+{
+	adjusted = new Date(date);
+	timestamp = adjusted.getTime();
+	timestamp = timestamp + adjustment;
+	adjusted.setTime(timestamp);
+	return adjusted;
+}
+
+
 function add_filter()
 {
 	var filter_list = document.getElementById('filter_list');
@@ -16,7 +26,7 @@ function add_filter()
 
 function highlight_named_anchor()
 {
-	if (window.location.hash.match(/^#\d+$/))
+	if (window.location.hash.match(/^#\d+.\d+$/))
 	{
 		var element = document.getElementById(window.location.hash.substr(1));
 		if (element && element.parentNode)
@@ -26,6 +36,51 @@ function highlight_named_anchor()
 			element.parentNode.style.border = "2px dotted white";
 		}
 	}
+}
+
+
+function parse_token()
+{
+	var token = prompt("Please enter a log token.\nLog tokens are expected to look like this example: '10:48:53:2009-03-08:req:19525:636'.\n", "HH:MM:SS:YYYY-MM-DD:<STRING>");
+
+	if (! token.length)
+	{
+		return;
+	}
+
+	// Token Regular Expression Map:
+	//   10:48:53:2009-03-08:<STRING>
+	//   HH:MM:SS:YYYY-MM-DD:<STRING>
+	if (! token.match(/^\d{2}:\d{2}:\d{2}:\d{4}-\d{2}-\d{2}:/))
+	{
+		alert("The log token '" + token + "' is not valid.");
+		return;
+	}
+
+	var hour = parseInt(token.substr(0,2), 10);
+	var minute = parseInt(token.substr(3,2), 10);
+	var second = parseInt(token.substr(6,2), 10);
+	var year = parseInt(token.substr(9,4), 10);
+	var month = parseInt(token.substr(14,2), 10);
+	var day = parseInt(token.substr(17,2), 10);
+	var string = token.substr(20);
+
+	reset_form();
+
+	var timestamp = new Date(year, month - 1, day, hour, minute, second);
+	if (! set_start_time_selections(adjust_date(timestamp, -1000)))
+	{
+		alert("The log token '" + token + "' is outside of the allowed timeframe.");
+		return;
+	}
+	if (! set_end_time_selections(adjust_date(timestamp, 1000)))
+	{
+		alert("The log token '" + token + "' is outside of the allowed timeframe.");
+		return;
+	}
+
+	add_filter();
+	document.getElementsByName('filter[]')[1].value = '/' + string + '/';
 }
 
 
@@ -65,57 +120,74 @@ function reset_form()
 }
 
 
-function submit_form()
+function set_end_time_selections(timestamp)
 {
-	var log_file_form = document.getElementById('log_file_form');
-	var timestamp_input = document.getElementById('timestamp_input');
+	var r = true;
 
-	if (timestamp_input)
-	{
-		var timestamp = new Date();
-		timestamp_input.value = timestamp.getTime();
-	}
+	r = r && set_selection(document.getElementsByName('end_year')[0], timestamp.getFullYear());
+	r = r && set_selection(document.getElementsByName('end_month')[0], timestamp.getMonth() + 1);
+	r = r && set_selection(document.getElementsByName('end_day')[0], timestamp.getDate());
+	r = r && set_selection(document.getElementsByName('end_hour')[0], timestamp.getHours());
+	r = r && set_selection(document.getElementsByName('end_minute')[0], timestamp.getMinutes());
+	r = r && set_selection(document.getElementsByName('end_second')[0], timestamp.getSeconds());
 
-	// Submit the form.
-	if (log_file_form)
+	return r;
+}
+
+
+function set_selection(select, value)
+{
+	for (var i = 0; i < select.options.length; i++)
 	{
-		log_file_form.submit();
+		if (typeof(value) == 'number')
+		{
+			if (parseInt(select.options[i].value, 10) == value)
+			{
+				select.selectedIndex = i;
+				return true;
+			}
+		}
+		else
+		{
+			if (select.options[i].value == value)
+			{
+				select.selectedIndex = i;
+				return true;
+			}
+		}
 	}
+	return false;
+}
+
+
+function set_start_time_selections(timestamp)
+{
+	var r = true;
+
+	r = r && set_selection(document.getElementsByName('start_year')[0], timestamp.getFullYear());
+	r = r && set_selection(document.getElementsByName('start_month')[0], timestamp.getMonth() + 1);
+	r = r && set_selection(document.getElementsByName('start_day')[0], timestamp.getDate());
+	r = r && set_selection(document.getElementsByName('start_hour')[0], timestamp.getHours());
+	r = r && set_selection(document.getElementsByName('start_minute')[0], timestamp.getMinutes());
+	r = r && set_selection(document.getElementsByName('start_second')[0], timestamp.getSeconds());
+
+	return r;
 }
 
 
 function tail()
 {
-	var length_input = document.getElementById('length_input');
-	var log_file_form = document.getElementById('log_file_form');
-	var offset_input = document.getElementById('offset_input');
+	var form = document.getElementById('control_form');
 
-	if (length_input)
+	var timestamp = new Date();
+	set_start_time_selections(adjust_date(timestamp, -60000));
+	set_end_time_selections(timestamp);
+
+	if (form)
 	{
-		var length = parseInt(length_input.value);
-		if (isNaN(length))
-		{
-			length = '';
-		}
-		else if (length == 0)
-		{
-			length = '';
-		}
-		else
-		{
-			length = Math.abs(length) * -1;
-		}
-		length_input.value = length.toString();
+		form.action = form.action + '#tail';
+		form.submit();
 	}
-	if (offset_input)
-	{
-		offset_input.value = '';
-	}
-	if (log_file_form)
-	{
-		log_file_form.action = log_file_form.action + '#tail';
-	}
-	submit_form();
 }
 
 

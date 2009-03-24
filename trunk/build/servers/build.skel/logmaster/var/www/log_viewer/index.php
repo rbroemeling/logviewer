@@ -12,53 +12,76 @@
 /******************************************************************************
  * Configuration Constants
  ******************************************************************************/
-// Default length for the interface to use, if the user does not supply one.
-define('DEFAULT_LENGTH', -1 * 64 * 1024);
-
-// A limit on the maximum number of lines that is allowed in filter context.
-// This limitation is necessary as we need to archive all of the lines that
-// we are hiding so that they can be recalled for the filter context if
-// necessary.  Thus this restriction helps keep memory usage down.
-define('MAX_CONTEXT', 100);
-
 // Maximum number of lines to ever display, the script will never display more
 // than this number of lines.  This is a simple sanity check only, to prevent
 // run-away log data display.
 define('MAX_LINES', 15000);
 
 // Debug-mode: output extra information about the handlers being used.
-if (! defined('DEBUG'))
+if ((! defined('DEBUG')) && $_GET['debug'])
 {
-	if ($_GET['debug'])
-	{
-		define('DEBUG', true);
-	}
+	define('DEBUG', true);
 }
 
 
 /******************************************************************************
- * Configuration Variables
+ * Configuration details about the location of log files.  In general, log file
+ * paths are expected to follow the below template:
+ *
+ * $config['log_root']/$log_environment/YYYY-MM-DD-HH.$log_language.log
+ *
  ******************************************************************************/
-// An array of all of the log sources that this script can be used to view.
-$log_sources = array
-(
-	'php-beta-today' => '/var/log/php-beta.log',
-	'php-beta-yesterday' => '/var/log/php-beta.log.1',
-	'php-live-today' => '/var/log/php-live.log',
-	'php-live-yesterday' => '/var/log/php-live.log.1',
-	'php-stage-today' => '/var/log/php-stage.log',
-	'php-stage-yesterday' => '/var/log/php-stage.log.1',
-	'ruby-beta-today' => '/var/log/ruby-beta.log',
-	'ruby-beta-yesterday' => '/var/log/ruby-beta.log.1',
-	'ruby-live-today' => '/var/log/ruby-live.log',
-	'ruby-live-yesterday' => '/var/log/ruby-live.log.1',
-	'ruby-stage-today' => '/var/log/ruby-stage.log',
-	'ruby-stage-yesterday' => '/var/log/ruby-stage.log.1'
-);
+$config = array();
+
+// The root log directory that contains sub-directories for each environment.
+$config['log_root'] = '/var/log/development';
+
+// A list of environments to be exposed to the user.
+$config['environments'] = array('beta', 'live', 'stage');
+
+// A list of languages to be exposed to the user.
+$config['languages'] = array('php', 'ruby');
+
 
 /******************************************************************************
  * Utility Functions
  ******************************************************************************/
+function create_numeric_select($name, $min, $max, $default_value = null, $label_formatter = null)
+{
+	if (is_null($label_formatter))
+	{
+		$label_formatter = create_function('$i', 'return $i;');
+	}
+	if (is_null($default_value))
+	{
+		$default_value = $min;
+	}
+
+	$s = array();
+	for ($i = intval($min); $i <= intval($max); $i++)
+	{
+		$s[$i] = '<option value="' . $i . '">' . call_user_func($label_formatter, $i) . '</option>';
+	}
+
+	unset($i);
+	if (isset($_GET[$name]))
+	{
+		$i = intval($_GET[$name]);
+		if (! isset($s[$i]))
+		{
+			unset($i);
+		}
+	}
+	if (! isset($i))
+	{
+		$i = intval($default_value);
+	}
+	$s[$i] = '<option value="' . $i . '" selected>' . call_user_func($label_formatter, $i) . '</option>';
+
+	return '<select name="' . $name . '">' . "\n" . implode("\n", $s) . "</select>\n";
+}
+
+
 function filter_form_string($filter = null, $negate_filter = 0, $logic_filter = 'OR')
 {
 	$s = '';
@@ -67,6 +90,20 @@ function filter_form_string($filter = null, $negate_filter = 0, $logic_filter = 
 	$s .= '<select name="negate_filter[]" style="margin-right: 10px;"><option value="0" ' . ($negate_filter ? '' : 'selected') . '>Normal Match</option><option value="1" ' . ($negate_filter ? 'selected' : '') . '>Inverted Match</option></select>';
 	$s .= '<select name="logic_filter[]"><option ' . ($logic_filter == 'AND' ? 'selected' : '') . '>AND</option><option ' . ($logic_filter == 'OR' ? 'selected' : '') . '>OR</option></select>';
 	return $s;
+}
+
+
+function sanitize_environment()
+{
+	global $config;
+	global $errors;
+
+	if (! in_array($_GET['environment'], $config['environments']))
+	{
+		$errors[] = 'Environment "' . $_GET['environment'] . '" is not known to this interface.';
+		return 0;
+	}
+	return 1;
 }
 
 
@@ -127,78 +164,14 @@ function sanitize_filter($errno = null, $errstr = null)
 }
 
 
-function sanitize_filter_context()
+function sanitize_language()
 {
-	global $errors;
-	global $warnings;
-
-	if ((! is_string($_GET['filter_context'])) || (! strlen($_GET['filter_context'])))
-	{
-		$_GET['filter_context'] = 0;
-	}
-	if (! is_numeric($_GET['filter_context']))
-	{
-		$errors[] = 'Filter context "' . $_GET['filter_context'] . '" is not a numeric value.  Context must be numeric.';
-		return 0;
-	}
-	$_GET['filter_context'] = intval($_GET['filter_context']);
-	if ($_GET['filter_context'] < 0)
-	{
-		$warnings[] = 'Filter context is symmetrical, treating context ' . number_format($_GET['filter_context']) . ' as ' . number_format($_GET['filter_context'] * -1) . '.';
-		$_GET['filter_context'] = $_GET['filter_context'] * -1;
-	}
-	if ($_GET['filter_context'] > MAX_CONTEXT)
-	{
-		$warnings[] = 'Filter context is limited to ' . number_format(MAX_CONTEXT) . ' lines.';
-		$_GET['filter_context'] = MAX_CONTEXT;
-	}
-	return 1;
-}
-
-
-function sanitize_length()
-{
+	global $config;
 	global $errors;
 
-	if ((! is_string($_GET['length'])) || (! strlen($_GET['length'])))
+	if (! in_array($_GET['language'], $config['languages']))
 	{
-		$_GET['length'] = DEFAULT_LENGTH;
-	}
-	if (! is_numeric($_GET['length']))
-	{
-		$errors[] = 'Length "' . $_GET['length'] . '" is not a numeric value.  Length must be numeric.';
-		return 0;
-	}
-	$_GET['length'] = intval($_GET['length']);
-	if (! $_GET['length'])
-	{
-		$errors[] = 'Length of 0 does not make a whole lot of sense.  Try a positive or negative integer.';
-		return 0;
-	}
-	return 1;
-}
-
-
-function sanitize_log()
-{
-	global $errors;
-	global $log_size;
-	global $log_sources;
-
-	if ((! is_string($_GET['log'])) || (! $log_sources[$_GET['log']]))
-	{
-		$errors[] = 'Log name "' . $_GET['log'] . '" is not known to this interface.';
-		return 0;
-	}
-	if (! file_exists($log_sources[$_GET['log']]))
-	{
-		$errors[] = $log_sources[$_GET['log']] . ' does not exist.';
-		return 0;
-	}
-	$log_size = filesize($log_sources[$_GET['log']]);
-	if (! $log_size)
-	{
-		$errors[] = $log_sources[$_GET['log']] . ' is empty.';
+		$errors[] = 'Language "' . $_GET['language'] . '" is not known to this interface.';
 		return 0;
 	}
 	return 1;
@@ -268,72 +241,6 @@ function sanitize_negate_filter()
 }
 
 
-function sanitize_offset()
-{
-	global $errors;
-	global $log_size;
-
-	if ((! is_string($_GET['offset'])) || (! strlen($_GET['offset'])))
-	{
-		// Default offset is the bottom of the file
-		$_GET['offset'] = $log_size;
-		return 1;
-	}
-	if (! is_numeric($_GET['offset']))
-	{
-		$errors[] = 'Offset "' . $_GET['offset'] . '" is not a numeric value.  Offset must be numeric.';
-		return 0;
-	}
-	$_GET['offset'] = intval($_GET['offset']);
-	if ($_GET['offset'] < 0)
-	{
-		$errors[] = 'Negative offsets are not supported.  Offset must be larger than or equal to zero.';
-		return 0;
-	}
-	if ($_GET['offset'] > $log_size)
-	{
-		$errors[] = 'Offset ' . number_format($_GET['offset']) . ' is past the end of the file, which is ' . number_format($log_size) . '.';
-		return 0;
-	}
-	return 1;
-}
-
-
-function sanitize_position()
-{
-	global $errors;
-	global $warnings;
-
-	if ($_GET['length'] > 0)
-	{
-		return 1;
-	}
-
-	// Negative length.
-	$_GET['length'] = $_GET['length'] * -1;
-	if ($_GET['length'] > $_GET['offset'])
-	{
-		if ($_GET['offset'] > 0)
-		{
-			$warnings[] = 'Impossible to read ' . number_format($_GET['length']) . ' bytes before offset ' . number_format($_GET['offset']) . '.  Adjusting length to ' . number_format($_GET['offset'] * -1) . '.';
-			$_GET['length'] = $_GET['offset'];
-			$_GET['offset'] = 0;
-		}
-		else
-		{
-			$errors[] = 'Impossible to read ' . number_format($_GET['length']) . ' bytes before offset 0.';
-			$_GET['length'] = $_GET['length'] * -1;
-			return 0;
-		}
-	}
-	else
-	{
-		$_GET['offset'] = $_GET['offset'] - $_GET['length'];
-	}
-	return 1;
-}
-
-
 function slash_machine(&$data)
 {
 	if (is_array($data))
@@ -363,8 +270,6 @@ include_once(dirname(__FILE__) . '/lib/LogFile.class.php');
  * Global Variables and Executable Code
  ******************************************************************************/
 $errors = array();
-$log_excerpt = array();
-$log_size = -1;
 $warnings = array();
 
 set_magic_quotes_runtime(0);
@@ -373,20 +278,69 @@ if (get_magic_quotes_gpc())
 	slash_machine($_GET);
 }
 
-$log_file = null;
-if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && sanitize_position() && sanitize_filter_context() && sanitize_filter() && sanitize_negate_filter() && sanitize_logic_filter())
+/**
+ * Allow a start_timestamp GET parameter to "fill in the blanks" for the start_* set of date and time entries.
+ * This allows us to just pass in start_timestamp if we want, and the other start_* set of UI entries will be
+ * populated correctly from start_timestamp.
+ **/
+if (isset($_GET['start_timestamp']))
 {
-	//
-	// Allow this script to run for 2 seconds for each megabyte of the requested log.
-	//
-	set_time_limit(ceil($log_size / 1048576) * 2);
+	$_GET['start_timestamp'] = getdate(intval($_GET['start_timestamp']));
+	$_GET['start_year'] = (strlen($_GET['start_year']) ? $_GET['start_year'] : $_GET['start_timestamp']['year']);
+	$_GET['start_month'] = (strlen($_GET['start_month']) ? $_GET['start_month'] : $_GET['start_timestamp']['mon']);
+	$_GET['start_day'] = (strlen($_GET['start_day']) ? $_GET['start_day'] : $_GET['start_timestamp']['mday']);
+	$_GET['start_hour'] = (strlen($_GET['start_hour']) ? $_GET['start_hour'] : $_GET['start_timestamp']['hours']);
+	$_GET['start_minute'] = (strlen($_GET['start_minute']) ? $_GET['start_minute'] : $_GET['start_timestamp']['minutes']);
+	$_GET['start_second'] = (strlen($_GET['start_second']) ? $_GET['start_second'] : $_GET['start_timestamp']['seconds']);
+	unset($_GET['start_timestamp']);
+}
 
-	$log_file = new LogFile();
-	if (! $log_file->open($log_sources[$_GET['log']]))
+/**
+ * Allow an end_timestamp GET parameter to "fill in the blanks" for the end_* set of date and time entries.
+ * This allows us to just pass in end_timestamp if we want, and the other end_* set of UI entries will be
+ * populated correctly from end_timestamp.
+ **/
+if (isset($_GET['end_timestamp']))
+{
+	$_GET['end_timestamp'] = getdate(intval($_GET['end_timestamp']));
+	$_GET['end_year'] = (strlen($_GET['end_year']) ? $_GET['end_year'] : $_GET['end_timestamp']['year']);
+	$_GET['end_month'] = (strlen($_GET['end_month']) ? $_GET['end_month'] : $_GET['end_timestamp']['mon']);
+	$_GET['end_day'] = (strlen($_GET['end_day']) ? $_GET['end_day'] : $_GET['end_timestamp']['mday']);
+	$_GET['end_hour'] = (strlen($_GET['end_hour']) ? $_GET['end_hour'] : $_GET['end_timestamp']['hours']);
+	$_GET['end_minute'] = (strlen($_GET['end_minute']) ? $_GET['end_minute'] : $_GET['end_timestamp']['minutes']);
+	$_GET['end_second'] = (strlen($_GET['end_second']) ? $_GET['end_second'] : $_GET['end_timestamp']['seconds']);
+	unset($_GET['end_timestamp']);
+}
+
+if (isset($_GET['environment']) && isset($_GET['language']))
+{
+	if (! sanitize_environment())
 	{
-		$errors[] = $log_sources[$_GET['log']] . ' could not be opened for read.';
-		$log_file = null;
+		unset($_GET['environment']);
 	}
+	if (! sanitize_language())
+	{
+		unset($_GET['language']);
+	}
+	sanitize_filter();
+	sanitize_negate_filter();
+	sanitize_logic_filter();
+}
+
+if (isset($_GET['environment']) && isset($_GET['language']))
+{
+	$end_timestamp = mktime($_GET['end_hour'], $_GET['end_minute'], $_GET['end_second'], $_GET['end_month'], $_GET['end_day'], $_GET['end_year']);
+	$log_timestamp = mktime($_GET['start_hour'], 0, 0, $_GET['start_month'], $_GET['start_day'], $_GET['start_year']);
+	$start_timestamp = mktime($_GET['start_hour'], $_GET['start_minute'], $_GET['start_second'], $_GET['start_month'], $_GET['start_day'], $_GET['start_year']);
+
+	/**
+	 * This script can be quite costly to run; but we specifically do not want it to timeout
+	 * on a system administrator or developer who is searching over a large amount of logs.
+	 * Therefore we allow the script to run for 1 second for each 10 seconds of the requested timeframe.
+	 * This could be dangerous, however a conscious choice has been made to be extravagant with
+	 * the resources allocated to this script to make things nicer for the users of it.
+	 **/
+	set_time_limit(ceil(($end_timestamp - $start_timestamp) / 10));
 }
 ?>
 <html>
@@ -400,42 +354,62 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			<!-- This is an invisible div that simply serves as a template for the HTML that defines a filter. -->
 			<?php echo filter_form_string(); ?>
 		</div>
-		<form id='log_file_form' method="get">
-			<input type='hidden' id='timestamp_input' name='timestamp' value='' />
+		<form id="control_form" method="get">
 			<table width="100%">
 				<tr>
 					<td>
-						Log File:
-						<select name='log'>
+						Env:
+						<select name='environment'>
 							<option></option>
 							<?php
-								foreach (array_keys($log_sources) as $log)
+								foreach ($config['environments'] as $env)
 								{
-									if ($_GET['log'] == $log)
-									{
-										echo '<option selected>';
-									}
-									else
-									{
-										echo '<option>';
-									}
-									echo "$log</option>\n";
+									echo '<option' . ($_GET['environment'] == $env ? ' selected' : '') . ">$env</option>\n";
 								}
 							?>
 						</select>
 					</td>
-					<td style="text-align: center;">
-						Offset: <input type="text" id="offset_input" name="offset" size="11" maxlength="11" value='<?php echo htmlspecialchars($_GET['offset'], ENT_QUOTES); ?>' />
+					<td>
+						Lang:
+						<select name='language'>
+							<option></option>
+							<?php
+								foreach ($config['languages'] as $lang)
+								{
+									echo '<option' . ($_GET['language'] == $lang ? ' selected' : '') . ">$lang</option>\n";
+								}
+							?>
+						</select>
 					</td>
-					<td style="text-align: center;">
-						Length: <input type="text" id="length_input" name="length" size="9" maxlength="9" value='<?php echo htmlspecialchars($_GET['length'], ENT_QUOTES); ?>' />
-					</td>
-					<td style="text-align: center;">
-						Filter Context: <input type='text' name='filter_context' size='4' maxlength='3' value='<?php echo htmlspecialchars($_GET['filter_context'], ENT_QUOTES); ?>' />
+					<td style='text-align: center;'>
+						<?php
+							echo create_numeric_select('start_hour', 0, 23, date('H') - 1, create_function('$hour', 'return sprintf("%02d", $hour);')) . ' : ';
+							echo create_numeric_select('start_minute', 0, 59, 0, create_function('$min', 'return sprintf("%02d", $min);')) . ' : ';
+							echo create_numeric_select('start_second', 0, 59, 0, create_function('$sec', 'return sprintf("%02d", $sec);')) . ' on ';
+							echo create_numeric_select('start_month', date('m', strtotime('1 month ago')), date('m'), date('m'), create_function('$mon', 'return strftime("%b", mktime(12, 0, 0, $mon, 15));')) . ' ';
+							echo create_numeric_select('start_day', 1, 31, date('d'), create_function('$day', 'return sprintf("%02d", $day);')) . ', ';
+							echo create_numeric_select('start_year', date('Y', strtotime('1 month ago')), date('Y'), null, create_function('$year', 'return sprintf("%04d", $year);'));
+						?>
+						thru
+						<?php
+							echo create_numeric_select('end_hour', 0, 23, date('H') + 1, create_function('$hour', 'return sprintf("%02d", $hour);')) . ' : ';
+							echo create_numeric_select('end_minute', 0, 59, 0, create_function('$min', 'return sprintf("%02d", $min);')) . ' : ';
+							echo create_numeric_select('end_second', 0, 59, 0, create_function('$sec', 'return sprintf("%02d", $sec);')) . ' on ';
+							echo create_numeric_select('end_month', date('m', strtotime('1 month ago')), date('m'), date('m'), create_function('$mon', 'return strftime("%b", mktime(12, 0, 0, $mon, 15));')) . ' ';
+							echo create_numeric_select('end_day', 1, 31, date('d'), create_function('$day', 'return sprintf("%02d", $day);')) . ', ';
+							echo create_numeric_select('end_year', date('Y', strtotime('1 month ago')), date('Y'), null, create_function('$year', 'return sprintf("%04d", $year);'));
+						?>
 					</td>
 					<td style="text-align: right;">
-						<input type='button' value='Add Filter' onclick='add_filter();' />
 						<input type='button' value='?' onclick='toggle_display("documentation_table");' />
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<input type='button' value='Add Filter' onclick='add_filter();' />
+					</td>
+					<td>
+						<input type='button' value='Parse Token' onclick='parse_token();' />
 					</td>
 				</tr>
 			</table>
@@ -452,11 +426,11 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 			<table width="100%">
 				<tr>
 					<td>
-						<input type='button' value='Reset' onclick='reset_form();' />
+						<input type='button' value='Reset Form' onclick='reset_form();' />
 					</td>
 					<td style="text-align: right;">
 						<input style="margin-right: 10px;" type='button' value='Tail' onclick='tail();' />
-						<input type='button' value='Submit' onclick='submit_form();' />
+						<input type='submit' value='Submit' />
 					</td>
 				</tr>
 			</table>
@@ -485,31 +459,22 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 				</thead>
 				<tbody>
 					<tr>
-						<td><i>Log File</i></td>
-						<td>Which log file to retrieve data from.</td>
+						<td><i>Environment</i></td>
+						<td>Which environment to retrieve log data for.</td>
 						<td>&nbsp;</td>
 					</tr>
 					<tr>
-						<td><i>Offset</i></td>
-						<td>
-							The byte position to begin fetching lines from within the log file.  If <i>offset</i> is a position in the
-							middle of a log line, the partial line is not displayed.
-						</td>
-						<td>The last byte position in the log file.</td>
+						<td><i>Language</i></td>
+						<td>Which language to retrieve log data for.</td>
+						<td>&nbsp;</td>
 					</tr>
 					<tr>
-						<td><i>Length</i></td>
+						<td><i>Timeframe</i></td>
 						<td>
-							The amount of data to read from the log file.  If <i>length</i> is positive, read forward from <i>offset</i>.  If <i>length</i>
-							is negative, read backward from <i>offset</i>.  If (<i>offset</i> + <i>length</i>) terminates in the middle of a log line,
-							the entirety of that log line is displayed.
+							These two controls specify the timeframe within which log data should be returned.  Log data outside of this timeframe will
+							not be retrieved.
 						</td>
-						<td><?php echo number_format(DEFAULT_LENGTH); ?></td>
-					</tr>
-					<tr>
-						<td><i>Filter Context</i></td>
-						<td>How many lines of context you would like to be displayed around the lines that match the given filters.</td>
-						<td>0</td>
+						<td>+/- one hour</td>
 					</tr>
 					<tr>
 						<td><i>Add Filter</i></td>
@@ -581,85 +546,73 @@ if ($_GET['log'] && sanitize_log() && sanitize_offset() && sanitize_length() && 
 		</div>
 		<div id="log_excerpt">
 			<?php
-				if ($log_file)
+				LineArchive::reset();
+				while (isset($log_timestamp) && ($log_timestamp < $end_timestamp) && (LineOutput::$displayed_lines <= MAX_LINES))
 				{
-					if ($_GET['offset'])
+					$log_path = sprintf('%s/%s/%s.%s.log', $config['log_root'], $_GET['environment'], strftime('%Y-%m-%d-%H', $log_timestamp), $_GET['language']);
+					$log_file = new LogFile();
+					if (defined('DEBUG') && DEBUG)
 					{
-						$log_file->seek($_GET['offset']);
+						echo '<div class="debug">Begin LogFile: ' . $log_path . '</div>';
 					}
 
-					LineArchive::reset();
-					$contextual_lines = $_GET['filter_context'] + 1;
+					if (! $log_file->open($log_path))
+					{
+						echo '<div class="error">' . $log_path . " could not be opened for reading.</div>\n";
+						$log_timestamp += 3600;
+						continue;
+					}
+
 					while ($current_line = $log_file->gets())
 					{
-						if ($current_line->get_offset() > ($_GET['offset'] + $_GET['length']))
+						if ($current_line->log_timestamp() < $start_timestamp)
 						{
-							break;
+							continue;
+						}
+						if ($current_line->log_timestamp() > $end_timestamp)
+						{
+							echo LineArchive::skip_warning();
+							LineArchive::reset();
+							echo "<div class='warning'>Reached end of requested timeframe (" . strftime('%Y-%m-%d %H:%M:%S', $end_timestamp) . ").</div>";
+							break 2;
 						}
 						if (LineOutput::$displayed_lines >= MAX_LINES)
 						{
-							break;
+							echo LineArchive::skip_warning();
+							LineArchive::reset();
+							echo "<div class='warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.</div>";
+							break 2;
 						}
 
 						// If we have filters, skip lines that do not match them.
-						if ($_GET['filter'])
+						if ($_GET['filter'] && (! $current_line->matches_filters()))
 						{
-							if ($current_line->matches_filters())
-							{
-								$archived_lines = LineArchive::pop_last($_GET['filter_context']);
-								echo LineArchive::skip_warning();
-								foreach ($archived_lines as $skipped_line)
-								{
-									LineOutput::display($skipped_line, 'log_context');
-								}
-								$contextual_lines = 0;
-								LineArchive::reset();
-							}
-							else
-							{
-								if ($contextual_lines >= $_GET['filter_context'])
-								{
-									LineArchive::add($current_line);
-									continue;
-								}
-								$contextual_lines++;
-							}
+							LineArchive::add($current_line);
+							continue;
 						}
 
-						if ((0 < $contextual_lines) && ($contextual_lines <= $_GET['filter_context']))
-						{
-							LineOutput::display($current_line, 'log_context');
-						}
-						else
-						{
-							LineOutput::display($current_line);
-						}
+						echo LineArchive::skip_warning();
+						LineArchive::reset();
+						LineOutput::display($current_line);
 					}
-					echo LineArchive::skip_warning();
-					LineArchive::reset();
-
-					if (! $current_line)
+					if (defined('DEBUG') && DEBUG)
 					{
-						echo "<div class='warning'>Encountered end of file at offset " . number_format($log_file->tell()) . ".</div>\n";
+						echo '<div class="debug">End LogFile: ' . $log_path . '</div>';
 					}
-					else
-					{
-						if (LineOutput::$displayed_lines >= MAX_LINES)
-						{
-							echo "<div class='warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.  End of file is " . number_format($log_size - $current_line->get_offset()) . " bytes further.</div>\n";
-						}
-
-						if ($current_line->get_offset() > ($_GET['offset'] + $_GET['length']))
-						{
-							echo "<div class='warning'>Encountered end of requested data at offset " . number_format($current_line->get_offset()) . ".  End of file is " . number_format($log_size - $current_line->get_offset()) . " bytes further.</div>\n";
-						}
-					}
+					$log_timestamp += 3600;
 				}
 			?>
 			<a name="tail"></a>
 		</div>
-		<div style="text-align: right;">
-			<input style="margin-right: 10px;" type='button' value='Tail' onclick='tail();' />
-		</div>
+		<?php
+			if (LineOutput::$displayed_lines > 0)
+			{
+		?>
+				<div style="text-align: right;">
+					<input style="margin-right: 10px;" type='button' value='Tail' onclick='tail();' />
+				</div>
+		<?php
+			}
+		?>
 	</body>
 </html>

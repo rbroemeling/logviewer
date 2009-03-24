@@ -7,18 +7,32 @@ class LineOutput
 	{
 		self::$displayed_lines++;
 
-		$offset = $line->get_offset();
-
 		echo "<div class='log_line " . $extra_classes . "'>";
 		echo '(' . number_format(self::$displayed_lines) . ') ';
-		echo '[' . LineOutput::offset_link($offset) . '] ';
+		echo '[' . LineOutput::create_link($line) . '] ';
 		echo (string)$line;
 		echo "</div>\n";
 	}
 
-	protected static function offset_link($offset)
+	protected static function create_link($line)
 	{
-		return "<a href='?log=" . $_GET['log'] . "&offset=" . max(($offset - 8192), 0) . "&length=12288#" . $offset . "' id='" . $offset . "' name='" . $offset . "'>" . $offset .  "</a>";
+		$query_params = array
+		(
+			'environment' => $_GET['environment'],
+			'language' => $_GET['language'],
+			'start_timestamp' => $line->log_timestamp() - 1,
+			'end_timestamp' => $line->log_timestamp() + 5
+		);
+		$line_identifier = $line->log_timestamp() . '.' . $line->get_offset();
+
+		$url = '?';
+		foreach ($query_params as $key => $value)
+		{
+			$url .= $key . '=' . urlencode($value) . '&';
+		}
+		$url = substr($url, 0, -1) . '#' . $line_identifier;
+
+		return "<a href='$url' id='" . $line_identifier . "' name='" . $line_identifier . "'>link</a>";
 	}
 }
 ?>
