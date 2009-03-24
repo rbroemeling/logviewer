@@ -3,9 +3,7 @@ class LogFile
 {
 	protected $handle = null;
 	protected $path = null;
-	protected $statistics = array();
-	protected $timestamp_lower_bound = null;
-	protected $timestamp_upper_bound = null;
+	protected $statistics = null;
 
 
 	public function __construct()
@@ -24,7 +22,7 @@ class LogFile
 			$this->handle = null;
 		}
 		$this->path = null;
-		$this->statistics = array();
+		$this->statistics = null;
 	}
 
 
@@ -43,14 +41,6 @@ class LogFile
 		}
 		$data = Log::factory($data);
 		$data->set_offset($offset);
-		$timestamp = $data->log_timestamp();
-		if ($timestamp > 0)
-		{
-			if (is_null($this->timestamp_upper_bound) || ($timestamp > $this->timestamp_upper_bound))
-			{
-				$this->timestamp_upper_bound = $timestamp;
-			}
-		}
 		return $data;
 	}
 
@@ -58,8 +48,8 @@ class LogFile
 	public function open($path)
 	{
 		$this->path = $path;
-		$this->statistics = stat($path);
-		$this->handle = gzopen($path, 'rb');
+		$this->statistics = @stat($path);
+		$this->handle = @gzopen($path, 'rb');
 
 		if ((! $this->statistics) || (! $this->handle))
 		{
@@ -68,55 +58,6 @@ class LogFile
 			$this->statistics = array();
 			return false;
 		}
-
-		/**
-		 * Attempt to read and parse the first line of the log file
-		 * so that we can hopefully retrieve a timestamp that will
-		 * represent the first date/time that is available in this
-		 * log file.
-		 */
-		if ($data = gzgets($this->handle))
-		{
-			$data = Log::factory($data);
-			$timestamp = $data->log_timestamp();
-			if ($timestamp > 0)
-			{
-				$this->timestamp_lower_bound = $timestamp;
-			}
-		}
-
-		/**
-		 * If we are not a GZIP-compressed file (i.e. if we do not
-		 * end in .gz), then attempt to read and parse the last line
-		 * of the log file so that we can hopefully retrieve a timestamp
-		 * that will represent the last date/time that is available in this
-		 * log file.
-		 */
-		if (strcasecmp(substr($this->path, -3), ".gz"))
-		{
-			for ($i = 2; $i < $this->statistics['size']; $i++)
-			{
-				gzseek($this->handle, $this->statistics['size'] - $i);
-				$c = gzgetc($this->handle);
-				if ($c == "\n")
-				{
-					$data = gzgets($this->handle);
-					if ($data)
-					{
-						$data = Log::factory($data);
-						$timestamp = $data->log_timestamp();
-						if ($timestamp > 0)
-						{
-							$this->timestamp_upper_bound = $timestamp;
-						}
-					}
-					break;
-				}
-			}
-		}
-
-		$this->seek(0);
-
 		return true;
 	}
 
