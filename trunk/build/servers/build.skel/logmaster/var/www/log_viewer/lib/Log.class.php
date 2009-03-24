@@ -208,7 +208,7 @@ class Log
 		}
 
 		$j = count($filter_results);
-		for ($i = 0; $i < $j; $i++)
+		for ($i = 0; $i < $j - 1; $i++)
 		{
 			if ($_GET['logic_filter'][$i] == 'AND')
 			{
