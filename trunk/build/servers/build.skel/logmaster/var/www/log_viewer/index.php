@@ -340,7 +340,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 	 * This could be dangerous, however a conscious choice has been made to be extravagant with
 	 * the resources allocated to this script to make things nicer for the users of it.
 	 **/
-	set_time_limit(ceil(($end_timestamp - $start_timestamp) / 10));
+	set_time_limit(max(10, ceil(($end_timestamp - $start_timestamp) / 10)));
 }
 ?>
 <html>
