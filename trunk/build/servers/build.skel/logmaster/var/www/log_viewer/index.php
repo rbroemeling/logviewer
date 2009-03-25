@@ -425,9 +425,6 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 			</div>
 			<table width="100%">
 				<tr>
-					<td>
-						<input type='button' value='Reset Form' onclick='reset_form();' />
-					</td>
 					<td style="text-align: right;">
 						<input style="margin-right: 10px;" type='button' value='Tail' onclick='tail();' />
 						<input type='submit' value='Submit' />

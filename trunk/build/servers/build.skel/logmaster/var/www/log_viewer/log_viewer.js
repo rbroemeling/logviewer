@@ -65,8 +65,6 @@ function parse_token()
 	var day = parseInt(token.substr(17,2), 10);
 	var string = token.substr(20);
 
-	reset_form();
-
 	var timestamp = new Date(year, month - 1, day, hour, minute, second);
 	if (! set_start_time_selections(adjust_date(timestamp, -1000)))
 	{
@@ -79,35 +77,6 @@ function parse_token()
 		return;
 	}
 
-	add_filter();
-	document.getElementsByName('filter[]')[1].value = '/' + string + '/';
-}
-
-
-function reset_form()
-{
-	var inputs = document.getElementsByTagName('input');
-
-	for (var i = 0; i < inputs.length; i++)
-	{
-		if (inputs[i].type == 'text' || inputs[i].type == 'hidden')
-		{
-			inputs[i].value = '';
-		}
-		else if (inputs[i].type == 'checkbox')
-		{
-			inputs[i].checked = false;
-		}
-		else if (inputs[i].type == 'button' || inputs[i].type == 'submit')
-		{
-			/* Skip this input, it doesn't need to be reset. */
-		}
-		else
-		{
-			alert("reset_form(): do not know how to clear an input of type " + inputs[i].type)
-		}
-	}
-
 	// Remove all filters.
 	var filter_list = document.getElementById('filter_list');
 	if (filter_list)
@@ -117,6 +86,11 @@ function reset_form()
 			filter_list.removeChild(filter_list.firstChild);
 		}
 	}
+
+	// Add a single filter that consists of the token string that we are
+	// looking for.
+	add_filter();
+	document.getElementsByName('filter[]')[1].value = '/' + string + '/';
 }
 
 
