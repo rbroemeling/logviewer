@@ -547,12 +547,17 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 				while (isset($log_timestamp) && ($log_timestamp < $end_timestamp) && (LineOutput::$displayed_lines <= MAX_LINES))
 				{
 					$log_path = sprintf('%s/%s/%s.%s.log', $config['log_root'], $_GET['environment'], strftime('%Y-%m-%d-%H', $log_timestamp), $_GET['language']);
+					if ((! file_exists($log_path)) && file_exists($log_path . '.gz'))
+					{
+						// We don't have an uncompressed version of the log, but we do have a compressed
+						// version, so use that.
+						$log_path .= '.gz';
+					}
 					$log_file = new LogFile();
 					if (defined('DEBUG') && DEBUG)
 					{
 						echo '<div class="debug">Begin LogFile: ' . $log_path . '</div>';
 					}
-
 					if (! $log_file->open($log_path))
 					{
 						echo '<div class="error">' . $log_path . " could not be opened for reading.</div>\n";
