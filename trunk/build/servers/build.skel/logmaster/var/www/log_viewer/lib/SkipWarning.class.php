@@ -28,15 +28,17 @@ class SkipWarning
 
 	public static function warning($reset = false)
 	{
+		$s = "";
+
 		if (self::$current_skipped)
 		{
-			return "<div class='warning'>Skipped " . number_format(self::$current_skipped) . " log line" . (self::$current_skipped > 1 ? 's' : '') . " based on filters applied.</div>\n";
+			$s = "<div class='warning'>Skipped " . number_format(self::$current_skipped) . " log line" . (self::$current_skipped > 1 ? 's' : '') . " based on filters applied.</div>\n";
 		}
 		if ($reset)
 		{
 			self::reset();
 		}
-		return "";
+		return $s;
 	}
 }
 ?>
