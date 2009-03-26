@@ -603,10 +603,6 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 				echo SkipWarning::warning(true);
 				if (isset($log_timestamp))
 				{
-					if ($current_line && ($current_line->log_timestamp() <= $end_timestamp))
-					{
-						echo "<div class='warning'>Reached end of available logging data before reaching end of requested timeframe (" . strftime('%Y-%m-%d %H:%M:%S', $end_timestamp) . ").</div>";
-					}
 					if ((LineOutput::$displayed_lines == 0) && (SkipWarning::$total_skipped == 0))
 					{
 						echo "<div class='warning'>No log lines were found for the requested timeframe (" . strftime('%Y-%m-%d %H:%M:%S', $start_timestamp) . " thru " . strftime('%Y-%m-%d %H:%M:%S', $end_timestamp) . ').</div>';
