@@ -600,6 +600,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 					}
 					$log_timestamp += 3600;
 				}
+				echo SkipWarning::warning(true);
 				if (isset($log_timestamp) && (LineOutput::$displayed_lines == 0) && (SkipWarning::$total_skipped == 0))
 				{
 					echo "<div class='warning'>No log lines were found for the requested timeframe (" . strftime('%Y-%m-%d %H:%M:%S', $start_timestamp) . " thru " . strftime('%Y-%m-%d %H:%M:%S', $end_timestamp) . ').</div>';
