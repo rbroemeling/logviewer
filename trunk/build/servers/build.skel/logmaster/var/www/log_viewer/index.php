@@ -260,10 +260,10 @@ function slash_machine(&$data)
 /******************************************************************************
  * Classes
  ******************************************************************************/
-include_once(dirname(__FILE__) . '/lib/LineArchive.class.php');
 include_once(dirname(__FILE__) . '/lib/LineOutput.class.php');
 include_once(dirname(__FILE__) . '/lib/Log.class.php');
 include_once(dirname(__FILE__) . '/lib/LogFile.class.php');
+include_once(dirname(__FILE__) . '/lib/SkipWarning.class.php');
 
 
 /******************************************************************************
@@ -543,7 +543,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 		</div>
 		<div id="log_excerpt">
 			<?php
-				LineArchive::reset();
+				SkipWarning::reset();
 				while (isset($log_timestamp) && ($log_timestamp < $end_timestamp) && (LineOutput::$displayed_lines <= MAX_LINES))
 				{
 					$log_path = sprintf('%s/%s/%s.%s.log', $config['log_root'], $_GET['environment'], strftime('%Y-%m-%d-%H', $log_timestamp), $_GET['language']);
@@ -573,15 +573,13 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 						}
 						if ($current_line->log_timestamp() > $end_timestamp)
 						{
-							echo LineArchive::skip_warning();
-							LineArchive::reset();
+							echo SkipWarning::warning(true);
 							echo "<div class='warning'>Reached end of requested timeframe (" . strftime('%Y-%m-%d %H:%M:%S', $end_timestamp) . ").</div>";
 							break 2;
 						}
 						if (LineOutput::$displayed_lines >= MAX_LINES)
 						{
-							echo LineArchive::skip_warning();
-							LineArchive::reset();
+							echo SkipWarning::warning(true);
 							echo "<div class='warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.</div>";
 							break 2;
 						}
@@ -589,12 +587,11 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 						// If we have filters, skip lines that do not match them.
 						if ($_GET['filter'] && (! $current_line->matches_filters()))
 						{
-							LineArchive::add($current_line);
+							SkipWarning::add();
 							continue;
 						}
 
-						echo LineArchive::skip_warning();
-						LineArchive::reset();
+						echo SkipWarning::warning(true);
 						LineOutput::display($current_line);
 					}
 					if (defined('DEBUG') && DEBUG)
@@ -603,7 +600,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 					}
 					$log_timestamp += 3600;
 				}
-				if (isset($log_timestamp) && (LineOutput::$displayed_lines == 0))
+				if (isset($log_timestamp) && (LineOutput::$displayed_lines == 0) && (SkipWarning::$total_skipped == 0))
 				{
 					echo "<div class='warning'>No log lines were found for the requested timeframe (" . strftime('%Y-%m-%d %H:%M:%S', $start_timestamp) . " thru " . strftime('%Y-%m-%d %H:%M:%S', $end_timestamp) . ').</div>';
 				}
