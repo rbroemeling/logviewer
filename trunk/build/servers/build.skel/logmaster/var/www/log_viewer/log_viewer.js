@@ -90,7 +90,7 @@ function parse_token()
 	// Add a single filter that consists of the token string that we are
 	// looking for.
 	add_filter();
-	document.getElementsByName('filter[]')[1].value = '/' + string + '/';
+	document.getElementsByName('filter[]')[1].value = '/' + string.replace(/\s+$/g, '') + '/';
 }
 
 
