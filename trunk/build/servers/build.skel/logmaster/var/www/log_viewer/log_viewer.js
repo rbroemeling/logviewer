@@ -42,6 +42,7 @@ function highlight_named_anchor()
 function parse_token()
 {
 	var token = prompt("Please enter a log token.\nLog tokens are expected to look like this example: '10:48:53:2009-03-08:req:19525:636'.\n", "HH:MM:SS:YYYY-MM-DD:<STRING>");
+	token = token.replace(/^\s+|\s+$/g, '');
 
 	if (! token.length)
 	{
@@ -90,7 +91,7 @@ function parse_token()
 	// Add a single filter that consists of the token string that we are
 	// looking for.
 	add_filter();
-	document.getElementsByName('filter[]')[1].value = '/' + string.replace(/\s+$/g, '') + '/';
+	document.getElementsByName('filter[]')[1].value = '/' + string + '/';
 }
 
 
