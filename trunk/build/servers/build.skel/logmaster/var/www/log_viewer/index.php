@@ -360,24 +360,26 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 					<td>
 						Env:
 						<select name='environment'>
-							<option></option>
 							<?php
+								$selected_environment = (isset($_GET['environment']) ? $_GET['environment'] : 'live');
 								foreach ($config['environments'] as $env)
 								{
-									echo '<option' . ($_GET['environment'] == $env ? ' selected' : '') . ">$env</option>\n";
+									echo '<option' . ($selected_environment == $env ? ' selected' : '') . ">$env</option>\n";
 								}
+								unset($selected_environment);
 							?>
 						</select>
 					</td>
 					<td>
 						Lang:
 						<select name='language'>
-							<option></option>
 							<?php
+								$selected_language = (isset($_GET['language']) ? $_GET['language'] : 'ruby');
 								foreach ($config['languages'] as $lang)
 								{
-									echo '<option' . ($_GET['language'] == $lang ? ' selected' : '') . ">$lang</option>\n";
+									echo '<option' . ($selected_language == $lang ? ' selected' : '') . ">$lang</option>\n";
 								}
+								unset($selected_language);
 							?>
 						</select>
 					</td>
