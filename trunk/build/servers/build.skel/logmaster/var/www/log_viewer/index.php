@@ -322,25 +322,25 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 	{
 		unset($_GET['language']);
 	}
-	sanitize_filter();
-	sanitize_negate_filter();
-	sanitize_logic_filter();
 }
 
 if (isset($_GET['environment']) && isset($_GET['language']))
 {
-	$end_timestamp = mktime($_GET['end_hour'], $_GET['end_minute'], $_GET['end_second'], $_GET['end_month'], $_GET['end_day'], $_GET['end_year']);
-	$log_timestamp = mktime($_GET['start_hour'], 0, 0, $_GET['start_month'], $_GET['start_day'], $_GET['start_year']);
-	$start_timestamp = mktime($_GET['start_hour'], $_GET['start_minute'], $_GET['start_second'], $_GET['start_month'], $_GET['start_day'], $_GET['start_year']);
+	if (sanitize_filter() && sanitize_negate_filter() && sanitize_logic_filter())
+	{
+		$end_timestamp = mktime($_GET['end_hour'], $_GET['end_minute'], $_GET['end_second'], $_GET['end_month'], $_GET['end_day'], $_GET['end_year']);
+		$log_timestamp = mktime($_GET['start_hour'], 0, 0, $_GET['start_month'], $_GET['start_day'], $_GET['start_year']);
+		$start_timestamp = mktime($_GET['start_hour'], $_GET['start_minute'], $_GET['start_second'], $_GET['start_month'], $_GET['start_day'], $_GET['start_year']);
 
-	/**
-	 * This script can be quite costly to run; but we specifically do not want it to timeout
-	 * on a system administrator or developer who is searching over a large amount of logs.
-	 * Therefore we allow the script to run for 1 second for each 10 seconds of the requested timeframe.
-	 * This could be dangerous, however a conscious choice has been made to be extravagant with
-	 * the resources allocated to this script to make things nicer for the users of it.
-	 **/
-	set_time_limit(max(10, ceil(($end_timestamp - $start_timestamp) / 10)));
+		/**
+		 * This script can be quite costly to run; but we specifically do not want it to timeout
+		 * on a system administrator or developer who is searching over a large amount of logs.
+		 * Therefore we allow the script to run for 1 second for each 10 seconds of the requested timeframe.
+		 * This could be dangerous, however a conscious choice has been made to be extravagant with
+		 * the resources allocated to this script to make things nicer for the users of it.
+		 **/
+		set_time_limit(max(10, ceil(($end_timestamp - $start_timestamp) / 10)));
+	}
 }
 ?>
 <html>
