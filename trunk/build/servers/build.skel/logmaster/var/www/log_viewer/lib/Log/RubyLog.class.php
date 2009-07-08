@@ -3,6 +3,7 @@ class RubyLog extends Log
 {
 	protected $ruby_component = null;
 	protected $ruby_configuration = null;
+	protected $ruby_revision = null;
 	protected $ruby_error_level = null;
 	protected $ruby_error_message = null;
 	protected $ruby_pid = null;
@@ -22,20 +23,25 @@ class RubyLog extends Log
 
 		# Regular Expression Map:
 		#  '(live).(31564).(general).(critical): (.*)'
-		#  '(live).(19426).(general).(error)( (req:19426:211)): (.*)'
-		if (preg_match('!([a-z]+)\.(\d+)\.([a-z]+)\.([a-z]+)( +\(req:\d+:\d+.*?\))?: *(.*)!i', $this->extra_data, $matches))
+		#  '(live).(r26781.)(31564).(general).(critical): (.*)'
+		#  '(live).(r26781.)(19426).(general).(error)( (req:19426:211)): (.*)'
+		if (preg_match('!([a-z]+)\.(r\d+\.)?(\d+)\.([a-z]+)\.([a-z]+)( +\(req:\d+:\d+.*?\))?: *(.*)!i', $this->extra_data, $matches))
 		{
 			$this->extra_data = null;
 
 			$this->ruby_configuration = $matches[1];
-			$this->ruby_pid = $matches[2];
-			$this->ruby_component = $matches[3];
-			$this->ruby_error_level = $matches[4];
-			if (strlen($matches[5]))
+			if (strlen($matches[2]))
 			{
-				$this->ruby_request_identifier = trim($matches[5]);
+				$this->ruby_revision = substr($matches[2], 1, -1);
 			}
-			$this->ruby_error_message = $matches[6];
+			$this->ruby_pid = $matches[3];
+			$this->ruby_component = $matches[4];
+			$this->ruby_error_level = $matches[5];
+			if (strlen($matches[6]))
+			{
+				$this->ruby_request_identifier = trim($matches[6]);
+			}
+			$this->ruby_error_message = $matches[7];
 
 			switch ($this->ruby_error_level)
 			{
@@ -62,6 +68,10 @@ class RubyLog extends Log
 		if (! is_null($this->ruby_configuration))
 		{
 			$string .= " <span class='configuration'>" . htmlspecialchars($this->ruby_configuration, ENT_QUOTES) . "</span>.";
+		}
+		if (! is_null($this->ruby_revision))
+		{
+			$string .= " <span class='revision'>r" . htmlspecialchars($this->ruby_revision, ENT_QUOTES) . "</span>.";
 		}
 		if (! is_null($this->ruby_pid))
 		{
@@ -113,7 +123,8 @@ class RubyLog extends Log
 		{
 			# Regular Expression Map:
 			#  ' live.31564.general.critical:'
-			if (preg_match('/ [a-z]+\.\d+\.[a-z]+\.[a-z]+\W/', $line))
+			#  ' live.r26781.31564.general.critical:'
+			if (preg_match('/ [a-z]+\.(r\d+\.)?\d+\.[a-z]+\.[a-z]+\W/', $line))
 			{
 				return true;
 			}
