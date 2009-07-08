@@ -71,7 +71,7 @@ class RubyLog extends Log
 		}
 		if (! is_null($this->ruby_revision))
 		{
-			$string .= " <span class='revision'>r" . htmlspecialchars($this->ruby_revision, ENT_QUOTES) . "</span>.";
+			$string .= "<span class='revision'>r" . htmlspecialchars($this->ruby_revision, ENT_QUOTES) . "</span>.";
 		}
 		if (! is_null($this->ruby_pid))
 		{
