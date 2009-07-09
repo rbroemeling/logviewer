@@ -40,7 +40,7 @@ $config['log_root'] = '/var/log/development';
 $config['environments'] = array('beta', 'live', 'stage');
 
 // A list of languages to be exposed to the user.
-$config['languages'] = array('php', 'ruby');
+$config['languages'] = array('dispatcher', 'php', 'ruby');
 
 
 /******************************************************************************
