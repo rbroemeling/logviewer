@@ -335,11 +335,12 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 		/**
 		 * This script can be quite costly to run; but we specifically do not want it to timeout
 		 * on a system administrator or developer who is searching over a large amount of logs.
-		 * Therefore we allow the script to run for 1 second for each 10 seconds of the requested timeframe.
-		 * This could be dangerous, however a conscious choice has been made to be extravagant with
-		 * the resources allocated to this script to make things nicer for the users of it.
+		 * Therefore we allow the script to run for 1 second for each 10 seconds of the requested
+		 * timeframe, with a minimum of 30 seconds.  This could be dangerous, however a conscious
+		 * choice has been made to be extravagant with the resources allocated to this script to
+		 * make things nicer for the users of it.
 		 **/
-		set_time_limit(max(10, ceil(($end_timestamp - $start_timestamp) / 10)));
+		set_time_limit(max(30, ceil(($end_timestamp - $start_timestamp) / 10)));
 	}
 }
 ?>
