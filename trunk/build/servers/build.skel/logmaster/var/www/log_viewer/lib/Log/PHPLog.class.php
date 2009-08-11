@@ -99,7 +99,7 @@ class PHPLog extends Log
 	{
 		if (parent::handles($line))
 		{
-			return (strpos($line, ' PHP error: ') !== FALSE);
+			return (strpos($line, ' php-site: ') !== FALSE);
 		}
 	}
 

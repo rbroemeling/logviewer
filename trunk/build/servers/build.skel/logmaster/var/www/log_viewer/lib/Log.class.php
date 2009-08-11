@@ -41,7 +41,7 @@ class Log
 		}
 
 		# Regular Expression Map:
-		#	'(PHP error:) (.*)'
+		#	'(php-site:) (.*)'
 		#	'(nexopia-parent - initializing:) (.*)'
 		if (preg_match('!^([^:]+:) +(.*)!', $this->extra_data, $fields))
 		{
