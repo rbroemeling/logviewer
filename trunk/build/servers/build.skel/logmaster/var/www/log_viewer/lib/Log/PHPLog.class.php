@@ -79,7 +79,7 @@ class PHPLog extends Log
 		}
 		if (! is_null($this->php_error_message))
 		{
-			$string .= htmlspecialchars($this->php_error_message, ENT_QUOTES);
+			$string .= "<span class='errorlevel_" . $this->error_level . "'>" . htmlspecialchars($this->php_error_message, ENT_QUOTES) . "</span>";
 		}
 		if (defined('DEBUG') && DEBUG)
 		{
