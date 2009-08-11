@@ -69,18 +69,20 @@ class PHPLog extends Log
 			$string .= $this->php_configuration;
 		}
 		$string .= ')</span> ';
+		$string .= "<span class='errorlevel_" . $this->error_level . "'>";
 		if (! is_null($this->php_script_name))
 		{
 			$string .= htmlspecialchars($this->php_script_name, ENT_QUOTES) . " ";
 		}
 		if (! is_null($this->php_error_level))
 		{
-			$string .= "<span class='errorlevel_" . $this->error_level . "'>(" . htmlspecialchars($this->php_error_level, ENT_QUOTES) . ")</span> ";
+			$string .= "(" . htmlspecialchars($this->php_error_level, ENT_QUOTES) . ") ";
 		}
 		if (! is_null($this->php_error_message))
 		{
-			$string .= "<span class='errorlevel_" . $this->error_level . "'>" . htmlspecialchars($this->php_error_message, ENT_QUOTES) . "</span>";
+			$string .= htmlspecialchars($this->php_error_message, ENT_QUOTES);
 		}
+		$string .= '</span>';
 		if (defined('DEBUG') && DEBUG)
 		{
 			$string .= '<span class="debug">End ' . __CLASS__ . '</span>';
