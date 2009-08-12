@@ -65,7 +65,7 @@ class PHPLog extends Log
 		
 		# Regular Expression Map:
 		# '([3296920/)(75.157.111.45]) (.*)'
-		if (preg_match('!^(\[[0-9-]+/)([0-9.]+\]) +(.*)!'))
+		if (preg_match('!^(\[[0-9-]+/)([0-9.]+\]) +(.*)!', $this->php_error_message, $matches))
 		{
 			$this->client_uid = $matches[1];
 			$this->client_ip = $matches[2];
