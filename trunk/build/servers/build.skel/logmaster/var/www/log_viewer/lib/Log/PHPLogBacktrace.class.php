@@ -29,7 +29,7 @@ class PHPLogBacktrace extends PHPLog
 			// backtrace component is the second array element.
 			if (count($backtrace_components) > 0)
 			{
-				$backtrace_components = array_splice($backtrace_components, 0, 1, preg_split('! /!', $backtrace_components[0], 2));
+				array_splice($backtrace_components, 0, 1, preg_split('! /!', $backtrace_components[0], 2));
 			}
 			for ($i = 0; $i < count($backtrace_components); $i++)
 			{
