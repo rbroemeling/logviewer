@@ -23,19 +23,19 @@ class PHPLogBacktrace extends PHPLog
 		if (! is_null($this->php_backtrace))
 		{
 			$string .= "<span class='errorlevel_" . $this->error_level . "'>";
-			$backtrace_components = preg_split('!<-!', $this->php_backtrace, -1, PREG_SPLIT_DELIM_CAPTURE);
+			$backtrace_components = preg_split('!<-/!', $this->php_backtrace, -1, PREG_SPLIT_DELIM_CAPTURE);
 			// The first array element will contain the error message as well as the first actual backtrace
 			// element.  Split it up so that the error message is the first array element and the first actual
 			// backtrace component is the second array element.
 			if (count($backtrace_components) > 0)
 			{
-				array_splice($backtrace_components, 0, 1, preg_split('! /!', $backtrace_components[0], 2));
+				array_splice($backtrace_components, 0, 1, preg_split('! /!', $backtrace_components[0], 2, PREG_SPLIT_DELIM_CAPTURE));
 			}
 			for ($i = 0; $i < count($backtrace_components); $i++)
 			{
 				$backtrace_components[$i] = htmlspecialchars($backtrace_components[$i], ENT_QUOTES);
 			}
-			$string .= implode("<br>\n<spacer type='block' width='40'/>", $backtrace_components);
+			$string .= implode("<br>\n<spacer type='block' width='40'/>/", $backtrace_components);
 			$string .= "</span>";
 		}
 		if (defined('DEBUG') && DEBUG)
