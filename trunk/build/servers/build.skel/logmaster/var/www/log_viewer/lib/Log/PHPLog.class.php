@@ -4,8 +4,9 @@ class PHPLog extends Log
 	protected $php_configuration = null;
 	protected $php_error_level = null;
 	protected $php_error_message = null;
+	protected $php_script_lineno = null;
 	protected $php_script_name = null;
-
+	protected $php_script_path = null;
 
 	public function __construct($line)
 	{
@@ -52,6 +53,17 @@ class PHPLog extends Log
 					break;
 			}
 		}
+		
+		# Regular Expression Map:
+		# '(/cache/templates/forums/forumviewthread.parsed.php):(117) ([3296920/)(75.157.111.45]) (.*)'
+		if (preg_match('!([^:]+):(\d+) +(\[[0-9-]+/)([0-9.]+\]) +(.*)!i', $this->php_error_message, $matches))
+		{
+			$this->php_script_path = $matches[1];
+			$this->php_script_lineno = $matches[2];
+			$this->client_uid = $matches[3];
+			$this->client_ip = $matches[4];
+			$this->php_error_message = $matches[5];
+		}
 	}
 
 
@@ -77,6 +89,14 @@ class PHPLog extends Log
 		if (! is_null($this->php_error_level))
 		{
 			$string .= "(" . htmlspecialchars($this->php_error_level, ENT_QUOTES) . ") ";
+		}
+		if (! is_null($this->php_script_path))
+		{
+			$string .= $this->php_script_path . ":";
+		}
+		if (! is_null($this->php_script_lineno))
+		{
+			$string .= $this->php_script_lineno . " ";
 		}
 		if (! is_null($this->php_error_message))
 		{
