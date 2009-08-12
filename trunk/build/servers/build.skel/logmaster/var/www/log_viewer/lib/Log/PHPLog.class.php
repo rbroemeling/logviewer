@@ -55,14 +55,21 @@ class PHPLog extends Log
 		}
 		
 		# Regular Expression Map:
-		# '(/cache/templates/forums/forumviewthread.parsed.php):(117) ([3296920/)(75.157.111.45]) (.*)'
-		if (preg_match('!([^:]+):(\d+) +(\[[0-9-]+/)([0-9.]+\]) +(.*)!i', $this->php_error_message, $matches))
+		# '(/cache/templates/forums/forumviewthread.parsed.php):(117) (.*)'
+		if (preg_match('!^([^:]+):(\d+) +(.*)!', $this->php_error_message, $matches))
 		{
 			$this->php_script_path = $matches[1];
 			$this->php_script_lineno = $matches[2];
-			$this->client_uid = $matches[3];
-			$this->client_ip = $matches[4];
-			$this->php_error_message = $matches[5];
+			$this->php_error_message = $matches[3];
+		}
+		
+		# Regular Expression Map:
+		# '([3296920/)(75.157.111.45]) (.*)'
+		if (preg_match('!^(\[[0-9-]+/)([0-9.]+\]) +(.*)!'))
+		{
+			$this->client_uid = $matches[1];
+			$this->client_ip = $matches[2];
+			$this->php_error_message = $matches[3];
 		}
 	}
 
