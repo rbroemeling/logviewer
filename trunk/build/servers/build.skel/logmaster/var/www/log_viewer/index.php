@@ -629,9 +629,12 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 				<script>
 					var form = document.getElementById('control_form');
 					var token = <?php echo json_encode($_REQUEST['token']); ?>;
-					if (form && parse_token(token))
+					if (parse_token(token))
 					{
-						form.submit();
+						if (form)
+						{
+							form.submit();
+						}
 					}
 				</script>
 		<?

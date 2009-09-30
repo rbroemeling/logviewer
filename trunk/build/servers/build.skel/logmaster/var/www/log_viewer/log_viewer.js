@@ -49,7 +49,7 @@ function parse_token(token)
 
 	if (! token.length)
 	{
-		return;
+		return false;
 	}
 
 	// Token Regular Expression Map:
@@ -58,7 +58,7 @@ function parse_token(token)
 	if (! token.match(/^\d{2}:\d{2}:\d{2}:\d{4}-\d{2}-\d{2}:/))
 	{
 		alert("The log token '" + token + "' is not valid.");
-		return;
+		return false;
 	}
 
 	var hour = parseInt(token.substr(0,2), 10);
@@ -73,12 +73,12 @@ function parse_token(token)
 	if (! set_start_time_selections(adjust_date(timestamp, -1000)))
 	{
 		alert("The log token '" + token + "' is outside of the allowed timeframe.");
-		return;
+		return false;
 	}
 	if (! set_end_time_selections(adjust_date(timestamp, 1000)))
 	{
 		alert("The log token '" + token + "' is outside of the allowed timeframe.");
-		return;
+		return false;
 	}
 
 	// Remove all filters.
@@ -95,6 +95,7 @@ function parse_token(token)
 	// looking for.
 	add_filter();
 	document.getElementsByName('filter[]')[1].value = '/' + string + '/';
+	return true;
 }
 
 
