@@ -39,9 +39,12 @@ function highlight_named_anchor()
 }
 
 
-function parse_token()
+function parse_token(token)
 {
-	var token = prompt("Please enter a log token.\nLog tokens are expected to look like this example: '10:48:53:2009-03-08:req:19525:636'.\n", "HH:MM:SS:YYYY-MM-DD:<STRING>");
+	if (token == null)
+	{
+		token = prompt("Please enter a log token.\nLog tokens are expected to look like this example: '10:48:53:2009-03-08:req:19525:636'.\n", "HH:MM:SS:YYYY-MM-DD:<STRING>");
+	}
 	token = token.replace(/^\s+|\s+$/g, '');
 
 	if (! token.length)

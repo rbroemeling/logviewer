@@ -412,7 +412,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 						<input type='button' value='Add Filter' onclick='add_filter();' />
 					</td>
 					<td>
-						<input type='button' value='Parse Token' onclick='parse_token();' />
+						<input type='button' value='Parse Token' onclick='parse_token(null);' />
 					</td>
 				</tr>
 			</table>
@@ -622,6 +622,19 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 					<input style="margin-right: 10px;" type='button' value='Tail' onclick='tail();' />
 				</div>
 		<?php
+			}
+			if (isset($_REQUEST['token']))
+			{
+		?>
+				<script>
+					var form = document.getElementById('control_form');
+					var token = <?php echo json_encode($_REQUEST['token']); ?>
+					if (form && parse_token(token))
+					{
+						form.submit();
+					}
+				</script>
+		<?
 			}
 		?>
 	</body>
