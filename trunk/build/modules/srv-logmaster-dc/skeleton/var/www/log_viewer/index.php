@@ -328,6 +328,20 @@ if (isset($_GET['end_timestamp']))
 	unset($_GET['end_timestamp']);
 }
 
+/**
+ * Ensure that our display_extended_filters get variable is populated correctly
+ * with an obviously boolean value.
+ **/
+if (! isset($_GET['display_extended_filters']))
+{
+	$_GET['display_extended_filters'] = 1;
+}
+$_GET['display_extended_filters'] = $_GET['display_extended_filters'] ? 1 : 0;
+
+/**
+ * Sanitize our environment and language get variables and unset them if they
+ * are not valid.
+ **/
 if (isset($_GET['environment']) && isset($_GET['language']))
 {
 	if (! sanitize_environment())
@@ -340,6 +354,12 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 	}
 }
 
+/**
+ * If our environment and language variables are valid, check the rest of our
+ * filters and assuming that they all check out populate $end_timestamp,
+ * $log_timestamp, and $start_timestamp with the range that this query to the
+ * log viewer will iterate through.
+ **/
 if (isset($_GET['environment']) && isset($_GET['language']))
 {
 	if (sanitize_filter() && sanitize_negate_filter() && sanitize_logic_filter())
@@ -372,10 +392,23 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 			<?php echo filter_form_string(); ?>
 		</div>
 		<div style="margin-bottom: 5px; text-align: right;">
-			<span onclick="this.innerHTML = toggle_display('extended_filters') ? '&#9660;' : '&#9668;';" style="cursor: pointer;">&#9660;</span>
+			<?php
+				if ($_GET['display_extended_filters'])
+				{
+					$extended_filter_icon = '&#9660;';
+					$extended_filter_style = '';
+				}
+				else
+				{
+					$extended_filter_icon = '&#9668;';
+					$extended_filter_style = 'display: none;';
+				}
+			?>
+			<span onclick="this.innerHTML = toggle_display('extended_filters') ? '&#9660;' : '&#9668;';" style="cursor: pointer;"><?php echo $extended_filter_icon; unset($extended_filter_icon); ?></span>
 		</div>
-		<form id="control_form" method="get">
-			<table id="extended_filters" width="100%">
+		<form id="control_form" method="get" onsubmit="document.getElementsByName('display_extended_filters')[0].value = is_visible('extended_filters'); return 1;">
+			<input type='hidden' name='display_extended_filters' value=''>
+			<table id="extended_filters" style="<?php echo $extended_filter_style; unset($extended_filter_style); ?>" width="100%">
 				<tr>
 					<td>
 						Env:

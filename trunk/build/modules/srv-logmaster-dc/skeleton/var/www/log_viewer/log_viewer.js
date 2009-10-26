@@ -39,6 +39,22 @@ function highlight_named_anchor()
 }
 
 
+function is_visible(id)
+{
+	var element = document.getElementById(id);
+
+	if (! element)
+	{
+		return -1;
+	}
+	if (element.style.display == 'none')
+	{
+		return 0;
+	}
+	return 1;
+}
+
+
 function parse_token(token)
 {
 	if (token == null)
