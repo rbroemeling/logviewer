@@ -645,6 +645,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 					{
 						if (form)
 						{
+							form.onsubmit();
 							form.submit();
 						}
 					}

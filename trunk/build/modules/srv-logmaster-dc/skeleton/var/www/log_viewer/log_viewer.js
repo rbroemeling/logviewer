@@ -181,6 +181,7 @@ function tail()
 	if (form)
 	{
 		form.action = form.action + '#tail';
+		form.onsubmit();
 		form.submit();
 	}
 }
