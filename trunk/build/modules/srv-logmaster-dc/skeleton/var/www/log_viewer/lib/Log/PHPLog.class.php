@@ -78,7 +78,7 @@ class PHPLog extends Log
 	public function __toString()
 	{
 		$string  = parent::__toString();
-		if (defined('DEBUG') && DEBUG)
+		if (DEBUG)
 		{
 			$string .= '<span class="debug">Begin ' . __CLASS__ . '</span>';
 		}
@@ -111,7 +111,7 @@ class PHPLog extends Log
 			$string .= htmlspecialchars($this->php_error_message, ENT_QUOTES);
 		}
 		$string .= '</span>';
-		if (defined('DEBUG') && DEBUG)
+		if (DEBUG)
 		{
 			$string .= '<span class="debug">End ' . __CLASS__ . '</span>';
 		}

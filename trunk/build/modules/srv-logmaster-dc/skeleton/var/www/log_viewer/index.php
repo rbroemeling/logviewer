@@ -18,11 +18,17 @@
 define('MAX_LINES', 15000);
 
 // Debug-mode: output extra information about the handlers being used.
-if ((! defined('DEBUG')) && $_GET['debug'])
+if (! defined('DEBUG'))
 {
-	define('DEBUG', true);
+	if ($_GET['debug'])
+	{
+		define('DEBUG', true);
+	}
+	else
+	{
+		define('DEBUG', false);
+	}
 }
-
 
 /******************************************************************************
  * Configuration details about the location of log files.  In general, log file
@@ -569,7 +575,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 						$log_path .= '.gz';
 					}
 					$log_file = new LogFile();
-					if (defined('DEBUG') && DEBUG)
+					if (DEBUG)
 					{
 						echo '<div class="debug">Beginning logfile: ' . $log_path . '</div>';
 					}
@@ -609,7 +615,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 						echo SkipWarning::warning(true);
 						LineOutput::display($current_line);
 					}
-					if (defined('DEBUG') && DEBUG)
+					if (DEBUG)
 					{
 						echo '<div class="debug">Reached end of logfile: ' . $log_path . '</div>';
 					}

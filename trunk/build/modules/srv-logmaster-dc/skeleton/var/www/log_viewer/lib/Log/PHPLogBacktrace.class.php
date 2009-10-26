@@ -16,7 +16,7 @@ class PHPLogBacktrace extends PHPLog
 	public function __toString()
 	{
 		$string  = parent::__toString();
-		if (defined('DEBUG') && DEBUG)
+		if (DEBUG)
 		{
 			$string .= '<span class="debug">Begin ' . __CLASS__ . '</span>';
 		}
@@ -46,7 +46,7 @@ class PHPLogBacktrace extends PHPLog
 			$string .= implode("<br>\n<spacer type='block' width='40'/>", $backtrace_components);
 			$string .= "</span>";
 		}
-		if (defined('DEBUG') && DEBUG)
+		if (DEBUG)
 		{
 			$string .= '<span class="debug">End ' . __CLASS__ . '</span>';
 		}

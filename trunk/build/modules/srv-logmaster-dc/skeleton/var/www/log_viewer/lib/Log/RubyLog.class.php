@@ -61,7 +61,7 @@ class RubyLog extends Log
 	public function __toString()
 	{
 		$string  = parent::__toString();
-		if (defined('DEBUG') && DEBUG)
+		if (DEBUG)
 		{
 			$string .= '<span class="debug">Begin ' . __CLASS__ . '</span>';
 		}
@@ -102,7 +102,7 @@ class RubyLog extends Log
 			}
 			$string .= "</span>";
 		}
-		if (defined('DEBUG') && DEBUG)
+		if (DEBUG)
 		{
 			$string .= '<span class="debug">End ' . __CLASS__ . '</span>';
 		}

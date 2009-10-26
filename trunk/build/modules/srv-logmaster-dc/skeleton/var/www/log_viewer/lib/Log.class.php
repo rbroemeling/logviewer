@@ -78,7 +78,7 @@ class Log
 		}
 
 		$string  = '';
-		if (defined('DEBUG') && DEBUG)
+		if (DEBUG)
 		{
 			$string .= '<span class="debug">Begin ' . __CLASS__ . '</span>';
 		}
@@ -94,7 +94,7 @@ class Log
 			$string .= "<span class='ip'>" . htmlspecialchars($this->client_ip, ENT_QUOTES) . "</span> ";
 		}
 		$string .= htmlspecialchars($this->extra_data, ENT_QUOTES);
-		if (defined('DEBUG') && DEBUG)
+		if (DEBUG)
 		{
 			$string .= '<span class="debug">End ' . __CLASS__ . '</span>';
 		}
@@ -113,7 +113,7 @@ class Log
 		{
 			if (call_user_func(array($class_summary['class'], 'handles'), $line))
 			{
-				if (defined('DEBUG') && DEBUG)
+				if (DEBUG)
 				{
 					echo '<div class="debug">Handler ' . $class_summary['class'] . ' chosen for line: "' . $line . '"</div>' . "\n";
 				}
@@ -121,7 +121,7 @@ class Log
 			}
 		}
 
-		if (defined('DEBUG') && DEBUG)
+		if (DEBUG)
 		{
 			echo '<div class="debug">Handler ' . __CLASS__ . ' chosen for line: "' . $line . '"</div>' . "\n";
 		}
