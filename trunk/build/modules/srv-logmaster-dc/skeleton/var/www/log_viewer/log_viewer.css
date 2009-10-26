@@ -66,6 +66,15 @@ span.debug:after
 
 
 /* Input Form Styling ********************************************/
+table#basic_filters
+{
+	border-bottom: 3px groove green;
+	border-top: 1px dotted green;
+}
+table#extended_filters select
+{
+	width: 200px;
+}
 div#filter_list div
 {
 	margin-bottom: 5px;
@@ -74,29 +83,6 @@ div#filter_list div
 div#filter_template
 {
 	display: none;
-}
-
-
-/* Documentation Table Styling ***********************************/
-table#documentation_table
-{
-	font-size: 0.9em;
-	border-spacing: 0px;
-}
-table#documentation_table td
-{
-	border-width: 1px 0px 1px 0px;
-	border-spacing: 0px;
-	border-style: solid none solid none;
-	border-collapse: collapse;
-}
-table#documentation_table th
-{
-	background: #003300;
-	border-width: 1px 0px 1px 0px;
-	border-spacing: 0px;
-	border-style: solid none solid none;
-	border-collapse: collapse;
 }
 
 

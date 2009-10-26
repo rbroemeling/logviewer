@@ -180,7 +180,7 @@ function toggle_display(id)
 	}
 	if (element.style.display == 'none')
 	{
-		element.style.display = 'block';
+		element.style.display = '';
 		return 1;
 	}
 	element.style.display = 'none';

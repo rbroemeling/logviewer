@@ -33,6 +33,12 @@ if ((! defined('DEBUG')) && $_GET['debug'])
  ******************************************************************************/
 $config = array();
 
+// A list of log facilities that can be filtered on by the user.
+$config['log_facilities'] = array('cron', 'general', 'orwell', 'sql');
+
+// A list of log levels that can be filtered on by the user.
+$config['log_levels'] = array('critical', 'error', 'warning', 'info', 'debug', 'spam');
+
 // The root log directory that contains sub-directories for each environment.
 $config['log_root'] = '/var/log/development';
 
@@ -42,6 +48,16 @@ $config['environments'] = array('beta', 'live', 'stage');
 // A list of languages to be exposed to the user.
 $config['languages'] = array('dispatcher', 'php', 'ruby');
 
+// A list of source hosts that can be filtered on by the user.
+$config['source_hosts'] = array();
+for ($i = 100; $i <= 111; $i++)
+{
+	$config['source_hosts'][] = '10.0.3.' . $i;
+}
+for ($i = 200; $i <= 211; $i++)
+{
+	$config['source_hosts'][] = '10.0.3.' . $i;
+}
 
 /******************************************************************************
  * Utility Functions
@@ -355,36 +371,123 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 			<!-- This is an invisible div that simply serves as a template for the HTML that defines a filter. -->
 			<?php echo filter_form_string(); ?>
 		</div>
+		<div style="margin-bottom: 5px; text-align: right;">
+			<span onclick="this.innerHTML = toggle_display('extended_filters') ? '&#9660;' : '&#9668;';" style="cursor: pointer;">&#9660;</span>
+		</div>
 		<form id="control_form" method="get">
-			<table width="100%">
+			<table id="extended_filters" width="100%">
 				<tr>
 					<td>
 						Env:
-						<select name='environment'>
+						<select name="environment">
 							<?php
 								$selected_environment = (isset($_GET['environment']) ? $_GET['environment'] : 'live');
 								foreach ($config['environments'] as $env)
 								{
-									echo '<option' . ($selected_environment == $env ? ' selected' : '') . ">$env</option>\n";
+									$selected = '';
+									if ($selected_environment == $env)
+									{
+										$selected = 'selected';
+									}
+									echo "<option $selected>$env</option>\n";
 								}
 								unset($selected_environment);
 							?>
 						</select>
 					</td>
+					<td rowspan="2" style="text-align: center;">
+						Source Host(s):<br>
+						<select multiple name="source_hosts[]" size="6">
+							<?php
+								foreach ($config['source_hosts'] as $source_host)
+								{
+									$selected = '';
+									if (in_array($source_host, $_GET['source_hosts']))
+									{
+										$selected = 'selected';
+									}
+									echo "<option $selected>$source_host</option>\n";
+								}
+							?>
+						</select>
+					</td>
+					<td rowspan="2" style="text-align: center;">
+						Log Level(s):<br>
+						<select multiple name="log_levels[]" size="6">
+							<?php
+								foreach ($config['log_levels'] as $log_level)
+								{
+									$selected = '';
+									if (in_array($log_level, $_GET['log_levels']))
+									{
+										$selected = 'selected';
+									}
+									echo "<option $selected>$log_level</option>\n";
+								}
+							?>
+						</select>
+					</td>
+					<td rowspan="2" style="text-align: center;">
+						Log Facility(ies):<br>
+						<select multiple name="log_facilities[]" size="6">
+							<?php
+								foreach ($config['log_facilities'] as $log_facility)
+								{
+									$selected = '';
+									if (in_array($log_facility, $_GET['log_facilities']))
+									{
+										$selected = 'selected';
+									}
+									echo "<option $selected>$log_facility</option>\n";
+								}
+							?>
+						</select>
+					</td>
+				</tr>
+				<tr>
 					<td>
 						Lang:
-						<select name='language'>
+						<select name="language">
 							<?php
 								$selected_language = (isset($_GET['language']) ? $_GET['language'] : 'ruby');
 								foreach ($config['languages'] as $lang)
 								{
-									echo '<option' . ($selected_language == $lang ? ' selected' : '') . ">$lang</option>\n";
+									$selected = '';
+									if ($selected_language == $lang)
+									{
+										$selected = 'selected';
+									}
+									echo "<option $selected>$lang</option>\n";
 								}
 								unset($selected_language);
 							?>
 						</select>
 					</td>
-					<td style='text-align: center;'>
+				</tr>
+				<tr>
+					<td colspan="4" style="text-align: right;">
+						<input type='button' value='Add Filter' onclick='add_filter();' />
+						<input type='button' value='Parse Token' onclick='parse_token(null);' />						
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4">
+						<div id="filter_list">
+							<?php
+								for ($i = 0; $i < count($_GET['filter']); $i++)
+								{
+									echo '<div>';
+									echo filter_form_string($_GET['filter'][$i], $_GET['negate_filter'][$i], $_GET['logic_filter'][$i]);
+									echo '</div>';
+								}
+							?>
+						</div>
+					</td>
+				</tr>
+			</table>
+			<table id="basic_filters" width="100%">
+				<tr>
+					<td colspan="3" style="text-align: center;">
 						<?php
 							echo create_numeric_select('start_hour', 0, 23, date('H') - 1, create_function('$hour', 'return sprintf("%02d", $hour);')) . ' : ';
 							echo create_numeric_select('start_minute', 0, 59, 0, create_function('$min', 'return sprintf("%02d", $min);')) . ' : ';
@@ -404,33 +507,8 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 						?>
 					</td>
 					<td style="text-align: right;">
-						<input type='button' value='?' onclick='toggle_display("documentation_table");' />
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<input type='button' value='Add Filter' onclick='add_filter();' />
-					</td>
-					<td>
-						<input type='button' value='Parse Token' onclick='parse_token(null);' />
-					</td>
-				</tr>
-			</table>
-			<div id="filter_list">
-				<?php
-					for ($i = 0; $i < count($_GET['filter']); $i++)
-					{
-						echo '<div>';
-						echo filter_form_string($_GET['filter'][$i], $_GET['negate_filter'][$i], $_GET['logic_filter'][$i]);
-						echo '</div>';
-					}
-				?>
-			</div>
-			<table width="100%">
-				<tr>
-					<td style="text-align: right;">
-						<input style="margin-right: 10px;" type='button' value='Tail' onclick='tail();' />
-						<input type='submit' value='Submit' />
+						<input style="margin-right: 10px;" type="button" value="Tail" onclick="tail();" />
+						<input type="submit" value="Submit" />
 					</td>
 				</tr>
 			</table>
@@ -445,105 +523,6 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 				echo '<div class="warning">' . htmlspecialchars($warning_message, ENT_QUOTES) . "</div>\n";
 			}
 		?>
-		<div>
-			<table id='documentation_table' style="display: none" width="100%">
-				<thead>
-					<tr>
-						<th colspan="3">General Controls</th>
-					</tr>
-					<tr>
-						<th width='125px'>Field</th>
-						<th>Description</th>
-						<th width='125px'>Default</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td><i>Environment</i></td>
-						<td>Which environment to retrieve log data for.</td>
-						<td>&nbsp;</td>
-					</tr>
-					<tr>
-						<td><i>Language</i></td>
-						<td>Which language to retrieve log data for.</td>
-						<td>&nbsp;</td>
-					</tr>
-					<tr>
-						<td><i>Timeframe</i></td>
-						<td>
-							These two controls specify the timeframe within which log data should be returned.  Log data outside of this timeframe will
-							not be retrieved.
-						</td>
-						<td>+/- one hour</td>
-					</tr>
-					<tr>
-						<td><i>Add Filter</i></td>
-						<td>Use this button to add a filter to the current list of filters.</td>
-						<td>&nbsp;</td>
-					</tr>
-				</tbody>
-				<thead>
-					<tr>
-						<th colspan="3">Per-Filter Controls</th>
-					</tr>
-					<tr>
-						<th width='125px'>Field</th>
-						<th>Description</th>
-						<th width='125px'>Default</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td><i>-</i></td>
-						<td>Use this button to remove the filter from the current list of filters.</td>
-						<td>&nbsp;</td>
-					</tr>
-					<tr>
-						<td><i>Filter</i></td>
-						<td>
-							A regular expression to match against the data retrieved from the log file.
-							Only log lines matching satisfying the list of filters (or their context,
-							see <i>filter context</i>) will be displayed.
-						</td>
-						<td>&nbsp;</td>
-					</tr>
-					<tr>
-						<td><i>Match Type</i></td>
-						<td>
-							A flag stating whether to match normally or to reverse the effect of <i>filter</i>.
-							<dl>
-								<dt>Normal Match
-								<dd>Match normally -- lines that match the <i>filter</i> regular expression will
-									satisfy it.
-								<dt>Inverted Match
-								<dd>Invert the match -- only lines that do not match the <i>filter</i>
-									regular expression will satisfy it.
-							</dl>
-						</td>
-						<td>Normal Match</td>
-					</tr>
-					<tr>
-						<td><i>Logical Operator</i></td>
-						<td>
-							A boolean operator that controls how this <i>filter</i> will relate to the
-							others within the filter list.  All 'AND' logical operations are executed
-							first, after which the results are 'OR'ed.
-							<dl>
-								<dt>OR
-								<dd>If the left-hand-side or the right-hand-side is true, consider
-									the filter list satisfied.  Note that 'OR' is considered to
-									be lower precedence than 'AND'.
-								<dt>AND
-								<dd>If the left-hand-side and the right-hand-side are both true,
-									consider the filter list satisfied.  Note that 'AND' is
-									considered to be a higher precedence than 'OR'.
-							</dl>
-						</td>
-						<td>OR</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
 		<div id="log_excerpt">
 			<?php
 				SkipWarning::reset();
@@ -623,12 +602,12 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 				</div>
 		<?php
 			}
-			if (isset($_REQUEST['token']))
+			if (isset($_GET['token']))
 			{
 		?>
 				<script>
 					var form = document.getElementById('control_form');
-					var token = <?php echo json_encode($_REQUEST['token']); ?>;
+					var token = <?php echo json_encode($_GET['token']); ?>;
 					if (parse_token(token))
 					{
 						if (form)
