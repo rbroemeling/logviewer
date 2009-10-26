@@ -18,6 +18,7 @@ class LineOutput
 	{
 		$query_params = array
 		(
+			'display_extended_filters' => 0,
 			'environment' => $_GET['environment'],
 			'language' => $_GET['language'],
 			'start_timestamp' => $line->log_timestamp() - 1,
