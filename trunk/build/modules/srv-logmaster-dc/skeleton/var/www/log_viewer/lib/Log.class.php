@@ -187,10 +187,30 @@ class Log
 	}
 
 
+	public function matches_log_facilities()
+	{
+		return true;
+	}
+	
+	
+	public function matches_log_levels()
+	{
+		if ((! $_GET['log_levels']) || $_GET['log_levels'][$this->error_level])
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	
 	public function matches_filters()
 	{
+		if (! $_GET['filter'])
+		{
+			return true;
+		}
+		
 		$filter_results = array();
-
 		for ($i = 0; $i < count($_GET['filter']); $i++)
 		{
 			if (! $_GET['filter'][$i])
@@ -218,6 +238,16 @@ class Log
 		}
 
 		return (array_sum($filter_results) > 0);
+	}
+
+
+	public function matches_source_hosts()
+	{
+		if ((! $_GET['source_hosts']) || $_GET['source_hosts'][$this->syslog_host])
+		{
+			return true;
+		}
+		return false;
 	}
 
 

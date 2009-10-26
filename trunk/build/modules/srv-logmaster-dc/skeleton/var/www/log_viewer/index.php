@@ -68,6 +68,17 @@ for ($i = 200; $i <= 211; $i++)
 /******************************************************************************
  * Utility Functions
  ******************************************************************************/
+function array_to_hash($arr)
+{
+	$hash = array();
+	foreach ($arr as $key)
+	{
+		$hash[$key] = true;
+	}
+	return $hash;
+}
+
+
 function create_numeric_select($name, $min, $max, $default_value = null, $label_formatter = null)
 {
 	if (is_null($label_formatter))
@@ -375,6 +386,24 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 		$start_timestamp = mktime($_GET['start_hour'], $_GET['start_minute'], $_GET['start_second'], $_GET['start_month'], $_GET['start_day'], $_GET['start_year']);
 
 		/**
+		 * Convert our filter arrays (source hosts, log levels, and log facilities) into
+		 * hashes.  This saves us from needing to search through the array to see if a
+		 * value exists and is much more performant.
+		 **/
+		if ($_GET['log_facilities'])
+		{
+			$_GET['log_facilities'] = array_to_hash($_GET['log_facilities']);
+		}
+		if ($_GET['log_levels'])
+		{
+			$_GET['log_levels'] = array_to_hash($_GET['log_levels']);
+		}
+		if ($_GET['source_hosts'])
+		{
+			$_GET['source_hosts'] = array_to_hash($_GET['source_hosts']);
+		}
+
+		/**
 		 * This script can be quite costly to run; but we specifically do not want it to timeout
 		 * on a system administrator or developer who is searching over a large amount of logs.
 		 * Therefore we allow the script to run for 1 second for each 10 seconds of the requested
@@ -436,51 +465,57 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 					</td>
 					<td rowspan="2" style="text-align: center;">
 						Source Host(s):<br>
-						<select multiple name="source_hosts[]" size="6">
+						<select multiple id="source_hosts" name="source_hosts[]" size="6">
 							<?php
 								foreach ($config['source_hosts'] as $source_host)
 								{
-									$selected = '';
-									if (in_array($source_host, $_GET['source_hosts']))
-									{
-										$selected = 'selected';
-									}
+									$selected = $_GET['source_hosts'][$source_host] ? 'selected' : '';
 									echo "<option $selected>$source_host</option>\n";
 								}
 							?>
 						</select>
+						<div>
+							<div style="float: right; width: 50%;">
+								<input type="button" value="Invert" onclick="invert_selection('source_hosts');">	
+							</div>
+							<input type="button" value="Clear" onclick="clear_selection('source_hosts');">
+						</div>
 					</td>
 					<td rowspan="2" style="text-align: center;">
 						Log Level(s):<br>
-						<select multiple name="log_levels[]" size="6">
+						<select multiple id="log_levels" name="log_levels[]" size="6">
 							<?php
 								foreach ($config['log_levels'] as $log_level)
 								{
-									$selected = '';
-									if (in_array($log_level, $_GET['log_levels']))
-									{
-										$selected = 'selected';
-									}
+									$selected = $_GET['log_levels'][$log_level] ? 'selected' : '';
 									echo "<option $selected>$log_level</option>\n";
 								}
 							?>
 						</select>
+						<div>
+							<div style="float: right; width: 50%;">
+								<input type="button" value="Invert" onclick="invert_selection('log_levels');">	
+							</div>
+							<input type="button" value="Clear" onclick="clear_selection('log_levels');">
+						</div>
 					</td>
 					<td rowspan="2" style="text-align: center;">
 						Log Facility(ies):<br>
-						<select multiple name="log_facilities[]" size="6">
+						<select multiple id="log_facilities" name="log_facilities[]" size="6">
 							<?php
 								foreach ($config['log_facilities'] as $log_facility)
 								{
-									$selected = '';
-									if (in_array($log_facility, $_GET['log_facilities']))
-									{
-										$selected = 'selected';
-									}
+									$selected = $_GET['log_facilities'][$log_facility] ? 'selected' : '';
 									echo "<option $selected>$log_facility</option>\n";
 								}
 							?>
 						</select>
+						<div>
+							<div style="float: right; width: 50%;">
+								<input type="button" value="Invert" onclick="invert_selection('log_facilities');">	
+							</div>
+							<input type="button" value="Clear" onclick="clear_selection('log_facilities');">
+						</div>
 					</td>
 				</tr>
 				<tr>
@@ -605,8 +640,13 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 							break 2;
 						}
 
-						// If we have filters, skip lines that do not match them.
-						if ($_GET['filter'] && (! $current_line->matches_filters()))
+						// If we have any filters, skip the lines that do not match them.
+						if (
+						    (! $current_line->matches_source_hosts()) ||
+						    (! $current_line->matches_log_levels()) ||
+						    (! $current_line->matches_log_facilities()) ||
+						    (! $current_line->matches_filters())
+						    )
 						{
 							SkipWarning::add();
 							continue;

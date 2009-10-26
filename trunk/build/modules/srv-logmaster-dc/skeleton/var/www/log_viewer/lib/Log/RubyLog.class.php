@@ -139,6 +139,16 @@ class RubyLog extends Log
 	}
 
 
+	public function matches_log_facilities()
+	{
+		if ((! $_GET['log_facilities']) || $_GET['log_facilities'][$this->ruby_component])
+		{
+			return true;
+		}
+		return false;
+	}
+	
+
 	public static function priority()
 	{
 		# This class must be a higher priority than PHPLog, because they are
