@@ -111,12 +111,12 @@ class Log
 
 	public static function factory($line)
 	{
-		if (is_null(Log::$classes))
+		if (is_null(self::$classes))
 		{
-			Log::initialize();
+			self::initialize();
 		}
 
-		foreach (Log::$classes as $class_summary)
+		foreach (self::$classes as $class_summary)
 		{
 			if (call_user_func(array($class_summary['class'], 'handles'), $line))
 			{
@@ -153,7 +153,7 @@ class Log
 			include_once(dirname(__FILE__) . '/Log/' . $file);
 		}
 
-		Log::$classes = array();
+		self::$classes = array();
 		foreach (get_declared_classes() as $class)
 		{
 			if (is_subclass_of($class, __CLASS__))
@@ -161,12 +161,12 @@ class Log
 				$class_summary = array();
 				$class_summary['class'] = $class;
 				$class_summary['priority'] = call_user_func(array($class_summary['class'], 'priority'));
-				array_push(Log::$classes, $class_summary);
+				array_push(self::$classes, $class_summary);
 			}
 		}
 		uasort
 		(
-			Log::$classes,
+			self::$classes,
 			create_function
 			(
 				'$a,$b',
