@@ -2,6 +2,8 @@
 class LineOutput
 {
 	public static $displayed_lines = 0;
+	private static $encoded_environment = null;
+	private static $encoded_language = null;
 
 	public static function display($line, $extra_classes = '')
 	{
@@ -16,18 +18,15 @@ class LineOutput
 
 	protected static function create_link($line)
 	{
-		static $encoded_environment = null;
-		static $encoded_language = null;
-
 		# urlencode our environment and language query parameters as
 		# necessary.
-		if (is_null($encoded_environment))
+		if (is_null(self::$encoded_environment))
 		{
-			$encoded_environment = urlencode($_GET['environment']);
+			self::$encoded_environment = urlencode($_GET['environment']);
 		}
-		if (is_null($encoded_language))
+		if (is_null(self::$encoded_language))
 		{
-			$encoded_language = urlencode($_GET['language']);
+			self::$encoded_language = urlencode($_GET['language']);
 		}
 
 		# Create an array of query parameters and create the line identifier
@@ -35,8 +34,8 @@ class LineOutput
 		$query_params = array
 		(
 			'display_extended_filters=0',
-			'environment=' . $encoded_environment,
-			'language=' . $encoded_language,
+			'environment=' . self::$encoded_environment,
+			'language=' . self::$encoded_language,
 			'start_timestamp=' . ($line->syslog_timestamp - 1),
 			'end_timestamp=' . ($line->syslog_timestamp + 5)
 		);
