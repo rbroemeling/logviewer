@@ -67,40 +67,40 @@ class RubyLog extends Log
 		}
 		if (! is_null($this->ruby_configuration))
 		{
-			$string .= " <span class='configuration'>" . htmlspecialchars($this->ruby_configuration, ENT_QUOTES) . "</span>.";
+			$string .= ' <span class="configuration">' . htmlspecialchars($this->ruby_configuration, ENT_QUOTES) . '</span>.';
 		}
 		if (! is_null($this->ruby_revision))
 		{
-			$string .= "<span class='revision'>r" . htmlspecialchars($this->ruby_revision, ENT_QUOTES) . "</span>.";
+			$string .= '<span class="revision">r' . htmlspecialchars($this->ruby_revision, ENT_QUOTES) . '</span>.';
 		}
 		if (! is_null($this->ruby_pid))
 		{
-			$string .= "<span class='pid'>" . htmlspecialchars($this->ruby_pid, ENT_QUOTES) . "</span>.";
+			$string .= '<span class="pid">' . htmlspecialchars($this->ruby_pid, ENT_QUOTES) . '</span>.';
 		}
 		if (! is_null($this->ruby_component))
 		{
-			$string .= "<span class='ruby_component_" . $this->ruby_component . "'>" . htmlspecialchars($this->ruby_component, ENT_QUOTES) . "</span>.";
+			$string .= '<span class="ruby_component_' . $this->ruby_component . '">' . htmlspecialchars($this->ruby_component, ENT_QUOTES) . '</span>.';
 		}
 		if (! is_null($this->ruby_error_level) || ! is_null($this->ruby_request_identifier) || ! is_null($this->ruby_error_message))
 		{
-			$string .= "<span class='errorlevel_" . $this->error_level . "'>";
+			$string .= '<span class="errorlevel_' . $this->error_level . '">';
 			if (! is_null($this->ruby_error_level))
 			{
 				$string .= htmlspecialchars($this->ruby_error_level, ENT_QUOTES);
 			}
 			if (! is_null($this->ruby_request_identifier))
 			{
-				$string .= " " . htmlspecialchars($this->ruby_request_identifier, ENT_QUOTES);
+				$string .= ' ' . htmlspecialchars($this->ruby_request_identifier, ENT_QUOTES);
 			}
 			if (! is_null($this->ruby_error_level) || ! is_null($this->ruby_request_identifier))
 			{
-				$string .= ": ";
+				$string .= ': ';
 			}
 			if (! is_null($this->ruby_error_message))
 			{
 				$string .= htmlspecialchars($this->ruby_error_message, ENT_QUOTES);
 			}
-			$string .= "</span>";
+			$string .= '</span>';
 		}
 		if (DEBUG)
 		{
