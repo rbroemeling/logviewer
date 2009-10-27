@@ -215,7 +215,8 @@ class Log
 		}
 		
 		$filter_results = array();
-		for ($i = 0; $i < count($_GET['filter']); $i++)
+		$j = count($_GET['filter']);
+		for ($i = 0; $i < $j; $i++)
 		{
 			if (! $_GET['filter'][$i])
 			{
