@@ -40,7 +40,7 @@ class LogFile
 			return false;
 		}
 		$data = Log::factory($data);
-		$data->set_offset($offset);
+		$data->line_offset = $offset;
 		return $data;
 	}
 

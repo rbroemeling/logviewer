@@ -1,13 +1,13 @@
 <?php
 class RubyLog extends Log
 {
-	protected $ruby_component = null;
-	protected $ruby_configuration = null;
-	protected $ruby_revision = null;
-	protected $ruby_error_level = null;
-	protected $ruby_error_message = null;
-	protected $ruby_pid = null;
-	protected $ruby_request_identifier = null;
+	public $ruby_component = null;
+	public $ruby_configuration = null;
+	public $ruby_revision = null;
+	public $ruby_error_level = null;
+	public $ruby_error_message = null;
+	public $ruby_pid = null;
+	public $ruby_request_identifier = null;
 
 
 	public function __construct($line)

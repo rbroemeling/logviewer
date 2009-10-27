@@ -3,17 +3,17 @@ class Log
 {
 	private static $classes = null;
 
-	protected $line = null;
-	protected $line_offset = null;
+	public $line = null;
+	public $line_offset = null;
 
-	protected $client_ip = null;
-	protected $client_uid = null;
-	protected $error_level = null;
-	protected $syslog_date = null;
-	protected $syslog_host = null;
-	protected $syslog_program = null;
+	public $client_ip = null;
+	public $client_uid = null;
+	public $error_level = null;
+	public $syslog_timestamp = null;
+	public $syslog_host = null;
+	public $syslog_program = null;
 
-	protected $extra_data = null;
+	public $extra_data = null;
 
 
 	public function __construct($line)
@@ -28,7 +28,7 @@ class Log
 		#	'(Sep 11 13:07:27) (10.0.3.8/10.0.0.16) (.*)'
 		if (preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([0-9./]+) +(.*)\n?$!i', $this->line, $fields))
 		{
-			$this->syslog_date = strtotime($fields[1]);
+			$this->syslog_timestamp = strtotime($fields[1]);
 			$this->syslog_host = $fields[2];
 
 			$this->extra_data = $fields[3];
@@ -82,7 +82,7 @@ class Log
 		{
 			$string .= '<span class="debug">Begin ' . __CLASS__ . '</span>';
 		}
-		$string .= "<span class='date'>" . htmlspecialchars(strftime("%b %e %H:%M:%S", $this->syslog_date), ENT_QUOTES) . "</span> ";
+		$string .= "<span class='date'>" . htmlspecialchars(strftime("%b %e %H:%M:%S", $this->syslog_timestamp), ENT_QUOTES) . "</span> ";
 		$string .= "<span class='host'>" . htmlspecialchars($this->syslog_host, ENT_QUOTES) . "</span> ";
 		$string .= "<span class='program'>" . htmlspecialchars($this->syslog_program, ENT_QUOTES) . "</span> ";
 		if (! is_null($this->client_uid))
@@ -129,12 +129,6 @@ class Log
 	}
 
 
-	public function get_offset()
-	{
-		return $this->line_offset;
-	}
-
-
 	public static function handles($line)
 	{
 		return true;
@@ -178,12 +172,6 @@ class Log
 				'
 			)
 		);
-	}
-
-
-	public function log_timestamp()
-	{
-		return $this->syslog_date;
 	}
 
 
@@ -254,12 +242,6 @@ class Log
 	public static function priority()
 	{
 		return 0;
-	}
-
-
-	public function set_offset($line_offset)
-	{
-		$this->line_offset = $line_offset;
 	}
 }
 ?>

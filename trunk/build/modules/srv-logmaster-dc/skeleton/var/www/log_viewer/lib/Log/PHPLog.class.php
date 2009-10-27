@@ -1,12 +1,12 @@
 <?php
 class PHPLog extends Log
 {
-	protected $php_configuration = null;
-	protected $php_error_level = null;
-	protected $php_error_message = null;
-	protected $php_script_lineno = null;
-	protected $php_script_name = null;
-	protected $php_script_path = null;
+	public $php_configuration = null;
+	public $php_error_level = null;
+	public $php_error_message = null;
+	public $php_script_lineno = null;
+	public $php_script_name = null;
+	public $php_script_path = null;
 
 	public function __construct($line)
 	{

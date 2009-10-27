@@ -623,11 +623,11 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 
 					while ($current_line = $log_file->gets())
 					{
-						if ($current_line->log_timestamp() < $start_timestamp)
+						if ($current_line->syslog_timestamp < $start_timestamp)
 						{
 							continue;
 						}
-						if ($current_line->log_timestamp() > $end_timestamp)
+						if ($current_line->syslog_timestamp > $end_timestamp)
 						{
 							echo SkipWarning::warning(true);
 							echo "<div class='warning'>Reached end of requested timeframe (" . strftime('%Y-%m-%d %H:%M:%S', $end_timestamp) . ").</div>";

@@ -1,7 +1,7 @@
 <?php
 class RubyLogBacktrace extends RubyLog
 {
-	protected $ruby_backtrace = null;
+	public $ruby_backtrace = null;
 
 
 	public function __construct($line)

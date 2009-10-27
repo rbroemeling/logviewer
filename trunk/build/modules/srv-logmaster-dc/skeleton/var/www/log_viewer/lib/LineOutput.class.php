@@ -19,7 +19,8 @@ class LineOutput
 		static $encoded_environment = null;
 		static $encoded_language = null;
 
-		# Initialize the necessary convenience variables as necessary.
+		# urlencode our environment and language query parameters as
+		# necessary.
 		if (is_null($encoded_environment))
 		{
 			$encoded_environment = urlencode($_GET['environment']);
@@ -28,8 +29,6 @@ class LineOutput
 		{
 			$encoded_language = urlencode($_GET['language']);
 		}
-		$log_timestamp = $line->log_timestamp();
-		$log_offset = $line->get_offset();
 
 		# Create an array of query parameters and create the line identifier
 		# for this particular log line.
@@ -38,27 +37,12 @@ class LineOutput
 			'display_extended_filters=0',
 			'environment=' . $encoded_environment,
 			'language=' . $encoded_language,
-			'start_timestamp=' . ($log_timestamp - 1),
-			'end_timestamp=' . ($log_timestamp + 5)
+			'start_timestamp=' . ($line->syslog_timestamp - 1),
+			'end_timestamp=' . ($line->syslog_timestamp + 5)
 		);
-		$line_identifier = $log_timestamp . '.' . $log_offset;
+		$line_id = $line->syslog_timestamp . '.' . $line->line_offset;
 
-		# Create the link by imploding an array of strings.  This is done
-		# rather than string concatenation for performance reasons (this
-		# is quicker).
-		$url_array = array
-		(
-			'<a href="?',
-			implode('&', $query_params),
-			'#',
-			$line_identifier,
-			'" id="',
-			$line_identifier,
-			'" name="',
-			$line_identifier,
-			'">link</a>'
-		);
-		return implode('', $url_array);
+		return '<a href="?' . implode('&', $query_params) . '#' . $line_id . '" id="' . $line_id . '" name="' . $line_id . '">link</a>';
 	}
 }
 ?>

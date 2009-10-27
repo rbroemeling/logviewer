@@ -1,7 +1,7 @@
 <?php
 class PHPLogBacktrace extends PHPLog
 {
-	protected $php_backtrace = null;
+	public $php_backtrace = null;
 
 
 	public function __construct($line)
