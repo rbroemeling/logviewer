@@ -60,9 +60,9 @@ class PHPLogBacktrace extends PHPLog
 	}
 
 
-	public static function handles($line)
+	public static function handles($line, $uuid)
 	{
-		if (parent::handles($line))
+		if (parent::handles($line, $uuid))
 		{
 			# Regular Expression Map:
 			#  'toString(0)<-/'

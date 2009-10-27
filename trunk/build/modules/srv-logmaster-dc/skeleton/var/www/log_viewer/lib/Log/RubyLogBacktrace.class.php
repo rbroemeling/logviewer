@@ -64,9 +64,9 @@ class RubyLogBacktrace extends RubyLog
 	}
 
 
-	public static function handles($line)
+	public static function handles($line, $uuid)
 	{
-		if (parent::handles($line))
+		if (parent::handles($line, $uuid))
 		{
 			# Regular Expression Map:
 			#  'pagehandler.rb:653:in `'

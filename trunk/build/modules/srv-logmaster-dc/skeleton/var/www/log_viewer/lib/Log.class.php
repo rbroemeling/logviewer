@@ -2,9 +2,10 @@
 class Log
 {
 	private static $classes = null;
+	private static $handle_id = 0;
 	private static $last_timestamp = null;
 	private static $last_timestring = null;
-
+	
 	public $line = null;
 	public $line_offset = null;
 
@@ -115,10 +116,11 @@ class Log
 		{
 			self::initialize();
 		}
-
+		
+		self::$handle_id++;
 		foreach (self::$classes as $class_summary)
 		{
-			if (call_user_func(array($class_summary['class'], 'handles'), $line))
+			if (call_user_func(array($class_summary['class'], 'handles'), $line, self::$handle_id))
 			{
 				if (DEBUG)
 				{
@@ -136,7 +138,7 @@ class Log
 	}
 
 
-	public static function handles($line)
+	public static function handles($line, $uuid)
 	{
 		return true;
 	}

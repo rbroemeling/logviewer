@@ -1,6 +1,9 @@
 <?php
 class RubyLog extends Log
 {
+	private static $handle_cache_id = null;
+	private static $handle_cache_result = null;
+
 	public $ruby_component = null;
 	public $ruby_configuration = null;
 	public $ruby_revision = null;
@@ -117,25 +120,30 @@ class RubyLog extends Log
 	}
 
 
-	public static function handles($line)
+	public static function handles($line, $uuid)
 	{
-		if (parent::handles($line))
+		if (self::$handle_cache_id != $uuid)
 		{
-			# Regular Expression Map:
-			#  ' live.31564.general.critical:'
-			#  ' live.r26781.31564.general.critical:'
-			if (preg_match('/ [a-z]+\.(r\d+\.)?\d+\.[a-z_]+\.[a-z]+\W/', $line))
+			self::$handle_cache_id = $uuid;
+			self::$handle_cache_result = false;
+			if (parent::handles($line, $uuid))
 			{
-				return true;
+				# Regular Expression Map:
+				#  ' live.31564.general.critical:'
+				#  ' live.r26781.31564.general.critical:'
+				if (preg_match('/ [a-z]+\.(r\d+\.)?\d+\.[a-z_]+\.[a-z]+\W/', $line))
+				{
+					self::$handle_cache_result = true;
+				}
+				# Regular Expression Map:
+				#  'pagehandler.rb:653:in `'
+				elseif (preg_match('/\w+\.rb:\d+:in `/', $line))
+				{
+					self::$handle_cache_result = true;
+				}
 			}
-			# Regular Expression Map:
-			#  'pagehandler.rb:653:in `'
-			if (preg_match('/\w+\.rb:\d+:in `/', $line))
-			{
-				return true;
-			}
-			return false;
 		}
+		return self::$handle_cache_result;
 	}
 
 

@@ -1,6 +1,9 @@
 <?php
 class PHPLog extends Log
 {
+	private static $handle_cache_id = null;
+	private static $handle_cache_result = null;
+
 	public $php_configuration = null;
 	public $php_error_level = null;
 	public $php_error_message = null;
@@ -125,12 +128,18 @@ class PHPLog extends Log
 	}
 
 
-	public static function handles($line)
+	public static function handles($line, $uuid)
 	{
-		if (parent::handles($line))
+		if (self::$handle_cache_id != $uuid)
 		{
-			return (strpos($line, ' php-site: ') !== FALSE);
+			self::$handle_cache_id = $uuid;
+			self::$handle_cache_result = false;
+			if (parent::handles($line, $uuid))
+			{
+				self::$handle_cache_result = (strpos($line, ' php-site: ') !== false);
+			}
 		}
+		return self::$handle_cache_result;
 	}
 
 
