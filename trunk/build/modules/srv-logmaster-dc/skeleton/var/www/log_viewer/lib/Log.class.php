@@ -3,8 +3,10 @@ class Log
 {
 	private static $classes = null;
 	private static $handle_id = 0;
-	private static $last_timestamp = null;
-	private static $last_timestring = null;
+	private static $last_input_timestamp = null;
+	private static $last_input_timestring = null;
+	private static $last_output_timestamp = null;
+	private static $last_output_timestring = null;
 	
 	public $line = null;
 	public $line_offset = null;
@@ -31,7 +33,12 @@ class Log
 		#	'(Sep 11 13:07:27) (10.0.3.8/10.0.0.16) (.*)'
 		if (preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([0-9./]+) +(.*)\n?$!i', $this->line, $fields))
 		{
-			$this->syslog_timestamp = strtotime($fields[1]);
+			if (strcmp(self::$last_input_timestring, $fields[1]))
+			{
+				self::$last_input_timestring = $fields[1];
+				self::$last_input_timestamp = strtotime($fields[1]);
+			}
+			$this->syslog_timestamp = self::$last_input_timestamp;
 			$this->syslog_host = $fields[2];
 
 			$this->extra_data = $fields[3];
@@ -85,12 +92,12 @@ class Log
 		{
 			$string .= '<span class="debug">Begin ' . __CLASS__ . '</span>';
 		}
-		if (self::$last_timestamp != $this->syslog_timestamp)
+		if (self::$last_output_timestamp != $this->syslog_timestamp)
 		{
-			self::$last_timestamp = $this->syslog_timestamp;
-			self::$last_timestring = htmlspecialchars(strftime('%b %e %H:%M:%S', $this->syslog_timestamp), ENT_QUOTES);			
+			self::$last_output_timestamp = $this->syslog_timestamp;
+			self::$last_output_timestring = htmlspecialchars(strftime('%b %e %H:%M:%S', $this->syslog_timestamp), ENT_QUOTES);			
 		}
-		$string .= '<span class="date">' . self::$last_timestring . '</span> ';
+		$string .= '<span class="date">' . self::$last_output_timestring . '</span> ';
 		$string .= '<span class="host">' . htmlspecialchars($this->syslog_host, ENT_QUOTES) . '</span> ';
 		$string .= '<span class="program">' . htmlspecialchars($this->syslog_program, ENT_QUOTES) . '</span> ';
 		if (! is_null($this->client_uid))
