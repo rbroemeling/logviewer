@@ -69,7 +69,6 @@ span.debug:after
 table#basic_filters
 {
 	border-bottom: 3px groove green;
-	border-top: 1px dotted green;
 }
 table#extended_filters select
 {
