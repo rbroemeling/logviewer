@@ -58,12 +58,6 @@ class RubyLogBacktrace extends RubyLog
 	}
 
 
-	public static function factory($line)
-	{
-		return new RubyLogBacktrace($line);
-	}
-
-
 	public static function handles($line, $uuid)
 	{
 		if (parent::handles($line, $uuid))

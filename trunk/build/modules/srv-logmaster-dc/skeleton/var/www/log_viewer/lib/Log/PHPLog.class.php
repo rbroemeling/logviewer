@@ -122,12 +122,6 @@ class PHPLog extends Log
 	}
 
 
-	public static function factory($line)
-	{
-		return new PHPLog($line);
-	}
-
-
 	public static function handles($line, $uuid)
 	{
 		if (self::$handle_cache_id != $uuid)

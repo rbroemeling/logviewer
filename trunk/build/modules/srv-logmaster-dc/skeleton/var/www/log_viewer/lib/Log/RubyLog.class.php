@@ -114,12 +114,6 @@ class RubyLog extends Log
 	}
 
 
-	public static function factory($line)
-	{
-		return new RubyLog($line);
-	}
-
-
 	public static function handles($line, $uuid)
 	{
 		if (self::$handle_cache_id != $uuid)

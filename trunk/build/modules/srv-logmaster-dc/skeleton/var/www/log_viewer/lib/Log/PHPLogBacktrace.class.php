@@ -54,12 +54,6 @@ class PHPLogBacktrace extends PHPLog
 	}
 
 
-	public static function factory($line)
-	{
-		return new PHPLogBacktrace($line);
-	}
-
-
 	public static function handles($line, $uuid)
 	{
 		if (parent::handles($line, $uuid))

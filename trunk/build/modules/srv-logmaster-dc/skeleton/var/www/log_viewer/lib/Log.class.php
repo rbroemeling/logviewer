@@ -133,7 +133,7 @@ class Log
 				{
 					echo '<div class="debug">Handler ' . $class_summary['class'] . ' chosen for line: "' . $line . '"</div>' . "\n";
 				}
-				return call_user_func(array($class_summary['class'], 'factory'), $line);
+				return new $class_summary['class']($line);
 			}
 		}
 
