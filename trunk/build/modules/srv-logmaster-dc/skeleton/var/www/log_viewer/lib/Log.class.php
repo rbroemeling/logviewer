@@ -2,6 +2,8 @@
 class Log
 {
 	private static $classes = null;
+	private static $last_timestamp = null;
+	private static $last_timestring = null;
 
 	public $line = null;
 	public $line_offset = null;
@@ -82,16 +84,21 @@ class Log
 		{
 			$string .= '<span class="debug">Begin ' . __CLASS__ . '</span>';
 		}
-		$string .= "<span class='date'>" . htmlspecialchars(strftime("%b %e %H:%M:%S", $this->syslog_timestamp), ENT_QUOTES) . "</span> ";
-		$string .= "<span class='host'>" . htmlspecialchars($this->syslog_host, ENT_QUOTES) . "</span> ";
-		$string .= "<span class='program'>" . htmlspecialchars($this->syslog_program, ENT_QUOTES) . "</span> ";
+		if (self::$last_timestamp != $this->syslog_timestamp)
+		{
+			self::$last_timestamp = $this->syslog_timestamp;
+			self::$last_timestring = htmlspecialchars(strftime('%b %e %H:%M:%S', $this->syslog_timestamp), ENT_QUOTES);			
+		}
+		$string .= '<span class="date">' . self::$last_timestring . '</span> ';
+		$string .= '<span class="host">' . htmlspecialchars($this->syslog_host, ENT_QUOTES) . '</span> ';
+		$string .= '<span class="program">' . htmlspecialchars($this->syslog_program, ENT_QUOTES) . '</span> ';
 		if (! is_null($this->client_uid))
 		{
-			$string .= "<span class='uid'>" . htmlspecialchars($this->client_uid, ENT_QUOTES) . "</span>";
+			$string .= '<span class="uid">' . htmlspecialchars($this->client_uid, ENT_QUOTES) . '</span>';
 		}
 		if (! is_null($this->client_ip))
 		{
-			$string .= "<span class='ip'>" . htmlspecialchars($this->client_ip, ENT_QUOTES) . "</span> ";
+			$string .= '<span class="ip">' . htmlspecialchars($this->client_ip, ENT_QUOTES) . '</span> ';
 		}
 		$string .= htmlspecialchars($this->extra_data, ENT_QUOTES);
 		if (DEBUG)
