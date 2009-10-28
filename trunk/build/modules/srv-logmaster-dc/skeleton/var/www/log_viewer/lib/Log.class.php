@@ -32,7 +32,7 @@ class Log
 		# Regular Expression Map:
 		#	'(Sep 11 13:07:27) (10.0.3.8) (.*)'
 		#	'(Sep 11 13:07:27) (10.0.3.8/10.0.0.16) (.*)'
-		if (preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([0-9./]+) +(.*)\n?$!i', $this->line, $fields))
+		if (preg_match('!^([a-z]{3} +\d+ +[0-9:]{8}) +([0-9./]+) +(.*)\s*$!i', $this->line, $fields))
 		{
 			if (strcmp(self::$last_input_timestring, $fields[1]))
 			{
