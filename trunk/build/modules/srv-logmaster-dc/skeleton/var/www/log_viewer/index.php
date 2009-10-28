@@ -434,28 +434,13 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 			<!-- This is an invisible div that simply serves as a template for the HTML that defines a filter. -->
 			<?php echo filter_form_string(); ?>
 		</div>
-		<div style="margin-bottom: 5px; text-align: right;">
-			<?php
-				if ($_GET['display_extended_filters'])
-				{
-					$extended_filter_icon = '&#9660;';
-					$extended_filter_style = '';
-				}
-				else
-				{
-					$extended_filter_icon = '&#9668;';
-					$extended_filter_style = 'display: none;';
-				}
-			?>
-			<span onclick="this.innerHTML = toggle_display('extended_filters') ? '&#9660;' : '&#9668;';" style="cursor: pointer;"><?php echo $extended_filter_icon; unset($extended_filter_icon); ?></span>
-		</div>
 		<form id="control_form" method="get" onsubmit="document.getElementsByName('display_extended_filters')[0].value = is_visible('extended_filters'); return 1;">
 			<input type='hidden' name='display_extended_filters' value=''>
-			<table id="extended_filters" style="<?php echo $extended_filter_style; unset($extended_filter_style); ?>" width="100%">
-				<tr>
-					<td>
-						Env:
-						<select name="environment">
+			<div style="margin-bottom: 5px; text-align: right;">
+				<div style="float: left; text-align: left; width: 750px;">
+					<span style="margin-left: 10px; margin-right: 10px;">
+						Environment:
+						<select alt="The environment from which to fetch log lines." title="The environment from which to fetch log lines." name="environment" style="width: 200px;">
 							<?php
 								$selected_environment = (isset($_GET['environment']) ? $_GET['environment'] : 'live');
 								foreach ($config['environments'] as $env)
@@ -470,66 +455,10 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 								unset($selected_environment);
 							?>
 						</select>
-					</td>
-					<td rowspan="2" style="text-align: center;">
-						Source Host(s):<br>
-						<select multiple id="source_hosts" name="source_hosts[]" size="6">
-							<?php
-								foreach ($config['source_hosts'] as $source_host)
-								{
-									$selected = $_GET['source_hosts'][$source_host] ? 'selected' : '';
-									echo "<option $selected>$source_host</option>\n";
-								}
-							?>
-						</select>
-						<div>
-							<div style="float: right; width: 50%;">
-								<input type="button" value="Invert" onclick="invert_selection('source_hosts');">	
-							</div>
-							<input type="button" value="Clear" onclick="clear_selection('source_hosts');">
-						</div>
-					</td>
-					<td rowspan="2" style="text-align: center;">
-						Log Level(s):<br>
-						<select multiple id="log_levels" name="log_levels[]" size="6">
-							<?php
-								foreach ($config['log_levels'] as $log_level)
-								{
-									$selected = $_GET['log_levels'][$log_level] ? 'selected' : '';
-									echo "<option $selected>$log_level</option>\n";
-								}
-							?>
-						</select>
-						<div>
-							<div style="float: right; width: 50%;">
-								<input type="button" value="Invert" onclick="invert_selection('log_levels');">	
-							</div>
-							<input type="button" value="Clear" onclick="clear_selection('log_levels');">
-						</div>
-					</td>
-					<td rowspan="2" style="text-align: center;">
-						Log Facility(ies):<br>
-						<select multiple id="log_facilities" name="log_facilities[]" size="6">
-							<?php
-								foreach ($config['log_facilities'] as $log_facility)
-								{
-									$selected = $_GET['log_facilities'][$log_facility] ? 'selected' : '';
-									echo "<option $selected>$log_facility</option>\n";
-								}
-							?>
-						</select>
-						<div>
-							<div style="float: right; width: 50%;">
-								<input type="button" value="Invert" onclick="invert_selection('log_facilities');">	
-							</div>
-							<input type="button" value="Clear" onclick="clear_selection('log_facilities');">
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						Lang:
-						<select name="language">
+					</span>
+					<span alt="The language for which to view log lines." title="The language for which to view log lines." style="margin-left: 10px; margin-right: 10px;">
+						Language:
+						<select name="language" style="width: 200px;">
 							<?php
 								$selected_language = (isset($_GET['language']) ? $_GET['language'] : 'ruby');
 								foreach ($config['languages'] as $lang)
@@ -544,15 +473,90 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 								unset($selected_language);
 							?>
 						</select>
+					</span>
+				</div>
+				<?php
+					if ($_GET['display_extended_filters'])
+					{
+						$extended_filter_tooltip = 'Hide extended filter options.';
+						$extended_filter_icon = '&#9660;';
+						$extended_filter_style = '';
+					}
+					else
+					{
+						$extended_filter_tooltip = 'Show extended filter options.';
+						$extended_filter_icon = '&#9668;';
+						$extended_filter_style = 'display: none;';
+					}
+				?>
+				<span alt="<?php echo $extended_filter_tooltip; ?>" title="<?php echo $extended_filter_tooltip; unset($extended_filter_tooltip); ?>" onclick="var v = toggle_display('extended_filters'); this.innerHTML = (v ? '&#9660;' : '&#9668;'); this.alt = (v ? 'Hide' : 'Show') + ' extended filter options.'; this.title = this.alt;" style="cursor: pointer;">
+					<?php echo $extended_filter_icon; unset($extended_filter_icon); ?>
+				</span>
+			</div>
+			<table id="extended_filters" style="<?php echo $extended_filter_style; unset($extended_filter_style); ?>" width="100%">
+				<tr>
+					<td style="text-align: center;">
+						Source Host(s):<br>
+						<select alt="Filter the displayed log lines by source dynamic server." title="Filter the displayed log lines by source dynamic server." multiple id="source_hosts" name="source_hosts[]" size="6">
+							<?php
+								foreach ($config['source_hosts'] as $source_host)
+								{
+									$selected = $_GET['source_hosts'][$source_host] ? 'selected' : '';
+									echo "<option $selected>$source_host</option>\n";
+								}
+							?>
+						</select>
+						<div style="margin: auto; text-align: left; width: 200px;">
+							<div style="float: right; text-align: right; width: 50%;">
+								<input alt="Invert selection of source hosts." title="Invert selection of source hosts." type="button" value="Invert" onclick="invert_selection('source_hosts');">	
+							</div>
+							<input alt="Clear selection of source hosts." title="Clear selection of source hosts." type="button" value="Clear" onclick="clear_selection('source_hosts');">
+						</div>
+					</td>
+					<td style="text-align: center;">
+						Log Level(s):<br>
+						<select alt="Filter the displayed log lines by error level." title="Filter the displayed log lines by error level." multiple id="log_levels" name="log_levels[]" size="6">
+							<?php
+								foreach ($config['log_levels'] as $log_level)
+								{
+									$selected = $_GET['log_levels'][$log_level] ? 'selected' : '';
+									echo "<option $selected>$log_level</option>\n";
+								}
+							?>
+						</select>
+						<div style="margin: auto; text-align: left; width: 200px;">
+							<div style="float: right; text-align: right; width: 50%;">
+								<input alt="Invert selection of error levels." title="Invert selection of error levels." type="button" value="Invert" onclick="invert_selection('log_levels');">	
+							</div>
+							<input alt="Clear selection of error levels." title="Clear selection of error levels." type="button" value="Clear" onclick="clear_selection('log_levels');">
+						</div>
+					</td>
+					<td style="text-align: center;">
+						Log Facility(ies):<br>
+						<select alt="Filter the displayed log lines by source facility/component." title="Filter the displayed log lines by source facility/component." multiple id="log_facilities" name="log_facilities[]" size="6">
+							<?php
+								foreach ($config['log_facilities'] as $log_facility)
+								{
+									$selected = $_GET['log_facilities'][$log_facility] ? 'selected' : '';
+									echo "<option $selected>$log_facility</option>\n";
+								}
+							?>
+						</select>
+						<div style="margin: auto; text-align: left; width: 200px;">
+							<div style="float: right; text-align: right; width: 50%;">
+								<input alt="Invert selection of log facilities." title="Invert selection of log facilities." type="button" value="Invert" onclick="invert_selection('log_facilities');">	
+							</div>
+							<input alt="Clear selection of log facilities." title="Clear selection of log facilities." type="button" value="Clear" onclick="clear_selection('log_facilities');">
+						</div>
 					</td>
 				</tr>
 				<tr>
-					<td colspan="4" style="border-top: 1px dotted green; padding-top: 5px; text-align: right;">
+					<td colspan="3" style="border-top: 1px dotted green; padding-top: 5px; text-align: right;">
 						<input alt="Add a text filter to match on." title="Add a text filter to match on." type="button" value="Add Filter" onclick="add_filter();">
 					</td>
 				</tr>
 				<tr>
-					<td colspan="4" style="border-bottom: 1px dotted green;">
+					<td colspan="3" style="border-bottom: 1px dotted green;">
 						<div id="filter_list">
 							<?php
 								for ($i = 0; $i < count($_GET['filter']); $i++)
@@ -568,7 +572,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 			</table>
 			<table id="basic_filters" width="100%">
 				<tr>
-					<td colspan="3" style="text-align: center;">
+					<td style="text-align: center;">
 						<?php
 							echo create_numeric_select('start_hour', 'Time of first log entry to display (hours).', 0, 23, date('H') - 1, create_function('$hour', 'return sprintf("%02d", $hour);')) . ' : ';
 							echo create_numeric_select('start_minute', 'Time of first log entry to display (minutes).', 0, 59, 0, create_function('$min', 'return sprintf("%02d", $min);')) . ' : ';

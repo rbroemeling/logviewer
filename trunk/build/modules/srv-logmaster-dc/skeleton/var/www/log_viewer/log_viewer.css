@@ -1,10 +1,10 @@
 /* Global Styling ************************************************/
-body
+body, td
 {
 	background: #000000;
 	color: #00ff00;
 	font-family: arial, sans-serif;
-	font-size: 12px;
+	font-size: 14px;
 }
 
 a
@@ -86,19 +86,16 @@ div#filter_template
 
 
 /* Log Excerpt Styling *******************************************/
-div.log_context
-{
-	background: #222222;
-}
 div#log_excerpt
 {
-	margin-top: 30px;
+	font-size: 12px;
+	margin-top: 20px;
 }
 div.log_line
 {
 	font-family: monospace;
-	padding-bottom: 5px;
-	padding-top: 5px;
+	padding-bottom: 4px;
+	padding-top: 4px;
 }
 
 /* Log generalized field colouring. */
