@@ -79,7 +79,7 @@ function array_to_hash($arr)
 }
 
 
-function create_numeric_select($name, $min, $max, $default_value = null, $label_formatter = null)
+function create_numeric_select($name, $tooltip, $min, $max, $default_value = null, $label_formatter = null)
 {
 	if (is_null($label_formatter))
 	{
@@ -89,6 +89,7 @@ function create_numeric_select($name, $min, $max, $default_value = null, $label_
 	{
 		$default_value = $min;
 	}
+	$tooltip = htmlspecialchars($tooltip, ENT_QUOTES);
 
 	$s = array();
 	for ($i = intval($min); $i <= intval($max); $i++)
@@ -111,17 +112,22 @@ function create_numeric_select($name, $min, $max, $default_value = null, $label_
 	}
 	$s[$i] = '<option value="' . $i . '" selected>' . call_user_func($label_formatter, $i) . '</option>';
 
-	return '<select name="' . $name . '">' . "\n" . implode("\n", $s) . "</select>\n";
+	return '<select alt="' . $tooltip . '" name="' . $name . '" title="' . $tooltip . '">' . "\n" . implode("\n", $s) . "</select>\n";
 }
 
 
 function filter_form_string($filter = null, $negate_filter = 0, $logic_filter = 'OR')
 {
+	$remove_tooltip = htmlspecialchars('Remove this filter.', ENT_QUOTES);
+	$filter_tooltip = htmlspecialchars('Pattern to match against each line.  This is treated as a plain-text search unless it begins and ends with the "/" character, which forces it to be treated as a regular expression pattern.', ENT_QUOTES);
+	$negation_tooltip = htmlspecialchars('"Normal Match" means that log lines matching this pattern will be INCLUDED in the results, "Inverted Match" means that log lines matching this pattern will be EXCLUDED from the results.', ENT_QUOTES);
+	$logical_tooltip = htmlspecialchars('Logical operation that relates this filter to the rest of the filters.  "AND" binds more tightly than "OR", so "a AND b AND c OR d AND e" equates to "((a AND b AND c) OR (d AND e))".', ENT_QUOTES);
+	
 	$s = '';
-	$s .= '<input type="button" style="margin-right: 10px;" value="-" onclick="this.parentNode.parentNode.removeChild(this.parentNode);" />';
-	$s .= 'Filter: <input type="text" name="filter[]" size="80" style="margin-right: 10px;" maxlength="100" value="' . htmlspecialchars($filter, ENT_QUOTES) . '" />';
-	$s .= '<select name="negate_filter[]" style="margin-right: 10px;"><option value="0" ' . ($negate_filter ? '' : 'selected') . '>Normal Match</option><option value="1" ' . ($negate_filter ? 'selected' : '') . '>Inverted Match</option></select>';
-	$s .= '<select name="logic_filter[]"><option ' . ($logic_filter == 'AND' ? 'selected' : '') . '>AND</option><option ' . ($logic_filter == 'OR' ? 'selected' : '') . '>OR</option></select>';
+	$s .= '<input alt="' . $remove_tooltip . '" title="' . $remove_tooltip . '" type="button" style="margin-right: 10px;" value="-" onclick="this.parentNode.parentNode.removeChild(this.parentNode);" />';
+	$s .= 'Filter: <input alt="' . $filter_tooltip . '" title="' . $filter_tooltip. '" type="text" name="filter[]" size="80" style="margin-right: 10px;" maxlength="100" value="' . htmlspecialchars($filter, ENT_QUOTES) . '">';
+	$s .= '<select alt="' . $negation_tooltip . '" title="' . $negation_tooltip . '" name="negate_filter[]" style="margin-right: 10px;"><option value="0" ' . ($negate_filter ? '' : 'selected') . '>Normal Match</option><option value="1" ' . ($negate_filter ? 'selected' : '') . '>Inverted Match</option></select>';
+	$s .= '<select alt="' . $logical_tooltip . '" title="' . $logical_tooltip . '" name="logic_filter[]"><option ' . ($logic_filter == 'AND' ? 'selected' : '') . '>AND</option><option ' . ($logic_filter == 'OR' ? 'selected' : '') . '>OR</option></select>';
 	return $s;
 }
 
@@ -542,8 +548,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 				</tr>
 				<tr>
 					<td colspan="4" style="border-top: 1px dotted green; padding-top: 5px; text-align: right;">
-						<input type='button' value='Add Filter' onclick='add_filter();' />
-						<input type='button' value='Parse Token' onclick='parse_token(null);' />						
+						<input alt="Add a text filter to match on." title="Add a text filter to match on." type="button" value="Add Filter" onclick="add_filter();">
 					</td>
 				</tr>
 				<tr>
@@ -565,26 +570,27 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 				<tr>
 					<td colspan="3" style="text-align: center;">
 						<?php
-							echo create_numeric_select('start_hour', 0, 23, date('H') - 1, create_function('$hour', 'return sprintf("%02d", $hour);')) . ' : ';
-							echo create_numeric_select('start_minute', 0, 59, 0, create_function('$min', 'return sprintf("%02d", $min);')) . ' : ';
-							echo create_numeric_select('start_second', 0, 59, 0, create_function('$sec', 'return sprintf("%02d", $sec);')) . ' on ';
-							echo create_numeric_select('start_month', date('m', strtotime('1 month ago')), date('m'), date('m'), create_function('$mon', 'return strftime("%b", mktime(12, 0, 0, $mon, 15));')) . ' ';
-							echo create_numeric_select('start_day', 1, 31, date('d'), create_function('$day', 'return sprintf("%02d", $day);')) . ', ';
-							echo create_numeric_select('start_year', date('Y', strtotime('1 month ago')), date('Y'), null, create_function('$year', 'return sprintf("%04d", $year);'));
+							echo create_numeric_select('start_hour', 'Time of first log entry to display (hours).', 0, 23, date('H') - 1, create_function('$hour', 'return sprintf("%02d", $hour);')) . ' : ';
+							echo create_numeric_select('start_minute', 'Time of first log entry to display (minutes).', 0, 59, 0, create_function('$min', 'return sprintf("%02d", $min);')) . ' : ';
+							echo create_numeric_select('start_second', 'Time of first log entry to display (seconds).', 0, 59, 0, create_function('$sec', 'return sprintf("%02d", $sec);')) . ' on ';
+							echo create_numeric_select('start_month', 'Date of first log entry to display (month).', date('m', strtotime('1 month ago')), date('m'), date('m'), create_function('$mon', 'return strftime("%b", mktime(12, 0, 0, $mon, 15));')) . ' ';
+							echo create_numeric_select('start_day', 'Date of first log entry to display (day).', 1, 31, date('d'), create_function('$day', 'return sprintf("%02d", $day);')) . ', ';
+							echo create_numeric_select('start_year', 'Date of first log entry to display (year).', date('Y', strtotime('1 month ago')), date('Y'), null, create_function('$year', 'return sprintf("%04d", $year);'));
 						?>
 						thru
 						<?php
-							echo create_numeric_select('end_hour', 0, 23, date('H') + 1, create_function('$hour', 'return sprintf("%02d", $hour);')) . ' : ';
-							echo create_numeric_select('end_minute', 0, 59, 0, create_function('$min', 'return sprintf("%02d", $min);')) . ' : ';
-							echo create_numeric_select('end_second', 0, 59, 0, create_function('$sec', 'return sprintf("%02d", $sec);')) . ' on ';
-							echo create_numeric_select('end_month', date('m', strtotime('1 month ago')), date('m'), date('m'), create_function('$mon', 'return strftime("%b", mktime(12, 0, 0, $mon, 15));')) . ' ';
-							echo create_numeric_select('end_day', 1, 31, date('d'), create_function('$day', 'return sprintf("%02d", $day);')) . ', ';
-							echo create_numeric_select('end_year', date('Y', strtotime('1 month ago')), date('Y'), null, create_function('$year', 'return sprintf("%04d", $year);'));
+							echo create_numeric_select('end_hour', 'Time of last log entry to display (hours).', 0, 23, date('H') + 1, create_function('$hour', 'return sprintf("%02d", $hour);')) . ' : ';
+							echo create_numeric_select('end_minute', 'Time of last log entry to display (minutes).', 0, 59, 0, create_function('$min', 'return sprintf("%02d", $min);')) . ' : ';
+							echo create_numeric_select('end_second', 'Time of last log entry to display (seconds).', 0, 59, 0, create_function('$sec', 'return sprintf("%02d", $sec);')) . ' on ';
+							echo create_numeric_select('end_month', 'Date of last log entry to display (month).', date('m', strtotime('1 month ago')), date('m'), date('m'), create_function('$mon', 'return strftime("%b", mktime(12, 0, 0, $mon, 15));')) . ' ';
+							echo create_numeric_select('end_day', 'Date of last log entry to display (day).', 1, 31, date('d'), create_function('$day', 'return sprintf("%02d", $day);')) . ', ';
+							echo create_numeric_select('end_year', 'Date of last log entry to display (year).', date('Y', strtotime('1 month ago')), date('Y'), null, create_function('$year', 'return sprintf("%04d", $year);'));
 						?>
 					</td>
 					<td style="text-align: right;">
-						<input style="margin-right: 10px;" type="button" value="Tail" onclick="tail();" />
-						<input type="submit" value="Submit" />
+						<input alt="Parse a log token and display the associated log line(s) in the log viewer." title="Parse a log token and find the associated log line(s)." style="margin-right: 15px;" type="button" value="Parse Token" onclick="parse_token(null);">
+						<input alt="Update the log viewer to display the last 60 seconds of logging data." title="Update the log viewer to display the last 60 seconds of logging data." style="margin-right: 15px;" type="button" value="Tail" onclick="tail();" />
+						<input alt="Refresh the log viewer results." title="Refresh the log viewer results." type="submit" value="Submit" />
 					</td>
 				</tr>
 			</table>
@@ -679,26 +685,13 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 			{
 		?>
 				<div style="text-align: right;">
-					<input style="margin-right: 10px;" type='button' value='Tail' onclick='tail();' />
+					<input alt="Update the log viewer to display the last 60 seconds of logging data." title="Update the log viewer to display the last 60 seconds of logging data." style="margin-right: 15px;" type="button" value="Tail" onclick="tail();" />
 				</div>
 		<?php
 			}
 			if (isset($_GET['token']))
 			{
-		?>
-				<script>
-					var form = document.getElementById('control_form');
-					var token = <?php echo json_encode($_GET['token']); ?>;
-					if (parse_token(token))
-					{
-						if (form)
-						{
-							form.onsubmit();
-							form.submit();
-						}
-					}
-				</script>
-		<?
+				echo '<script>parse_token(' . json_encode($_GET['token']) . ');</script>';
 			}
 		?>
 	</body>
