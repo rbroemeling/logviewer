@@ -91,7 +91,7 @@ function is_visible(id)
 	return 1;
 }
 
-
+	
 function parse_token(token)
 {
 	if (token == null)
@@ -147,8 +147,14 @@ function parse_token(token)
 	// Add a single filter that consists of the token string that we are
 	// looking for.
 	add_filter();
-	document.getElementsByName('filter[]')[1].value = '/' + string + '/';
-	return true;
+	document.getElementsByName('filter[]')[1].value = string;
+	
+	var form = document.getElementById('control_form');
+	if (form)
+	{
+		form.onsubmit();
+		form.submit();
+	}
 }
 
 
