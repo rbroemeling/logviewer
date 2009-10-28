@@ -481,6 +481,9 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 						</select>
 					</span>
 				</div>
+				<span onclick="var v = toggle_display('hotkey_list'); this.innerHTML = '[' + (v ? 'Hide' : 'Show') + ' Hotkey List]';" style="cursor: pointer;">
+					[Show Hotkey List]
+				</span>
 				<?php
 					if ($_GET['display_extended_filters'])
 					{
@@ -499,6 +502,29 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 					<?php echo $extended_filter_icon; unset($extended_filter_icon); ?>
 				</span>
 			</div>
+			<table id="hotkey_list" style="display: none;">
+				<caption>Annoying-but-necessary table that I don't know where else to put.</caption>
+				<thead>
+					<tr>
+						<th>Hotkey</th>
+						<th>Function</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>CTRL+ALT+H</td>
+						<td>Generate a filter to hide lines containing the selected text.</td>
+					</tr>
+					<tr>
+						<td>CTRL+ALT+R</td>
+						<td>Force a refresh of the current view.</td>
+					</tr>
+					<tr>
+						<td>CTRL+ALT+T</td>
+						<td>Force a refresh of the current view by performing a "Tail".</td>
+					</tr>
+				</tbody>
+			</table>
 			<table id="extended_filters" style="<?php echo $extended_filter_style; unset($extended_filter_style); ?>" width="100%">
 				<tr>
 					<td style="text-align: center;">
@@ -704,28 +730,5 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 				echo '<script>parse_token(' . json_encode($_GET['token']) . ');</script>';
 			}
 		?>
-		<table id="hotkey_help">
-			<caption>Annoying-but-necessary table that I don't know where else to put.</caption>
-			<thead>
-				<tr>
-					<th>Hotkey</th>
-					<th>Function</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td>CTRL+ALT+H</td>
-					<td>Generate a filter to hide lines containing the selected text.</td>
-				</tr>
-				<tr>
-					<td>CTRL+ALT+R</td>
-					<td>Force a refresh of the current view.</td>
-				</tr>
-				<tr>
-					<td>CTRL+ALT+T</td>
-					<td>Force a refresh of the current view by performing a "Tail".</td>
-				</tr>
-			</tbody>
-		</table>
 	</body>
 </html>

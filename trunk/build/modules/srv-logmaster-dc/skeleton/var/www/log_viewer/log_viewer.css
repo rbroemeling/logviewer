@@ -23,20 +23,23 @@ a:visited
 }
 
 
-/* Styling for "hotkey help" table *******************************/
-table#hotkey_help
+/* Styling for "hotkey list" table *******************************/
+table#hotkey_list
 {
 	border-collapse: collapse;
-	margin: auto;
+	margin-bottom: 10px;
+	margin-left: auto;
+	margin-right: auto;
+	
 }
 
-table#hotkey_help caption
+table#hotkey_list caption
 {
 	font-size: 8px;
 	color: #222222;
 }
 
-table#hotkey_help td
+table#hotkey_list td
 {
 	border-bottom: 1px dotted green;
 	border-top: 1px dotted green;
