@@ -1,6 +1,7 @@
 <?php
 class Log
 {
+	private static $cached_filters = null;
 	private static $classes = null;
 	private static $handle_id = 0;
 	private static $last_input_timestamp = null;
@@ -209,40 +210,86 @@ class Log
 	
 	public function matches_filters()
 	{
-		if (! $_GET['filter'])
+		if (is_null(self::$cached_filters))
+		{
+			self::$cached_filters = array();
+			if ($_GET['filter'])
+			{
+				$i = 0;
+				self::$cached_filters[$i] = array();
+				for ($j = 0; $j < count($_GET['filter']); $j++)
+				{
+					self::$cached_filters[$i][] = array
+					(
+						'filter' => $_GET['filter'][$j],
+						'inverted' => $_GET['negate_filter'][$j]
+					);
+					if ($_GET['logic_filter'][$j] == 'OR')
+					{
+						$i++;
+						self::$cached_filters[$i] = array();
+					}
+				}
+				if (! self::$cached_filters[$i])
+				{
+					unset(self::$cached_filters[$i]);
+				}
+			}
+		}
+		if (! self::$cached_filters)
 		{
 			return true;
 		}
 		
-		$filter_results = array();
-		$j = count($_GET['filter']);
-		for ($i = 0; $i < $j; $i++)
+		for ($i = 0, $j = count(self::$cached_filters); $i < $j; $i++)
 		{
-			if (! $_GET['filter'][$i])
+			# If the line matches any one of the groups of cached filters,
+			# then it is a match.
+			$match = true;
+			for ($k = 0, $m = count(self::$cached_filters[$i]); $k < $m; $k++)
 			{
-				$filter_results[$i] = (1 XOR $_GET['negate_filter'][$i]);
+				$filter = self::$cached_filters[$i][$k]['filter'];
+				$inverted = self::$cached_filters[$i][$k]['inverted'];
+				if (! $filter)
+				{
+					# Empty filter text matches everything... unless it is inverted, in
+					# which case it doesn't match anything.
+					if ($inverted)
+					{
+						# Empty filter text matches everything, except when it is
+						# inverted, in which case it matches nothing.  Therefore this
+						# group is not a match, so skip to the next one.
+						$match = false;
+						break;
+					}
+				}
+				elseif (preg_match($filter, $this->line))
+				{
+					if ($inverted)
+					{
+						# The filter matched, but it is inverted.  Therefore this
+						# group is not a match, so skip to the next one.
+						$match = false;
+						break;
+					}
+				}
+				else
+				{
+					# The line didn't match the filter, so unless the filter is inverted
+					# this group is not a match.
+					if (! $inverted)
+					{
+						$match = false;
+						break;						
+					}
+				}
 			}
-			elseif (preg_match($_GET['filter'][$i], $this->line) XOR $_GET['negate_filter'][$i])
+			if ($match)
 			{
-				$filter_results[$i] = 1;
-			}
-			else
-			{
-				$filter_results[$i] = 0;
+				return true;
 			}
 		}
-
-		$j = count($filter_results);
-		for ($i = 0; $i < $j - 1; $i++)
-		{
-			if ($_GET['logic_filter'][$i] == 'AND')
-			{
-				$filter_results[$i + 1] = $filter_results[$i] && $filter_results[$i + 1];
-				unset($filter_results[$i]);
-			}
-		}
-
-		return (array_sum($filter_results) > 0);
+		return false;
 	}
 
 
