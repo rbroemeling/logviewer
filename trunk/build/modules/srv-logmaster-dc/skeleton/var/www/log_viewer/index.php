@@ -481,7 +481,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 						</select>
 					</span>
 				</div>
-				<span onclick="var v = toggle_display('hotkey_list'); this.innerHTML = '[' + (v ? 'Hide' : 'Show') + ' Hotkey List]';" style="cursor: pointer;">
+				<span onclick="var v = toggle_display('hotkey_list'); this.innerHTML = '[' + (v ? 'Hide' : 'Show') + ' Hotkey List]';" style="cursor: pointer; margin-right: 10px;">
 					[Show Hotkey List]
 				</span>
 				<?php
