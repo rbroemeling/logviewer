@@ -25,7 +25,7 @@ class PHPLog extends Log
 		# Regular Expression Map:
 		#  '((live)) (/prefs.php) ((User Notice)) (.*)'
 		#  '(()) (/prefs.php) ((Warning)) (.*)'
-		if (preg_match('!\(([a-z]*)\) (\S+) +\((\w+ ?\w+)\) +(.*)!i', $this->extra_data, $matches))
+		if (preg_match('!^\(([a-z]*)\) (\S+) +\((\w+ ?\w+)\) +(.*)!i', $this->extra_data, $matches))
 		{
 			$this->extra_data = null;
 
