@@ -5,13 +5,13 @@ class LineOutput
 	private static $encoded_environment = null;
 	private static $encoded_language = null;
 
-	public static function display($line, $extra_classes = '')
+	public static function display($line)
 	{
 		self::$displayed_lines++;
 
-		echo "<div class='log_line " . $extra_classes . "'>";
-		echo '(' . number_format(self::$displayed_lines) . ') ';
-		echo '[' . LineOutput::create_link($line) . '] ';
+		echo "<div class='log_line'>";
+		echo '(', number_format(self::$displayed_lines), ') ';
+		echo '[', LineOutput::create_link($line), '] ';
 		echo (string)$line;
 		echo "</div>\n";
 	}
