@@ -222,7 +222,8 @@ class Log
 					self::$cached_filters[$i][] = array
 					(
 						'filter' => $_GET['filter'][$j],
-						'inverted' => $_GET['negate_filter'][$j]
+						'inverted' => $_GET['negate_filter'][$j],
+						'type' => (preg_match('!^/.*/$!', $_GET['filter'][$j]) ? 'regex' : 'plain')
 					);
 					if ($_GET['logic_filter'][$j] == 'OR')
 					{
@@ -250,6 +251,7 @@ class Log
 			for ($k = 0, $m = count(self::$cached_filters[$i]); $k < $m; $k++)
 			{
 				$filter = self::$cached_filters[$i][$k]['filter'];
+				$filter_type = self::$cached_filters[$i][$k]['type'];
 				$inverted = self::$cached_filters[$i][$k]['inverted'];
 				if (! $filter)
 				{
@@ -260,25 +262,25 @@ class Log
 						$match = false;
 						break;
 					}
+					continue;
 				}
-				elseif (preg_match($filter, $this->line))
+				if ($filter_type == 'regex')
 				{
-					# The line matched the filter, unless this filter is inverted.
-					if ($inverted)
+					if (preg_match($filter, $this->line) XOR $inverted)
 					{
-						$match = false;
-						break;
+						continue;
 					}
+					$match = false;
+					break;
 				}
 				else
 				{
-					# The line didn't match the filter, so unless the filter is inverted
-					# this group is not a match.
-					if (! $inverted)
+					if ((stripos($this->line, $filter) !== false) XOR $inverted)
 					{
-						$match = false;
-						break;						
+						continue;
 					}
+					$match = false;
+					break;
 				}
 			}
 			if ($match)

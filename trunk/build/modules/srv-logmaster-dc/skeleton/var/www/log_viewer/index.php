@@ -167,30 +167,32 @@ function sanitize_filter($errno = null, $errstr = null)
 	{
 		if (! strlen($_GET['filter'][$i]))
 		{
-			$warnings[] = 'Regular expression #' . ($i + 1) . ' is empty.  Empty regular expressions will match any string.';
+			$warnings[] = 'Filter #' . ($i + 1) . ' is empty.  Empty filters will match any string.';
 			continue;
 		}
 		if (! is_string($_GET['filter'][$i]))
 		{
-			$errors[] = 'Regular expression #' . ($i + 1) . ' is not a string.';
+			$errors[] = 'Filter #' . ($i + 1) . ' is not a string.';
 			$regular_expression_errors++;
 			continue;
 		}
-		if (preg_match('/^[ :;A-Z0-9_-]+$/i', $_GET['filter'][$i]))
+		if (preg_match('!^/.*/$!', $_GET['filter'][$i]))
 		{
-			// Assume that this is a plaintext match to be carried out, transform
-			// it into a regular expression.
-			$_GET['filter'][$i] = '/' . $_GET['filter'][$i] . '/';
+			// This filter is a regular expression, and thus needs to be tested for validity.
+			set_error_handler('sanitize_filter');
+			preg_match($_GET['filter'][$i], '');
+			restore_error_handler();
+			if ($regular_expression_errstr)
+			{
+				$regular_expression_errstr = explode(':', $regular_expression_errstr);
+				$errors[] = 'Filter #' . ($i + 1) . ' ("' . $_GET['filter'][$i] . '") is not a valid regular expression: ' . $regular_expression_errstr[1] . '.';
+				$regular_expression_errstr = '';
+				$regular_expression_errors++;
+			}
 		}
-		set_error_handler('sanitize_filter');
-		preg_match($_GET['filter'][$i], '');
-		restore_error_handler();
-		if ($regular_expression_errstr)
+		else
 		{
-			$regular_expression_errstr = explode(':', $regular_expression_errstr);
-			$errors[] = 'Regular expression #' . ($i + 1) . ' ("' . $_GET['filter'][$i] . '") is not valid: ' . $regular_expression_errstr[1] . '.';
-			$regular_expression_errstr = '';
-			$regular_expression_errors++;
+			// This filter is a plaintext match... there really isn't any sort of testing to be done.
 		}
 	}
 	return ($regular_expression_errors == 0);
