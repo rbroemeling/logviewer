@@ -9,11 +9,11 @@ class LineOutput
 	{
 		self::$displayed_lines++;
 
-		echo "<div class='log_line'>";
-		echo '(', number_format(self::$displayed_lines), ') ';
-		echo '[', LineOutput::create_link($line), '] ';
-		echo (string)$line;
-		echo "</div>\n";
+		echo "<div class='log_line'>",
+			'(', number_format(self::$displayed_lines), ') ',
+			'[', LineOutput::create_link($line), '] ',
+			(string)$line,
+			"</div>\n";
 	}
 
 	protected static function create_link($line)
