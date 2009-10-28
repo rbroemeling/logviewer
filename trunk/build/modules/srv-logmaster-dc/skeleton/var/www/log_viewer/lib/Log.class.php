@@ -244,7 +244,8 @@ class Log
 		for ($i = 0, $j = count(self::$cached_filters); $i < $j; $i++)
 		{
 			# If the line matches any one of the groups of cached filters,
-			# then it is a match.
+			# then it is a match.  A 'group' is a series of AND'ed filters --
+			# so a line only matches a group if it matches every filter in it.
 			$match = true;
 			for ($k = 0, $m = count(self::$cached_filters[$i]); $k < $m; $k++)
 			{
@@ -256,19 +257,15 @@ class Log
 					# which case it doesn't match anything.
 					if ($inverted)
 					{
-						# Empty filter text matches everything, except when it is
-						# inverted, in which case it matches nothing.  Therefore this
-						# group is not a match, so skip to the next one.
 						$match = false;
 						break;
 					}
 				}
 				elseif (preg_match($filter, $this->line))
 				{
+					# The line matched the filter, unless this filter is inverted.
 					if ($inverted)
 					{
-						# The filter matched, but it is inverted.  Therefore this
-						# group is not a match, so skip to the next one.
 						$match = false;
 						break;
 					}
