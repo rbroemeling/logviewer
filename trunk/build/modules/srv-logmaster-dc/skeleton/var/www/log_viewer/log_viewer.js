@@ -8,7 +8,7 @@ function adjust_date(date, adjustment)
 }
 
 
-function add_filter()
+function add_filter(pattern, negate_filter, logic_filter)
 {
 	var filter_list = document.getElementById('filter_list');
 	var filter_template = document.getElementById('filter_template');
@@ -17,6 +17,48 @@ function add_filter()
 	{
 		var new_filter = filter_template.cloneNode(true);
 		new_filter.id = '';
+		if (pattern != null)
+		{
+			for (var i = 0; i < new_filter.childNodes.length; i++)
+			{
+				if ((new_filter.childNodes[i].tagName == 'INPUT') && (new_filter.childNodes[i].name == 'filter[]'))
+				{
+					new_filter.childNodes[i].value = pattern;	
+				}
+			}
+		}
+		if (negate_filter != null)
+		{
+			for (var i = 0; i < new_filter.childNodes.length; i++)
+			{
+				if ((new_filter.childNodes[i].tagName == 'SELECT') && (new_filter.childNodes[i].name == 'negate_filter[]'))
+				{
+					for (var j = 0; j < new_filter.childNodes[i].options.length; j++)
+					{
+						if (new_filter.childNodes[i].options[j].value == negate_filter)
+						{
+							new_filter.childNodes[i].options[j].selected = 1;
+						}
+					}
+				}
+			}
+		}
+		if (logic_filter != null)
+		{
+			for (var i = 0; i < new_filter.childNodes.length; i++)
+			{
+				if ((new_filter.childNodes[i].tagName == 'SELECT') && (new_filter.childNodes[i].name == 'logic_filter[]'))
+				{
+					for (var j = 0; j < new_filter.childNodes[i].options.length; j++)
+					{
+						if (new_filter.childNodes[i].options[j].value == logic_filter)
+						{
+							new_filter.childNodes[i].options[j].selected = 1;
+						}
+					}
+				}
+			}
+		}
 		filter_list.appendChild(new_filter);
 		return 1;
 	}
@@ -35,6 +77,30 @@ function clear_selection(id)
 	for (var i = 0; i < select.options.length; i++)
 	{
 		select.options[i].selected = false;
+	}
+}
+
+
+function hide_selection(e)
+{
+	var selected_text = '';
+	
+	if (window.getSelection)
+	{
+		selected_text = window.getSelection().toString();
+	}
+	else if (document.getSelection)
+	{
+		selected_text = document.getSelection().toString();
+	}
+	else if (document.selection)
+	{
+		selected_text = document.selection.createRange().text;
+	}
+	selected_text = selected_text.replace(/^\s+|\s+$/g, '');
+	if (selected_text.length > 0)
+	{
+		add_filter(selected_text, 1, 'AND');
 	}
 }
 
@@ -146,9 +212,14 @@ function parse_token(token)
 
 	// Add a single filter that consists of the token string that we are
 	// looking for.
-	add_filter();
-	document.getElementsByName('filter[]')[1].value = string;
-	
+	add_filter(string, 0, null);
+
+	refresh_view();
+}
+
+
+function refresh_view()
+{
 	var form = document.getElementById('control_form');
 	if (form)
 	{
@@ -224,9 +295,8 @@ function tail()
 	if (form)
 	{
 		form.action = form.action + '#tail';
-		form.onsubmit();
-		form.submit();
 	}
+	refresh_view();
 }
 
 

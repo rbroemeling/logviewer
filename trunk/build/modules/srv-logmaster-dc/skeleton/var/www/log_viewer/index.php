@@ -427,7 +427,13 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 	<head>
 		<title>Simple Online Log Viewer</title>
 		<link rel="stylesheet" href="log_viewer.css">
+		<script src="shortcut.js"></script>
 		<script src="log_viewer.js"></script>
+		<script>
+			shortcut.add("CTRL+ALT+H", hide_selection, { 'disable_in_input': true });
+			shortcut.add("CTRL+ALT+R", refresh_view, { 'disable_in_input': true });
+			shortcut.add("CTRL+ALT+T", tail, { 'disable_in_input': true });
+		</script>
 	</head>
 	<body onload='highlight_named_anchor();'>
 		<div id='filter_template'>
@@ -552,7 +558,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 				</tr>
 				<tr>
 					<td colspan="3" style="border-top: 1px dotted green; padding-top: 5px; text-align: right;">
-						<input alt="Add a text filter to match on." title="Add a text filter to match on." type="button" value="Add Filter" onclick="add_filter();">
+						<input alt="Add a text filter to match on." title="Add a text filter to match on." type="button" value="Add Filter" onclick="add_filter(null, null, null);">
 					</td>
 				</tr>
 				<tr>
@@ -593,8 +599,8 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 					</td>
 					<td style="text-align: right;">
 						<input alt="Parse a log token and display the associated log line(s) in the log viewer." title="Parse a log token and find the associated log line(s)." style="margin-right: 15px;" type="button" value="Parse Token" onclick="parse_token(null);">
-						<input alt="Update the log viewer to display the last 60 seconds of logging data." title="Update the log viewer to display the last 60 seconds of logging data." style="margin-right: 15px;" type="button" value="Tail" onclick="tail();" />
-						<input alt="Refresh the log viewer results." title="Refresh the log viewer results." type="submit" value="Submit" />
+						<input alt="(CTRL+ALT+T) Update the log viewer to display the last 60 seconds of logging data." title="(CTRL+ALT+T) Update the log viewer to display the last 60 seconds of logging data." style="margin-right: 15px;" type="button" value="Tail" onclick="tail();">
+						<input alt="(CTRL+ALT+R) Refresh the log viewer results." title="(CTRL+ALT+R) Refresh the log viewer results." type="button" value="Refresh" onclick="refresh_view();">
 					</td>
 				</tr>
 			</table>
@@ -689,7 +695,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 			{
 		?>
 				<div style="text-align: right;">
-					<input alt="Update the log viewer to display the last 60 seconds of logging data." title="Update the log viewer to display the last 60 seconds of logging data." style="margin-right: 15px;" type="button" value="Tail" onclick="tail();" />
+					<input alt="(CTRL+ALT+T) Update the log viewer to display the last 60 seconds of logging data." title="(CTRL+ALT+T) Update the log viewer to display the last 60 seconds of logging data." style="margin-right: 15px;" type="button" value="Tail" onclick="tail();" />
 				</div>
 		<?php
 			}
