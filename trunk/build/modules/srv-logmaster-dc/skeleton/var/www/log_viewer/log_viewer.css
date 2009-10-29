@@ -27,7 +27,6 @@ a:visited
 table#hotkey_list
 {
 	border-collapse: collapse;
-	clear: both;
 	margin-bottom: 10px;
 	margin-left: auto;
 	margin-right: auto;
@@ -97,7 +96,6 @@ span.debug:after
 table#basic_filters
 {
 	border-bottom: 3px groove green;
-	clear: both;
 }
 
 table#extended_filters select

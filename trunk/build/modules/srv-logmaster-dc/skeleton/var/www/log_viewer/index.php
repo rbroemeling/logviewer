@@ -502,6 +502,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 					<?php echo $extended_filter_icon; unset($extended_filter_icon); ?>
 				</span>
 			</div>
+			<div style="clear: both;"></div>
 			<table id="hotkey_list" style="display: none;">
 				<caption>Annoying-but-necessary table that I don't know where else to put.</caption>
 				<thead>
