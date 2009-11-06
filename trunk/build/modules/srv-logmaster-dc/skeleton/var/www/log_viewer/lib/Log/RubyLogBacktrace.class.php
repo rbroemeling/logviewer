@@ -30,15 +30,12 @@ class RubyLogBacktrace extends RubyLog
 		}
 		if (! is_null($this->ruby_backtrace))
 		{
-			$this->ruby_backtrace = str_replace("'/", "' /", $this->ruby_backtrace);
-			$this->ruby_backtrace = str_replace("'./", "' ./", $this->ruby_backtrace);
-
 			$string .= "<span class='errorlevel_" . $this->error_level . "'>";
-			$backtrace_components = preg_split('! (\.?/)!', $this->ruby_backtrace, -1, PREG_SPLIT_DELIM_CAPTURE);
-			for ($i = 0; $i < count($backtrace_components);)
+			$backtrace_components = preg_split("!(:\d+:in `[^']+')!", $this->ruby_backtrace, -1, PREG_SPLIT_DELIM_CAPTURE);
+			for ($i = 0, $j = count($backtrace_components); $i < $j;)
 			{
 				$string .= htmlspecialchars($backtrace_components[$i++], ENT_QUOTES);
-				if (($i % 2) && ($i < (count($backtrace_components) - 1)))
+				if (($i % 2) && ($i < ($j - 1)))
 				{
 					$string .= "<br>\n<spacer type='block' width='40'/>";
 				}
