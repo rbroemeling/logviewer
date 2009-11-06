@@ -32,9 +32,9 @@ class RubyLogBacktrace extends RubyLog
 		{
 			$string .= "<span class='errorlevel_" . $this->error_level . "'>";
 			$backtrace_components = preg_split("!(:\d+:in `[^']+')!", $this->ruby_backtrace, -1, PREG_SPLIT_DELIM_CAPTURE);
-			for ($i = 0, $j = count($backtrace_components); $i < $j;)
+			for ($i = 0, $j = count($backtrace_components); $i < $j; $i++)
 			{
-				$string .= htmlspecialchars($backtrace_components[$i++], ENT_QUOTES);
+				$string .= htmlspecialchars($backtrace_components[$i], ENT_QUOTES);
 				if (($i % 2) && ($i < ($j - 1)))
 				{
 					$string .= "<br>\n<spacer type='block' width='40'/>";
