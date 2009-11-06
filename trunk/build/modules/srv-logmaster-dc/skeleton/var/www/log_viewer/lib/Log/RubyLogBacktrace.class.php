@@ -30,13 +30,8 @@ class RubyLogBacktrace extends RubyLog
 		}
 		if (! is_null($this->ruby_backtrace))
 		{
-			# Check for a RAP backtrace, because they are displayed slightly differently
-			# so we need to translate it into a normal ruby backtrace format if they are.
-			if (strpos($this->ruby_backtrace, 'RAP Error Backtrace:') !== false)
-			{
-				$this->ruby_backtrace = str_replace("'/", "' /", $this->ruby_backtrace);
-				$this->ruby_backtrace = str_replace("'./", "' ./", $this->ruby_backtrace);
-			}
+			$this->ruby_backtrace = str_replace("'/", "' /", $this->ruby_backtrace);
+			$this->ruby_backtrace = str_replace("'./", "' ./", $this->ruby_backtrace);
 
 			$string .= "<span class='errorlevel_" . $this->error_level . "'>";
 			$backtrace_components = preg_split('! (\.?/)!', $this->ruby_backtrace, -1, PREG_SPLIT_DELIM_CAPTURE);
