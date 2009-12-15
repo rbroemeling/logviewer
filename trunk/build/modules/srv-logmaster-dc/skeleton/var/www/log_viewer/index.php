@@ -40,7 +40,7 @@ if (! defined('DEBUG'))
 $config = array();
 
 // A list of log facilities that can be filtered on by the user.
-$config['log_facilities'] = array('cron', 'general', 'orwell', 'sql');
+$config['log_facilities'] = array('cron', 'fileserving', 'general', 'memcache', 'moderator', 'orwell', 'pagehandler', 'plus', 'sql');
 
 // A list of log levels that can be filtered on by the user.
 $config['log_levels'] = array('critical', 'error', 'warning', 'info', 'debug', 'spam');
