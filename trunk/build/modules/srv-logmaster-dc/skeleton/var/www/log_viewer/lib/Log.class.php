@@ -38,6 +38,22 @@ class Log
 			{
 				self::$last_input_timestring = $fields[1];
 				self::$last_input_timestamp = strtotime($fields[1]);
+				if (self::$last_input_timestamp > time())
+				{
+					# If our timestamp is higher than the current time, then
+					# we are dealing with a log entry that occurred *last year*,
+					# so adjust it accordingly.
+					$t = localtime(self::$last_input_timestamp);
+					self::$last_input_timestamp = mktime(
+						$t['tm_hour'],
+						$t['tm_min'],
+						$t['tm_sec'],
+						$t['tm_mon'] + 1,
+						$t['tm_mday'],
+						$t['tm_year'] + 1900 - 1
+					);
+					unset($t);
+				}
 			}
 			$this->syslog_timestamp = self::$last_input_timestamp;
 			$this->syslog_host = $fields[2];
