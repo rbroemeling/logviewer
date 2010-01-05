@@ -81,20 +81,37 @@ function array_to_hash($arr)
 
 function create_numeric_select($name, $tooltip, $min, $max, $default_value = null, $label_formatter = null)
 {
-	if (is_null($label_formatter))
-	{
-		$label_formatter = create_function('$i', 'return $i;');
-	}
+	$tooltip = htmlspecialchars($tooltip, ENT_QUOTES);
+	$min = intval($min);
+	$max = intval($max);
 	if (is_null($default_value))
 	{
 		$default_value = $min;
 	}
-	$tooltip = htmlspecialchars($tooltip, ENT_QUOTES);
+	else
+	{
+		$default_value = intval($default_value);
+	}
+	if (is_null($label_formatter))
+	{
+		$label_formatter = create_function('$i', 'return $i;');
+	}
 
 	$s = array();
-	for ($i = intval($min); $i <= intval($max); $i++)
+	if ($min > $max)
 	{
-		$s[$i] = '<option value="' . $i . '">' . call_user_func($label_formatter, $i) . '</option>';
+		// If $min > $max, then create two options, one for each of
+		// $min and $max; and then call that good.
+		$s[$min] = '<option value="' . $min . '">' . call_user_func($label_formatter, $min) . '</option>';
+		$s[$max] = '<option value="' . $max . '">' . call_user_func($label_formatter, $max) . '</option>';
+	}
+	else
+	{
+		// $min <= $max, so create one option for $i in $min .. $max.
+		for ($i = $min; $i <= $max; $i++)
+		{
+			$s[$i] = '<option value="' . $i . '">' . call_user_func($label_formatter, $i) . '</option>';
+		}
 	}
 
 	unset($i);
@@ -108,7 +125,7 @@ function create_numeric_select($name, $tooltip, $min, $max, $default_value = nul
 	}
 	if (! isset($i))
 	{
-		$i = intval($default_value);
+		$i = $default_value;
 	}
 	$s[$i] = '<option value="' . $i . '" selected>' . call_user_func($label_formatter, $i) . '</option>';
 
