@@ -44,14 +44,7 @@ class Log
 					# we are dealing with a log entry that occurred *last year*,
 					# so adjust it accordingly.
 					$t = localtime(self::$last_input_timestamp);
-					self::$last_input_timestamp = mktime(
-						$t['tm_hour'],
-						$t['tm_min'],
-						$t['tm_sec'],
-						$t['tm_mon'] + 1,
-						$t['tm_mday'],
-						$t['tm_year'] + 1900 - 1
-					);
+					self::$last_input_timestamp = mktime($t[2], $t[1], $t[0], $t[4] + 1, $t[3], $t[5] + 1900 - 1);
 					unset($t);
 				}
 			}
