@@ -612,7 +612,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 							echo create_numeric_select('start_second', 'Time of first log entry to display (seconds).', 0, 59, 0, create_function('$sec', 'return sprintf("%02d", $sec);')) . ' on ';
 							echo create_numeric_select('start_month', 'Date of first log entry to display (month).', date('m', strtotime('1 month ago')), date('m'), date('m'), create_function('$mon', 'return strftime("%b", mktime(12, 0, 0, $mon, 15));')) . ' ';
 							echo create_numeric_select('start_day', 'Date of first log entry to display (day).', 1, 31, date('d'), create_function('$day', 'return sprintf("%02d", $day);')) . ', ';
-							echo create_numeric_select('start_year', 'Date of first log entry to display (year).', date('Y', strtotime('1 month ago')), date('Y'), null, create_function('$year', 'return sprintf("%04d", $year);'));
+							echo create_numeric_select('start_year', 'Date of first log entry to display (year).', date('Y', strtotime('1 month ago')), date('Y'), date('Y'), create_function('$year', 'return sprintf("%04d", $year);'));
 						?>
 						thru
 						<?php
@@ -621,7 +621,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 							echo create_numeric_select('end_second', 'Time of last log entry to display (seconds).', 0, 59, 0, create_function('$sec', 'return sprintf("%02d", $sec);')) . ' on ';
 							echo create_numeric_select('end_month', 'Date of last log entry to display (month).', date('m', strtotime('1 month ago')), date('m'), date('m'), create_function('$mon', 'return strftime("%b", mktime(12, 0, 0, $mon, 15));')) . ' ';
 							echo create_numeric_select('end_day', 'Date of last log entry to display (day).', 1, 31, date('d'), create_function('$day', 'return sprintf("%02d", $day);')) . ', ';
-							echo create_numeric_select('end_year', 'Date of last log entry to display (year).', date('Y', strtotime('1 month ago')), date('Y'), null, create_function('$year', 'return sprintf("%04d", $year);'));
+							echo create_numeric_select('end_year', 'Date of last log entry to display (year).', date('Y', strtotime('1 month ago')), date('Y'), date('Y'), create_function('$year', 'return sprintf("%04d", $year);'));
 						?>
 					</td>
 					<td style="text-align: right;">
