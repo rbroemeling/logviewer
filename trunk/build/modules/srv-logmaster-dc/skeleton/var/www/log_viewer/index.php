@@ -43,7 +43,7 @@ $config = array();
 $config['log_facilities'] = array('cron', 'fileserving', 'general', 'memcache', 'moderator', 'orwell', 'pagehandler', 'plus', 'sql');
 
 // A list of log levels that can be filtered on by the user.
-$config['log_levels'] = array('critical', 'error', 'warning', 'info', 'debug', 'spam');
+$config['log_levels'] = array('critical', 'error', 'warning', 'info', 'debug', 'trace', 'spam');
 
 // The root log directory that contains sub-directories for each environment.
 $config['log_root'] = '/var/log/development';

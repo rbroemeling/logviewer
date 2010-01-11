@@ -164,7 +164,7 @@ div.log_line span.errorlevel_critical
 
 div.log_line span.errorlevel_debug
 {
-	color: #ffffff;
+	color: #ff00ff;
 }
 
 div.log_line span.errorlevel_error
@@ -180,6 +180,11 @@ div.log_line span.errorlevel_info
 div.log_line span.errorlevel_spam
 {
 	color: #888888;
+}
+
+div.log_line span.errorlevel_trace
+{
+	color: #ffffff;
 }
 
 div.log_line span.errorlevel_unknown

@@ -53,6 +53,7 @@ class RubyLog extends Log
 				case 'warning':
 				case 'info':
 				case 'debug':
+				case 'trace':
 				case 'spam':
 					$this->error_level = $this->ruby_error_level;
 					break;
