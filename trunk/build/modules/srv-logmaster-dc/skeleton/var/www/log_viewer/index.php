@@ -459,7 +459,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 		</div>
 		<form id="control_form" method="get" onsubmit="document.getElementsByName('display_extended_filters')[0].value = is_visible('extended_filters'); document.getElementsByName('form_request_timestamp')[0].value = (new Date()).getTime(); return 1;">
 			<input type='hidden' name='display_extended_filters' value=''>
-			<input type='hidden' name='form_request_timestamp' value='<?php echo intval($_GET['form_request_timestamp']); ?>'>
+			<input type='hidden' name='form_request_timestamp' value='<?php echo $_GET['form_request_timestamp']; ?>'>
 			<div style="margin-bottom: 5px; text-align: right;">
 				<div style="float: left; text-align: left; width: 750px;">
 					<span style="margin-left: 10px; margin-right: 10px;">
