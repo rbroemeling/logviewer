@@ -71,8 +71,9 @@ class Log
 		}
 
 		# Regular Expression Map:
+		#  '([/)(68.149.93.179]) (.*)'
 		#  '([3443893/)(68.149.93.179]) (.*)'
-		if (preg_match('!^(\[[0-9-]+/)([0-9.]+\]) +(.*)!', $this->extra_data, $fields))
+		if (preg_match('!^(\[[0-9-]*/)([0-9.]+\]) +(.*)!', $this->extra_data, $fields))
 		{
 			$this->client_uid = $fields[1];
 			$this->client_ip = $fields[2];
