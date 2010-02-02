@@ -207,7 +207,7 @@ class Log
 
 	public function matches_log_facilities()
 	{
-		if ((! $_GET['log_facilities']) || $_GET['log_facilities']['No/Unknown Log Facility'])
+		if ((! $_GET['log_facilities']) || $_GET['log_facilities']['unknown'])
 		{
 			return true;
 		}
