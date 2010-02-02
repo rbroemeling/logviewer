@@ -602,12 +602,12 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 					</td>
 				</tr>
 				<tr>
-					<td colspan="3" style="border-top: 1px dotted green; padding-top: 5px; text-align: right;">
+					<td colspan="3" style="border-top: 1px dotted #ffffff; padding-top: 5px; text-align: right;">
 						<input alt="Add a text filter to match on." title="Add a text filter to match on." type="button" value="Add Filter" onclick="add_filter(null, null, null);">
 					</td>
 				</tr>
 				<tr>
-					<td colspan="3" style="border-bottom: 1px dotted green;">
+					<td colspan="3" style="border-bottom: 1px dotted #ffffff;">
 						<div id="filter_list">
 							<?php
 								for ($i = 0; $i < count($_GET['filter']); $i++)

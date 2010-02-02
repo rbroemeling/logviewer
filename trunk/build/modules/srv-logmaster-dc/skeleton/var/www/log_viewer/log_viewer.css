@@ -40,8 +40,8 @@ table#hotkey_list caption
 
 table#hotkey_list td
 {
-	border-bottom: 1px dotted green;
-	border-top: 1px dotted green;
+	border-bottom: 1px dotted #ffffff;
+	border-top: 1px dotted #ffffff;
 	padding: 4px;
 }
 
@@ -95,7 +95,7 @@ span.debug:after
 /* Input Form Styling ********************************************/
 table#basic_filters
 {
-	border-bottom: 3px groove green;
+	border-bottom: 3px groove #ffffff;
 }
 
 table#extended_filters select
