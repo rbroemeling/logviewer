@@ -55,7 +55,7 @@ class Log
 		}
 		else
 		{
-			# This is note a default syslog line... we really don't know what to do
+			# This is not a default syslog line... we really don't know what to do
 			# with it.
 			return;
 		}
