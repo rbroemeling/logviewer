@@ -35,7 +35,7 @@ class RubyLog extends Log
 
 			if (strlen($matches[1]))
 			{
-				$this->ruby_configuration = substr($matches[1], 1, -1);
+				$this->ruby_configuration = substr($matches[1], 0, -1);
 			}
 			if (strlen($matches[2]))
 			{
