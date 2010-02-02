@@ -184,7 +184,7 @@ div.log_line span.errorlevel_spam
 
 div.log_line span.errorlevel_trace
 {
-	color: #ffffff;
+	color: #aaaaaa;
 }
 
 div.log_line span.errorlevel_unknown
