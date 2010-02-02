@@ -210,7 +210,7 @@ div.log_line span.revision
 
 div.log_line span.pid
 {
-	color: #ffffff;
+	color: #666666;
 }
 
 div.log_line span.ruby_component_files
