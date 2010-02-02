@@ -109,7 +109,10 @@ class Log
 		}
 		$string .= '<span class="date">' . self::$last_output_timestring . '</span> ';
 		$string .= '<span class="host">' . htmlspecialchars($this->syslog_host, ENT_QUOTES) . '</span> ';
-		$string .= '<span class="program">' . htmlspecialchars($this->syslog_program, ENT_QUOTES) . '</span> ';
+		if (! is_null($this->syslog_program))
+		{
+			$string .= '<span class="program">' . htmlspecialchars($this->syslog_program, ENT_QUOTES) . '</span> ';
+		}
 		if (! is_null($this->client_uid))
 		{
 			$string .= '<span class="uid">' . htmlspecialchars($this->client_uid, ENT_QUOTES) . '</span>';
