@@ -25,14 +25,18 @@ class RubyLog extends Log
 		}
 
 		# Regular Expression Map:
+		#  '(31564).(general).(critical): (.*)'
 		#  '(live).(31564).(general).(critical): (.*)'
 		#  '(live).(r26781.)(31564).(general).(critical): (.*)'
 		#  '(live).(r26781.)(19426).(general).(error)( (req:19426:211)): (.*)'
-		if (preg_match('!^([a-z]+)\.(r\d+\.)?(\d+)\.([a-z_]+)\.([a-z]+)( +\(req:\d+:\d+.*?\))?: *(.*)!i', $this->extra_data, $matches))
+		if (preg_match('!^([a-z]+\.)?(r\d+\.)?(\d+)\.([a-z_]+)\.([a-z]+)( +\(req:\d+:\d+.*?\))?: *(.*)!i', $this->extra_data, $matches))
 		{
 			$this->extra_data = null;
 
-			$this->ruby_configuration = $matches[1];
+			if (strlen($matches[1]))
+			{
+				$this->ruby_configuration = substr($matches[1], 1, -1);
+			}
 			if (strlen($matches[2]))
 			{
 				$this->ruby_revision = substr($matches[2], 1, -1);
@@ -124,9 +128,10 @@ class RubyLog extends Log
 			if (parent::handles($line, $uuid))
 			{
 				# Regular Expression Map:
+				#  ' 31564.general.critical:'
 				#  ' live.31564.general.critical:'
 				#  ' live.r26781.31564.general.critical:'
-				if (preg_match('/ [a-z]+\.(r\d+\.)?\d+\.[a-z_]+\.[a-z]+\W/', $line))
+				if (preg_match('/ ([a-z]+\.)?(r\d+\.)?\d+\.[a-z_]+\.[a-z]+\W/', $line))
 				{
 					self::$handle_cache_result = true;
 				}
