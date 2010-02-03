@@ -29,7 +29,7 @@ class RubyLog extends Log
 		#  '(live).(31564).(general).(critical): (.*)'
 		#  '(live).(r26781.)(31564).(general).(critical): (.*)'
 		#  '(live).(r26781.)(19426).(general).(error)( (req:19426:211)): (.*)'
-		if (preg_match('!^([a-z]+\.)?(r\d+\.)?(\d+)\.([a-z_]+)\.([a-z]+)( +\(req:\d+:\d+.*?\))?: *(.*)!i', $this->extra_data, $matches))
+		if (preg_match('!^([a-z-]+\.)?(r\d+\.)?(\d+)\.([a-z_]+)\.([a-z]+)( +\(req:\d+:\d+.*?\))?: *(.*)!i', $this->extra_data, $matches))
 		{
 			$this->extra_data = null;
 
@@ -131,7 +131,7 @@ class RubyLog extends Log
 				#  ' 31564.general.critical:'
 				#  ' live.31564.general.critical:'
 				#  ' live.r26781.31564.general.critical:'
-				if (preg_match('/ ([a-z]+\.)?(r\d+\.)?\d+\.[a-z_]+\.[a-z]+\W/', $line))
+				if (preg_match('/ ([a-z-]+\.)?(r\d+\.)?\d+\.[a-z_]+\.[a-z]+\W/', $line))
 				{
 					self::$handle_cache_result = true;
 				}
