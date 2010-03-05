@@ -19,10 +19,7 @@ class LogFile
 		if (! is_null($this->handle))
 		{
 			gzclose($this->handle);
-			$this->handle = null;
 		}
-		$this->path = null;
-		$this->statistics = null;
 	}
 
 
@@ -33,7 +30,7 @@ class LogFile
 			return false;
 		}
 
-		$offset = gztell($this->handle);
+		$offset = $this->tell();
 		$data = gzgets($this->handle);
 		if ($data === false)
 		{
@@ -47,15 +44,19 @@ class LogFile
 
 	public function open($path)
 	{
+		if (! is_null($this->handle))
+		{
+			gzclose($this->handle);
+			$this->__construct();
+		}
+
 		$this->path = $path;
 		$this->statistics = @stat($path);
 		$this->handle = @gzopen($path, 'rb');
 
 		if ((! $this->statistics) || (! $this->handle))
 		{
-			$this->handle = null;
-			$this->path = null;
-			$this->statistics = array();
+			$this->__construct();
 			return false;
 		}
 		return true;
