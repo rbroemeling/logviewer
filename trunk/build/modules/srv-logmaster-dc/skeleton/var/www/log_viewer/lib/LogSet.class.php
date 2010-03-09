@@ -13,32 +13,33 @@ class LogSet
 	const LOG_ROOT = '/var/log/development';
 
 
-	protected $current_timestamp = null;
 	protected $end_timestamp = null;
 	protected $environment = null;
 	protected $hooks = array();
 	protected $language = null;
 	protected $log_file = null;
-	
+	protected $log_timestamp = null;
+
 
 	public function __construct($environment, $language, $start_timestamp, $end_timestamp)
 	{
-		$this->current_timestamp = $start_timestamp;
 		$this->end_timestamp = $end_timestamp;
 		$this->environment = $environment;
 		$this->hooks = array();
 		$this->language = $language;
 		$this->log_file = null;
+		$this->log_timestamp = mktime(date('H', $start_timestamp), 0, 0, date('n', $start_timestamp), date('j', $start_timestamp), date('Y', $start_timestamp));
+		$this->start_timestamp = $start_timestamp;
 	}
 
 
 	public function gets()
 	{
-		while ($this->current_timestamp <= $this->end_timestamp)
+		while ($this->log_timestamp <= $this->end_timestamp)
 		{
 			if (is_null($this->log_file))
 			{
-				$log_path = sprintf('%s/%s/%s.%s.log', self::LOG_ROOT, $this->environment, strftime('%Y-%m-%d-%H', $this->current_timestamp), $this->language);
+				$log_path = sprintf('%s/%s/%s.%s.log', self::LOG_ROOT, $this->environment, strftime('%Y-%m-%d-%H', $this->log_timestamp), $this->language);
 				if (! file_exists($log_path))
 				{
 					// We don't have an uncompressed version
@@ -72,7 +73,7 @@ class LogSet
 			if (! is_null($this->log_file))
 			{
 				$line = $this->log_file->gets();
-				while (($line !== false) && ($line->syslog_timestamp < $this->current_timestamp))
+				while (($line !== false) && ($line->syslog_timestamp < $this->start_timestamp))
 				{
 					$line = $this->log_file->gets();
 				}
@@ -89,7 +90,7 @@ class LogSet
 				}
 			}
 			$this->log_file = null;
-			$this->current_timestamp += 3600;
+			$this->log_timestamp += 3600;
 		}
 		return false;
 	}
