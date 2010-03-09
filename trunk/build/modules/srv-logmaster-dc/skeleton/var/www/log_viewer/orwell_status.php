@@ -101,6 +101,7 @@ while ($entry = $log_set->gets())
 	elseif (stripos($entry->line, 'Completed Orwell run') !== false)
 	{
 		$orwell_end_timestamp = $entry->syslog_timestamp;
+		break;
 	}
 }
 
