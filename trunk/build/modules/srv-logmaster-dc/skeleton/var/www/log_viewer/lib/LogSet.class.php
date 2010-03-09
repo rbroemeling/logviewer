@@ -90,7 +90,7 @@ class LogSet
 				}
 			}
 			$this->log_file = null;
-			$this->log_timestamp += 3600;
+			$this->log_timestamp = strtotime('+1 hour', $this->log_timestamp);
 		}
 		return false;
 	}
