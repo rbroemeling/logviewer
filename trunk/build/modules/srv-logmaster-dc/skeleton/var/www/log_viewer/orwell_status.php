@@ -15,11 +15,7 @@ include_once(dirname(__FILE__) . '/lib/LogSet.class.php');
 if ($_SERVER)
 {
 	header("Content-type: text/plain");
-	define('CLI', false);
-}
-else
-{
-	define('CLI', true);
+	set_time_limit(600);
 }
 
 // Debug-mode: output extra information about the log handlers being used and
