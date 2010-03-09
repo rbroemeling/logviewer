@@ -1,4 +1,6 @@
 <?php
+include_once(dirname(__FILE__) . '/PHPLog.class.php');
+
 class PHPLogBacktrace extends PHPLog
 {
 	public $php_backtrace = null;

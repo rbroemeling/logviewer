@@ -9,7 +9,7 @@
  * Meant to be used as a passive service report to Nagios, via NSCA, in order
  * to allow for Nagios monitoring of Orwell execution runs.
  **/
-include_once(dirname(__FILE__) . '/lib/log/RubyLog.class.php');
+include_once(dirname(__FILE__) . '/lib/Log/RubyLog.class.php');
 include_once(dirname(__FILE__) . '/lib/LogSet.class.php');
 
 /**
@@ -29,6 +29,8 @@ function ensure_orwell_chunk($i)
 		);
 	}
 }
+
+define('DEBUG', false);
 
 $environment = 'live'; // beta, live, or stage
 $orwell_chunks = array();

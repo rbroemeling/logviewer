@@ -1,4 +1,6 @@
 <?php
+include_once(dirname(__FILE__) . '/RubyLog.class.php');
+
 class RubyLogBacktrace extends RubyLog
 {
 	public $ruby_backtrace = null;

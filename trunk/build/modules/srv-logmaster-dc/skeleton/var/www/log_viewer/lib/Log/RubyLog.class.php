@@ -1,4 +1,6 @@
 <?php
+include_once(dirname(__FILE__) . '/../Log.class.php');
+
 class RubyLog extends Log
 {
 	private static $handle_cache_id = null;
