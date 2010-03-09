@@ -12,6 +12,30 @@
 include_once(dirname(__FILE__) . '/lib/Log/RubyLog.class.php');
 include_once(dirname(__FILE__) . '/lib/LogSet.class.php');
 
+if ($_SERVER)
+{
+	header("Content-type: text/plain");
+	define('CLI', false);
+}
+else
+{
+	define('CLI', true);
+}
+
+// Debug-mode: output extra information about the log handlers being used and
+// the log files that are being opened/read/closed. 
+if (! defined('DEBUG'))
+{
+	if (CLI && $_GET['debug'])
+	{
+		define('DEBUG', true);
+	}
+	else
+	{
+		define('DEBUG', false);
+	}
+}
+
 /**
  * Trivial utility function to setup the counters for an orwell "chunk" in the
  * $orwell_chunks array.
@@ -29,8 +53,6 @@ function ensure_orwell_chunk($i)
 		);
 	}
 }
-
-define('DEBUG', false);
 
 $environment = 'live'; // beta, live, or stage
 $orwell_chunks = array();
@@ -66,5 +88,41 @@ while ($entry = $log_set->gets())
 	{
 		$orwell_end_timestamp = $entry->syslog_timestamp;
 	}
+}
+
+if (DEBUG)
+{
+	echo 'Orwell Start Time: ' . date('Y-m-d H:i:s', $orwell_start_timestamp) . ".\n";
+	echo 'Orwell End Time: ' . date('Y-m-d H:i:s', $orwell_end_timestamp) . ".\n";
+	echo "\n";
+	foreach (array_keys($orwell_chunks) as $chunk)
+	{
+		echo 'Orwell Chunk ' . $chunk . "\n";
+		for ($i = 0; $i < max(count($orwell_chunks[$chunk]['start']), count($orwell_chunks[$chunk]['stop'])); $i++)
+		{
+			if (isset($orwell_chunks[$chunk]['start'][$i]))
+			{
+				echo "\t" . date('Y-m-d H:i:s', $orwell_chunks[$chunk]['start'][$i]);
+			}
+			else
+			{
+				echo "\t" . str_repeat(' ', 19);
+			}
+			if (isset($orwell_chunks[$chunk]['stop'][$i]))
+			{
+				echo "\t" . date('Y-m-d H:i:s', $orwell_chunks[$chunk]['stop'][$i]);
+			}
+			else
+			{
+				echo "\t" . str_repeat(' ', 19);
+			}
+			if (isset($orwell_chunks[$chunk]['start'][$i]) && isset($orwell_chunks[$chunk]['stop'][$i]))
+			{
+				echo "\t" . number_format($orwell_chunks[$chunk]['stop'][$i] - $orwell_chunks[$chunk]['start'][$i]) . 's elapsed';
+			}
+			echo "\n";
+		}
+		echo "\n";
+	}	
 }
 ?>
