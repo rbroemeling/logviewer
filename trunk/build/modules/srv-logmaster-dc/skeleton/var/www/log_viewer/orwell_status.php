@@ -50,6 +50,24 @@ function ensure_orwell_chunk($i)
 	}
 }
 
+/**
+ * Trivial utility function to output the information from this script in the
+ * format that Nagios/NSCA expects (tab-delimited fields).
+ **/
+function nagios_service_report($return_code, $message)
+{
+	global $environment;
+	
+	$fields = array();
+	$fields[] = "logmaster";              // Hostname.
+	$fields[] = "orwell-" . $environment; // Service description.
+	$fields[] = $return_code;             // Check result (0 = OK, 1 = WARNING, 2 = CRITICAL).
+	$fields[] = $message;                 // Plugin output (verbose description/message).
+
+	echo join("\t", $fields) . "\n";
+	exit;
+}
+
 $environment = 'live'; // beta, live, or stage
 $orwell_chunks = array();
 $orwell_end_timestamp = null;
@@ -124,36 +142,30 @@ if (DEBUG)
 
 if (is_null($orwell_start_timestamp))
 {
-	echo "logmaster\torwell\t2\tCRITICAL: Start of orwell run could not be found.\n";
-	exit;
+	nagios_service_report(2, 'CRITICAL: Start of orwell run could not be found.');
 }
 if (is_null($orwell_end_timestamp))
 {
-	echo "logmaster\torwell\t2\tCRITICAL: End of orwell run could not be found.\n";
-	exit;
+	nagios_service_report(2, 'CRITICAL: End of orwell run could not be found.');
 }
 $orwell_elapsed = $orwell_end_timestamp - $orwell_start_timestamp;
 if ($orwell_elapsed > (4 * 3600))
 {
-	echo "logmaster\torwell\t1\tWARNING: Orwell run took " . number_format($orwell_elapsed) . " seconds.\n";
-	exit;
+	nagios_service_report(1, 'WARNING: Orwell run took ' . number_format($orwell_elapsed) . ' seconds.');
 }
 foreach (array_keys($orwell_chunks) as $chunk)
 {
 	if (count($orwell_chunks[$chunk]['start']) > 1)
 	{
-		echo "logmaster\torwell\t1\tWARNING: Orwell server_id chunk " . $chunk . " executed more than once.\n";
-		exit;
+		nagios_service_report(1, 'WARNING: Orwell server_id chunk ' . $chunk . ' executed more than once.');
 	}
 }
 foreach (array_keys($orwell_chunks) as $chunk)
 {
 	if (count($orwell_chunks[$chunk]['start']) != count($orwell_chunks[$chunk]['stop']))
 	{
-		echo "logmaster\torwell\t1\tWARNING: Mismatched start/stop count (" . count($orwell_chunks[$chunk]['start']) . "/" . count($orwell_chunks[$chunk]['stop']) . ") for orwell server_id chunk " . $chunk . ".\n";
-		exit;
+		nagios_service_report(1, 'WARNING: Mismatched start/stop count (' . count($orwell_chunks[$chunk]['start']) . '/' . count($orwell_chunks[$chunk]['stop']) . ') for orwell server_id chunk ' . $chunk . '.');
 	}
 }
-echo "logmaster\torwell\t0\tOK: Orwell completed " . count($orwell_chunks) . " server_id chunks in " . number_format($orwell_elapsed) . " seconds.\n";
-exit;
+nagios_service_report(0, 'OK: Orwell completed ' . count($orwell_chunks) . ' server_id chunks in ' . number_format($orwell_elapsed) . ' seconds.');
 ?>
