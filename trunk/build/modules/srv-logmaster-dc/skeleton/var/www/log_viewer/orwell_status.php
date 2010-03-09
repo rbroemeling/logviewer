@@ -135,7 +135,7 @@ if (is_null($orwell_end_timestamp))
 $orwell_elapsed = $orwell_end_timestamp - $orwell_start_timestamp;
 if ($orwell_elapsed > (4 * 3600))
 {
-	echo "logmaster\torwell\t1\tWARNING: Orwell run took " . $orwell_elapsed . " seconds.\n";
+	echo "logmaster\torwell\t1\tWARNING: Orwell run took " . number_format($orwell_elapsed) . " seconds.\n";
 	exit;
 }
 foreach (array_keys($orwell_chunks) as $chunk)
@@ -154,6 +154,6 @@ foreach (array_keys($orwell_chunks) as $chunk)
 		exit;
 	}
 }
-echo "logmaster\torwell\t0\tOK: Orwell completed " . count($orwell_chunks) . " server_id chunks in " . $orwell_elapsed . " seconds.\n";
+echo "logmaster\torwell\t0\tOK: Orwell completed " . count($orwell_chunks) . " server_id chunks in " . number_format($orwell_elapsed) . " seconds.\n";
 exit;
 ?>
