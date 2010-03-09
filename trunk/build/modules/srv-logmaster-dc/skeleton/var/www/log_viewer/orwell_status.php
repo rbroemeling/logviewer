@@ -22,7 +22,7 @@ if ($_SERVER)
 // the log files that are being opened/read/closed. 
 if (! defined('DEBUG'))
 {
-	if ($_GET['debug'])
+	if ($_GET['debug'] || getenv('debug'))
 	{
 		define('DEBUG', true);
 	}
