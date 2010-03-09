@@ -3,6 +3,7 @@ class Log
 {
 	private static $cached_filters = null;
 	private static $classes = null;
+	public static $debug = false;
 	private static $handle_id = 0;
 	private static $last_input_timestamp = null;
 	private static $last_input_timestring = null;
@@ -99,7 +100,7 @@ class Log
 		}
 
 		$string  = '';
-		if (DEBUG)
+		if (self::$debug)
 		{
 			$string .= '<span class="debug">Begin ' . __CLASS__ . '</span>';
 		}
@@ -123,7 +124,7 @@ class Log
 			$string .= '<span class="ip">' . htmlspecialchars($this->client_ip, ENT_QUOTES) . '</span> ';
 		}
 		$string .= htmlspecialchars($this->extra_data, ENT_QUOTES);
-		if (DEBUG)
+		if (self::$debug)
 		{
 			$string .= '<span class="debug">End ' . __CLASS__ . '</span>';
 		}
@@ -143,7 +144,7 @@ class Log
 		{
 			if (call_user_func(array($class_summary['class'], 'handles'), $line, self::$handle_id))
 			{
-				if (DEBUG)
+				if (self::$debug)
 				{
 					echo '<div class="debug">Handler ' . $class_summary['class'] . ' chosen for line: "' . $line . '"</div>' . "\n";
 				}
@@ -151,7 +152,7 @@ class Log
 			}
 		}
 
-		if (DEBUG)
+		if (self::$debug)
 		{
 			echo '<div class="debug">Handler ' . __CLASS__ . ' chosen for line: "' . $line . '"</div>' . "\n";
 		}

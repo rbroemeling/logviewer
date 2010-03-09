@@ -445,6 +445,7 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 		{
 			$log_set->register_hook('closed_file', create_function('$p', 'echo "<div class=\'debug\'>Closed logfile \'" . $p . "\'.</div>";'));
 			$log_set->register_hook('opened_file', create_function('$p', 'echo "<div class=\'debug\'>Opened logfile \'" . $p . "\'.</div>";'));
+			Log::$debug = true;
 		}
 
 		/**
