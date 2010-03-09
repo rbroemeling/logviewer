@@ -31,28 +31,59 @@ if (! defined('DEBUG'))
 }
 
 /******************************************************************************
- * Configuration details about the location of log files.  In general, log file
- * paths are expected to follow the below template:
- *
- * $config['log_root']/$log_environment/YYYY-MM-DD-HH.$log_language.log
- *
+ * Useful Configuration
  ******************************************************************************/
 $config = array();
 
 // A list of log facilities that can be filtered on by the user.
-$config['log_facilities'] = array('core', 'cron', 'fileserving', 'general', 'memcache', 'metrics', 'moderator', 'orwell', 'pagehandler', 'plus', 'run', 'scoop', 'site_module', 'sql', 'template', 'unknown', 'worker');
+$config['log_facilities'] = array
+(
+	'core',
+	'cron',
+	'fileserving',
+	'general',
+	'memcache',
+	'metrics',
+	'moderator',
+	'orwell',
+	'pagehandler',
+	'plus',
+	'run',
+	'scoop',
+	'site_module',
+	'sql',
+	'template',
+	'unknown',
+	'worker'
+);
 
 // A list of log levels that can be filtered on by the user.
-$config['log_levels'] = array('critical', 'error', 'warning', 'info', 'debug', 'trace', 'spam');
-
-// The root log directory that contains sub-directories for each environment.
-$config['log_root'] = '/var/log/development';
+$config['log_levels'] = array
+(
+	'critical',
+	'error',
+	'warning',
+	'info',
+	'debug',
+	'trace',
+	'spam'
+);
 
 // A list of environments to be exposed to the user.
-$config['environments'] = array('beta', 'live', 'stage');
+$config['environments'] = array
+(
+	'beta',
+	'live',
+	'stage'
+);
 
 // A list of languages to be exposed to the user.
-$config['languages'] = array('dispatcher', 'php', 'ruby');
+$config['languages'] = array
+(
+	'dispatcher',
+	'php',
+	'ruby'
+);
 
 // A list of source hosts that can be filtered on by the user.
 $config['source_hosts'] = array();
@@ -319,8 +350,7 @@ function slash_machine(&$data)
  * Classes
  ******************************************************************************/
 include_once(dirname(__FILE__) . '/lib/LineOutput.class.php');
-include_once(dirname(__FILE__) . '/lib/Log.class.php');
-include_once(dirname(__FILE__) . '/lib/LogFile.class.php');
+include_once(dirname(__FILE__) . '/lib/LogSet.class.php');
 include_once(dirname(__FILE__) . '/lib/SkipWarning.class.php');
 
 
@@ -399,16 +429,25 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 /**
  * If our environment and language variables are valid, check the rest of our
  * filters and assuming that they all check out populate $end_timestamp,
- * $log_timestamp, and $start_timestamp with the range that this query to the
- * log viewer will iterate through.
+ * and $start_timestamp with the range that this query to the log viewer will
+ * iterate through and instantiate a LogSet object that covers the requested
+ * data.
  **/
 if (isset($_GET['environment']) && isset($_GET['language']))
 {
 	if (sanitize_filter() && sanitize_negate_filter() && sanitize_logic_filter())
 	{
 		$end_timestamp = mktime($_GET['end_hour'], $_GET['end_minute'], $_GET['end_second'], $_GET['end_month'], $_GET['end_day'], $_GET['end_year']);
-		$log_timestamp = mktime($_GET['start_hour'], 0, 0, $_GET['start_month'], $_GET['start_day'], $_GET['start_year']);
 		$start_timestamp = mktime($_GET['start_hour'], $_GET['start_minute'], $_GET['start_second'], $_GET['start_month'], $_GET['start_day'], $_GET['start_year']);
+		
+		$log_set = new LogSet($_GET['environment'], $_GET['language'], $start_timestamp, $end_timestamp);
+		$log_set->register_hook('missing_file', create_function('$p', 'echo "<div class=\'error\'>Missing logfile: " . $p . "</div>";'));
+		$log_set->register_hook('read_error', create_function('$p', 'echo "<div class=\'error\'>Read error when processing logfile: " . $p . "</div>";'));
+		if (DEBUG)
+		{
+			$log_set->register_hook('opened_file', create_function('$p', 'echo "<div class=\'debug\'>Beginning logfile: " . $p . "</div>";'));
+			$log_set->register_hook('closed_file', create_function('$p', 'echo "<div class=\'debug\'>Reached end of logfile: " . $p . "</div>";'));
+		}
 
 		/**
 		 * Convert our filter arrays (source hosts, log levels, and log facilities) into
@@ -663,46 +702,10 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 		<div id="log_excerpt">
 			<?php
 				SkipWarning::reset();
-				while (isset($log_timestamp) && ($log_timestamp < $end_timestamp) && (LineOutput::$displayed_lines <= MAX_LINES))
+				if (isset($log_set))
 				{
-					$log_path = sprintf('%s/%s/%s.%s.log', $config['log_root'], $_GET['environment'], strftime('%Y-%m-%d-%H', $log_timestamp), $_GET['language']);
-					if ((! file_exists($log_path)) && file_exists($log_path . '.gz'))
+					while ((LineOutput::$displayed_lines < MAX_LINES) && ($current_line = $log_set->gets()))
 					{
-						// We don't have an uncompressed version of the log, but we do have a compressed
-						// version, so use that.
-						$log_path .= '.gz';
-					}
-					$log_file = new LogFile();
-					if (DEBUG)
-					{
-						echo '<div class="debug">Beginning logfile: ' . $log_path . '</div>';
-					}
-					if (! $log_file->open($log_path))
-					{
-						echo '<div class="error">' . $log_path . " could not be opened for reading.</div>\n";
-						$log_timestamp += 3600;
-						continue;
-					}
-
-					while ($current_line = $log_file->gets())
-					{
-						if ($current_line->syslog_timestamp < $start_timestamp)
-						{
-							continue;
-						}
-						if ($current_line->syslog_timestamp > $end_timestamp)
-						{
-							echo SkipWarning::warning(true);
-							echo "<div class='warning'>Reached end of requested timeframe (" . strftime('%Y-%m-%d %H:%M:%S', $end_timestamp) . ").</div>";
-							break 2;
-						}
-						if (LineOutput::$displayed_lines >= MAX_LINES)
-						{
-							echo SkipWarning::warning(true);
-							echo "<div class='warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.</div>";
-							break 2;
-						}
-
 						// If we have any filters, skip the lines that do not match them.
 						if (
 						    (! $current_line->matches_source_hosts()) ||
@@ -714,22 +717,22 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 							SkipWarning::add();
 							continue;
 						}
-
+	
 						echo SkipWarning::warning(true);
 						LineOutput::display($current_line);
 					}
-					if (DEBUG)
-					{
-						echo '<div class="debug">Reached end of logfile: ' . $log_path . '</div>';
-					}
-					$log_timestamp += 3600;
-				}
-				echo SkipWarning::warning(true);
-				if (isset($log_timestamp))
-				{
+					echo SkipWarning::warning(true);
 					if ((LineOutput::$displayed_lines == 0) && (SkipWarning::$total_skipped == 0))
 					{
 						echo "<div class='warning'>No log lines were found for the requested timeframe (" . strftime('%Y-%m-%d %H:%M:%S', $start_timestamp) . " thru " . strftime('%Y-%m-%d %H:%M:%S', $end_timestamp) . ').</div>';
+					}
+					elseif (LineOutput::$displayed_lines >= MAX_LINES)
+					{
+						echo "<div class='warning'>Encountered maximum line display limit of " . number_format(MAX_LINES) . " lines.</div>";
+					}
+					else
+					{
+						echo "<div class='warning'>Reached end of requested timeframe (" . strftime('%Y-%m-%d %H:%M:%S', $end_timestamp) . ").</div>";
 					}
 				}
 			?>

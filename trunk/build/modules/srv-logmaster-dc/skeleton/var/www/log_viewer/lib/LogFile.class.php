@@ -1,4 +1,6 @@
 <?php
+include_once(dirname(__FILE__) . '/Log.class.php');
+
 class LogFile
 {
 	protected $handle = null;
