@@ -59,10 +59,10 @@ function nagios_service_report($return_code, $message)
 	global $environment;
 	
 	$fields = array();
-	$fields[] = "logmaster";              // Hostname.
-	$fields[] = "orwell-" . $environment; // Service description.
-	$fields[] = $return_code;             // Check result (0 = OK, 1 = WARNING, 2 = CRITICAL).
-	$fields[] = $message;                 // Plugin output (verbose description/message).
+	$fields[] = "logmaster";                               // Hostname.
+	$fields[] = "Orwell: " . ucfirst(lower($environment)); // Service description.
+	$fields[] = $return_code;                              // Check result (0 = OK, 1 = WARNING, 2 = CRITICAL).
+	$fields[] = $message;                                  // Plugin output (verbose description/message).
 
 	echo join("\t", $fields) . "\n";
 	exit;
