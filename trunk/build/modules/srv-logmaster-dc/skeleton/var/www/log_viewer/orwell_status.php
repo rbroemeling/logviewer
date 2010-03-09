@@ -55,7 +55,7 @@ $orwell_chunks = array();
 $orwell_end_timestamp = null;
 $orwell_start_timestamp = null;
 
-$log_set = new LogSet($environment, 'ruby', strtotime('0900 today'), strtotime('2200 today'));
+$log_set = new LogSet($environment, 'ruby', strtotime('today 09:00'), strtotime('today 22:00'));
 while ($entry = $log_set->gets())
 {
 	if (! $entry instanceof RubyLog)
