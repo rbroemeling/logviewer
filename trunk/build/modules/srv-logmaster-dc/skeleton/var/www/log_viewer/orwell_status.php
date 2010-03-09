@@ -55,7 +55,7 @@ $orwell_chunks = array();
 $orwell_end_timestamp = null;
 $orwell_start_timestamp = null;
 
-$log_set = new LogSet($environment, 'ruby', strtotime('midnight'), strtotime('midnight tomorrow - 1 second'));
+$log_set = new LogSet($environment, 'ruby', strtotime('0900 today'), strtotime('2200 today'));
 while ($entry = $log_set->gets())
 {
 	if (! $entry instanceof RubyLog)
@@ -121,4 +121,33 @@ if (DEBUG)
 		echo "\n";
 	}	
 }
+
+if (is_null($orwell_start_timestamp))
+{
+	echo "logmaster\torwell\t2\tCRITICAL: Start of orwell run could not be found.\n";
+}
+if (is_null($orwell_end_timestamp))
+{
+	echo "logmaster\torwell\t2\tCRITICAL: End of orwell run could not be found.\n";
+}
+$orwell_elapsed = $orwell_end_timestamp - $orwell_start_timestamp;
+if ($orwell_elapsed > (4 * 3600))
+{
+	echo "logmaster\torwell\t1\tWARNING: Orwell run took " . $orwell_elapsed . " seconds.\n";
+}
+foreach (array_keys($orwell_chunks) as $chunk)
+{
+	if (count($orwell_chunks[$chunk]['start']) > 1)
+	{
+		echo "logmaster\torwell\t1\tWARNING: Orwell server_id chunk " . $chunk . " executed more than once.\n";
+	}
+}
+foreach (array_keys($orwell_chunks) as $chunk)
+{
+	if (count($orwell_chunks[$chunk]['start']) != count($orwell_chunks[$chunk]['stop']))
+	{
+		echo "logmaster\torwell\t1\tWARNING: Mismatched start/stop count (" . count($orwell_chunks[$chunk]['start']) . "/" . count($orwell_chunks[$chunk]['stop']) . ") for orwell server_id chunk " . $chunk . ".\n";
+	}
+}
+echo "logmaster\torwell\t0\tOK: Orwell completed " . count($orwell_chunks) . " server_id chunks in " . $orwell_elapsed . " seconds.\n";
 ?>
