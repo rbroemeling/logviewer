@@ -55,17 +55,17 @@ class LogSet
 					$this->log_file = new LogFile();
 					if (! $this->log_file->open($log_path))
 					{
-						trigger_hook('read_error', $log_path);
+						$this->trigger_hook('read_error', $log_path);
 						$this->log_file = null;
 					}
 					else
 					{
-						trigger_hook('opened_file', $this->log_file->path);
+						$this->trigger_hook('opened_file', $this->log_file->path);
 					}
 				}
 				else
 				{
-					trigger_hook('missing_file', $log_path);
+					$this->trigger_hook('missing_file', $log_path);
 				}
 			}
 
@@ -85,7 +85,7 @@ class LogSet
 				}
 				else
 				{
-					trigger_hook('closed_file', $this->log_file->path);
+					$this->trigger_hook('closed_file', $this->log_file->path);
 				}
 			}
 			$this->log_file = null;
@@ -103,7 +103,7 @@ class LogSet
 		}
 		array_push($this->hooks, $function);
 	}
-	
+
 	
 	function trigger_hook($hook, $argument)
 	{
