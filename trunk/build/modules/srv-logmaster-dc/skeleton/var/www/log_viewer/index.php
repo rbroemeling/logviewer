@@ -2,22 +2,20 @@
 /**
  * log_viewer index.php
  *
- * A monolithic script that allows web access to select log files.
+ * A somewhat simple web-based log viewer.
  *
- * This script is monolithic for the simplicity of installation that such a
- * design entails.  It has no dependencies.  Simply drop it into a directory,
- * perhaps modify some of the configuration variables, and it is ready to go.
  **/
 
 /******************************************************************************
  * Configuration Constants
  ******************************************************************************/
 // Maximum number of lines to ever display, the script will never display more
-// than this number of lines.  This is a simple sanity check only, to prevent
-// run-away log data display.
+// than this number of lines.  This is a simple sanity check only, use it
+// to prevent run-away log data display.
 define('MAX_LINES', 15000);
 
-// Debug-mode: output extra information about the handlers being used.
+// Debug-mode: output extra information about the log handlers being used and
+// the log files that are being opened/read/closed. 
 if (! defined('DEBUG'))
 {
 	if ($_GET['debug'])
@@ -31,7 +29,7 @@ if (! defined('DEBUG'))
 }
 
 /******************************************************************************
- * Useful Configuration
+ * Interface Configuration Variables
  ******************************************************************************/
 $config = array();
 
