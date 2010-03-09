@@ -441,12 +441,12 @@ if (isset($_GET['environment']) && isset($_GET['language']))
 		$start_timestamp = mktime($_GET['start_hour'], $_GET['start_minute'], $_GET['start_second'], $_GET['start_month'], $_GET['start_day'], $_GET['start_year']);
 		
 		$log_set = new LogSet($_GET['environment'], $_GET['language'], $start_timestamp, $end_timestamp);
-		$log_set->register_hook('missing_file', create_function('$p', 'echo "<div class=\'error\'>Missing logfile: " . $p . "</div>";'));
-		$log_set->register_hook('read_error', create_function('$p', 'echo "<div class=\'error\'>Read error when processing logfile: " . $p . "</div>";'));
+		$log_set->register_hook('missing_file', create_function('$p', 'echo "<div class=\'error\'>Missing logfile \'" . $p . "\'.</div>";'));
+		$log_set->register_hook('read_error', create_function('$p', 'echo "<div class=\'error\'>Read error when processing logfile \'" . $p . "\'.</div>";'));
 		if (DEBUG)
 		{
-			$log_set->register_hook('opened_file', create_function('$p', 'echo "<div class=\'debug\'>Beginning logfile: " . $p . "</div>";'));
-			$log_set->register_hook('closed_file', create_function('$p', 'echo "<div class=\'debug\'>Reached end of logfile: " . $p . "</div>";'));
+			$log_set->register_hook('closed_file', create_function('$p', 'echo "<div class=\'debug\'>Closed logfile \'" . $p . "\'.</div>";'));
+			$log_set->register_hook('opened_file', create_function('$p', 'echo "<div class=\'debug\'>Opened logfile \'" . $p . "\'.</div>";'));
 		}
 
 		/**
