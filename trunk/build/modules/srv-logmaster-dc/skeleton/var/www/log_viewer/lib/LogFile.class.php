@@ -2,7 +2,7 @@
 class LogFile
 {
 	protected $handle = null;
-	protected $path = null;
+	public $path = null;
 	protected $statistics = null;
 
 
@@ -16,13 +16,20 @@ class LogFile
 
 	public function __destruct()
 	{
-		if (! is_null($this->handle))
-		{
-			gzclose($this->handle);
-		}
+		$this->close();
 	}
 
 
+	public function close()
+	{
+		if ((! is_null($this->handle)) && ($this->handle !== false))
+		{
+			gzclose($this->handle);
+		}
+		$this->__construct();
+	}
+	
+	
 	public function gets()
 	{
 		if (is_null($this->handle) || gzeof($this->handle))
@@ -44,19 +51,14 @@ class LogFile
 
 	public function open($path)
 	{
-		if (! is_null($this->handle))
-		{
-			gzclose($this->handle);
-			$this->__construct();
-		}
-
+		$this->close();
 		$this->path = $path;
 		$this->statistics = @stat($path);
 		$this->handle = @gzopen($path, 'rb');
 
 		if ((! $this->statistics) || (! $this->handle))
 		{
-			$this->__construct();
+			$this->close();
 			return false;
 		}
 		return true;
