@@ -102,7 +102,7 @@ class LogSet
 		{
 			$this->hooks[$hook] = array();
 		}
-		array_push($this->hooks, $function);
+		array_push($this->hooks[$hook], $function);
 	}
 
 	
