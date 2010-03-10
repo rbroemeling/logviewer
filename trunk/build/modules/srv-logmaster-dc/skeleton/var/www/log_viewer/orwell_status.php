@@ -192,5 +192,5 @@ if (array_sum($orwell_emails) <= 10)
 {
 	nagios_service_report(1, 'WARNING: Orwell sent ' . number_format(array_sum($orwell_emails)) . ' e-mails.');
 }
-nagios_service_report(0, 'OK: Orwell completed ' . count($orwell_chunks) . ' server_id chunks in ' . number_format($orwell_elapsed) . ' seconds.');
+nagios_service_report(0, 'OK: Orwell completed ' . count($orwell_chunks) . ' server_id chunks in ' . number_format($orwell_elapsed) . ' seconds, sending a total of ' . number_format(array_sum($orwell_emails)) . ' e-mails.');
 ?>
