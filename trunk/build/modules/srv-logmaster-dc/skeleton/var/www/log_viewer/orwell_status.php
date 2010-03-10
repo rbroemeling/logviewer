@@ -78,6 +78,7 @@ if (getenv('environment'))
 {
 	$environment = getenv('environment');
 }
+$orwell_emails = array();
 $orwell_chunks = array();
 $orwell_end_timestamp = null;
 $orwell_start_timestamp = null;
@@ -97,7 +98,11 @@ while ($entry = $log_set->gets())
 	{
 		$orwell_start_timestamp = $entry->syslog_timestamp;
 	}
-	if (preg_match('/Adding Orwell task to ppq_tasks, server_ids => (\[[0-9, ]+\])/', $entry->line, $matches))
+	if (preg_match('/Sent orwell (.*) email to user (\S+) with id (\d+)/', $entry->line, $matches))
+	{
+		$orwell_emails[$matches[1]] += 1;
+	}
+	elseif (preg_match('/Adding Orwell task to ppq_tasks, server_ids => (\[[0-9, ]+\])/', $entry->line, $matches))
 	{
 		ensure_orwell_chunk($matches[1]);
 		array_push($orwell_chunks[$matches[1]]['start'], $entry->syslog_timestamp);
@@ -147,7 +152,14 @@ if (DEBUG)
 			echo "\n";
 		}
 		echo "\n";
-	}	
+	}
+	echo "\n";
+	echo "Orwell E-mail Type\tSent E-mail Count\n";
+	foreach (array_keys($orwell_emails) as $email_type)
+	{
+		echo str_pad($email_type, 18) . "\t" . $orwell_emails[$email_type] . "\n";
+	}
+	echo "\n";
 }
 
 if (is_null($orwell_start_timestamp))
@@ -173,6 +185,10 @@ foreach (array_keys($orwell_chunks) as $chunk)
 	{
 		nagios_service_report(1, 'WARNING: Mismatched start/stop count (' . count($orwell_chunks[$chunk]['start']) . '/' . count($orwell_chunks[$chunk]['stop']) . ') for orwell server_id chunk ' . $chunk . '.');
 	}
+}
+if (array_sum($orwell_emails) <= 10)
+{
+	nagios_service_report(1, 'WARNING: Orwell sent ' . number_format(array_sum($orwell_emails)) . ' e-mails.');
 }
 nagios_service_report(0, 'OK: Orwell completed ' . count($orwell_chunks) . ' server_id chunks in ' . number_format($orwell_elapsed) . ' seconds.');
 ?>
