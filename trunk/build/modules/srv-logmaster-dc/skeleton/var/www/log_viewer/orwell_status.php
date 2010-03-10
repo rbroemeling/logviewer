@@ -153,7 +153,6 @@ if (DEBUG)
 		}
 		echo "\n";
 	}
-	echo "\n";
 	if ($orwell_emails)
 	{
 		echo "Orwell E-mail Type\tSent E-mail Count\n";
