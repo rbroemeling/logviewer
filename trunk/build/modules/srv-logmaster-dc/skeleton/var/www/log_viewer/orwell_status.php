@@ -19,7 +19,8 @@ if ($_SERVER)
 }
 
 // Debug-mode: output extra information about the log handlers being used and
-// the log files that are being opened/read/closed. 
+// the log files that are being opened/read/closed, as well as a summary of
+// discovered orwell information after reading the logfiles.
 if (! defined('DEBUG'))
 {
 	if ($_GET['debug'] || getenv('debug'))
@@ -69,6 +70,14 @@ function nagios_service_report($return_code, $message)
 }
 
 $environment = 'live'; // beta, live, or stage
+if ($_GET['environment'])
+{
+	$environment = $_GET['environment'];
+}
+if (getenv('environment'))
+{
+	$environment = getenv('environment');
+}
 $orwell_chunks = array();
 $orwell_end_timestamp = null;
 $orwell_start_timestamp = null;
@@ -160,9 +169,6 @@ foreach (array_keys($orwell_chunks) as $chunk)
 	{
 		nagios_service_report(1, 'WARNING: Orwell server_id chunk ' . $chunk . ' executed more than once.');
 	}
-}
-foreach (array_keys($orwell_chunks) as $chunk)
-{
 	if (count($orwell_chunks[$chunk]['start']) != count($orwell_chunks[$chunk]['stop']))
 	{
 		nagios_service_report(1, 'WARNING: Mismatched start/stop count (' . count($orwell_chunks[$chunk]['start']) . '/' . count($orwell_chunks[$chunk]['stop']) . ') for orwell server_id chunk ' . $chunk . '.');
