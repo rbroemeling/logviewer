@@ -154,12 +154,15 @@ if (DEBUG)
 		echo "\n";
 	}
 	echo "\n";
-	echo "Orwell E-mail Type\tSent E-mail Count\n";
-	foreach (array_keys($orwell_emails) as $email_type)
+	if ($orwell_emails)
 	{
-		echo str_pad($email_type, 18) . "\t" . $orwell_emails[$email_type] . "\n";
+		echo "Orwell E-mail Type\tSent E-mail Count\n";
+		foreach (array_keys($orwell_emails) as $email_type)
+		{
+			echo str_pad($email_type, 18) . "\t" . $orwell_emails[$email_type] . "\n";
+		}
+		echo "\n";
 	}
-	echo "\n";
 }
 
 if (is_null($orwell_start_timestamp))
