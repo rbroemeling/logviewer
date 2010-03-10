@@ -158,8 +158,9 @@ if (DEBUG)
 		echo "Orwell E-mail Type\tSent E-mail Count\n";
 		foreach (array_keys($orwell_emails) as $email_type)
 		{
-			echo str_pad($email_type, 18) . "\t" . $orwell_emails[$email_type] . "\n";
+			echo str_pad($email_type, 18) . "\t" . number_format($orwell_emails[$email_type]) . "\n";
 		}
+		echo str_pad("TOTAL", 18) . "\t" . number_format(array_sum($orwell_emails)) . "\n";
 		echo "\n";
 	}
 }
