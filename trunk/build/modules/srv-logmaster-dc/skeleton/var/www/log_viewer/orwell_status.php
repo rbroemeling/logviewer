@@ -107,8 +107,8 @@ while ($entry = $log_set->gets())
 
 if (DEBUG)
 {
-	echo 'Orwell Start Time: ' . date('Y-m-d H:i:s', $orwell_start_timestamp) . ".\n";
-	echo 'Orwell End Time: ' . date('Y-m-d H:i:s', $orwell_end_timestamp) . ".\n";
+	echo 'Orwell Start Time: ' . (is_null($orwell_start_timestamp) ? 'NULL (Not Found)' : date('Y-m-d H:i:s', $orwell_start_timestamp)) . ".\n";
+	echo 'Orwell End Time: ' . (is_null($orwell_end_timestamp) ? 'NULL (Not Found)' : date('Y-m-d H:i:s', $orwell_end_timestamp)) . ".\n";
 	echo "\n";
 	foreach (array_keys($orwell_chunks) as $chunk)
 	{
