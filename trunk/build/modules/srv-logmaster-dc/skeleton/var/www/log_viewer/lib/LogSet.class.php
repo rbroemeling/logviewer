@@ -23,6 +23,12 @@ class LogSet
 
 	public function __construct($environment, $language, $start_timestamp, $end_timestamp)
 	{
+		// Sanitize incoming data for safety and sanity.
+		$environment = preg_replace('/[^A-Za-z0-9]/', '', $environment);
+		$language = preg_replace('/[^A-za-z0-9]/', '', $language);
+		$start_timestamp = intval($start_timestamp);
+		$end_timestamp = intval($end_timestamp);
+		
 		$this->end_timestamp = $end_timestamp;
 		$this->environment = $environment;
 		$this->hooks = array();
